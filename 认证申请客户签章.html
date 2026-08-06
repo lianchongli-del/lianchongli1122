@@ -14,9 +14,14 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #f3f6fb;
+            background: transparent;
             color: #1e293b;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+        }
+        html.signature-page-closed body {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
         .page-shell {
             width: 100%;
@@ -586,9 +591,11 @@
             display: none;
         }
 
-        #onlineSignModal {
-            background: transparent;
-            backdrop-filter: none;
+        #onlineSignModal.sign-modal-mask,
+        #onlineSignModal.sign-modal-mask.show {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
 
     </style>
@@ -675,7 +682,7 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
                     <button type="button" class="action-btn" onclick="downloadPdfDemo()"><i class="fas fa-download"></i>下载</button>
-                    <button type="button" class="sign-modal-close" onclick="closeSignModalById('pdfPreviewModal')" aria-label="关闭"><i class="fas fa-times"></i></button>
+                    <button type="button" class="sign-modal-close" onclick="closePdfPreviewAndReset()" aria-label="关闭"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div class="pdf-viewer">
@@ -754,6 +761,7 @@
         }
 
         function openSignModal() {
+            document.documentElement.classList.remove('signature-page-closed');
             const idx = currentSignIndex();
             if (idx === -1) {
                 showSignToast('全部节点已完成签章，可预览最终文件');
@@ -795,6 +803,70 @@
             modal.classList.remove('show');
             if (!document.querySelector('.sign-modal-mask.show')) document.body.style.overflow = '';
         }
+
+        function resetCustomerSignatureState() {
+            signingIndex = -1;
+            signNodes.forEach(function (node) {
+                node.status = 'pending';
+                node.signedAt = '';
+                node.attempts = 0;
+                node.error = '';
+            });
+            setModalStatus('pending');
+            setModalError('');
+            const btn = document.getElementById('confirmSignBtn');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i>签章';
+            }
+            document.querySelectorAll('.sign-process-line').forEach(function (line) {
+                line.classList.remove('running', 'done', 'failed');
+            });
+            renderAllSignatureUI();
+        }
+
+        function notifyHostSignatureClosed() {
+            const message = { type: 'customer-signature-close', source: '认证申请客户签章' };
+            try {
+                if (window.parent && window.parent !== window) window.parent.postMessage(message, '*');
+            } catch (error) {}
+            try {
+                window.dispatchEvent(new CustomEvent('customer-signature-close', { detail: message }));
+            } catch (error) {}
+        }
+
+        function closeCustomerSignaturePage() {
+            document.documentElement.classList.add('signature-page-closed');
+            document.body.style.overflow = '';
+            try {
+                if (window.frameElement) window.frameElement.style.display = 'none';
+            } catch (error) {}
+            try {
+                if (window.opener) window.close();
+            } catch (error) {}
+        }
+
+        function closePdfPreviewAndReset() {
+            closeSignModalById('pdfPreviewModal');
+            closeSignModalById('onlineSignModal');
+            const frame = document.getElementById('pdfPreviewFrame');
+            if (frame) {
+                frame.removeAttribute('src');
+                frame.srcdoc = '';
+            }
+            resetCustomerSignatureState();
+            notifyHostSignatureClosed();
+            closeCustomerSignaturePage();
+        }
+
+        window.openCustomerSignaturePage = function () {
+            try {
+                if (window.frameElement) window.frameElement.style.display = '';
+            } catch (error) {}
+            resetCustomerSignatureState();
+            document.documentElement.classList.remove('signature-page-closed');
+            setTimeout(openSignModal, 80);
+        };
 
         function setModalStatus(status) {
             const meta = statusMeta(status);
@@ -1699,11 +1771,20 @@
 
         document.addEventListener('click', function (event) {
             if (event.target && event.target.classList && event.target.classList.contains('sign-modal-mask')) {
-                closeSignModalById(event.target.id);
+                if (event.target.id === 'pdfPreviewModal') {
+                    closePdfPreviewAndReset();
+                } else {
+                    closeSignModalById(event.target.id);
+                }
             }
         });
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
+                const pdfModal = document.getElementById('pdfPreviewModal');
+                if (pdfModal && pdfModal.classList.contains('show')) {
+                    closePdfPreviewAndReset();
+                    return;
+                }
                 document.querySelectorAll('.sign-modal-mask.show').forEach(function (modal) { closeSignModalById(modal.id); });
             }
         });

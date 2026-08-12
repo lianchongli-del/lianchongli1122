@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>不符合项报告确认</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-width: 0;
+      background: #f5f7fa;
+      color: #1f2937;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    button, input, textarea, select { font: inherit; }
+    .page-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #f5f7fa;
+    }
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 20px;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #111827;
+      white-space: nowrap;
+    }
+    .page-title i { color: #2563eb; }
+    .content { width: 100%; max-width: 100%; padding: 18px 20px 28px; }
+    .nc-list { display: flex; flex-direction: column; gap: 16px; }
+    .nc-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 286px;
+      gap: 0;
+      background: #fff;
+      border: 1px solid #dbe5f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+    }
+    .nc-main { min-width: 0; padding: 0; border-right: 1px solid #e2e8f0; }
+    .nc-header {
+      min-height: 60px;
+      padding: 10px 14px 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+    .nc-title { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 auto; }
+    .nc-no {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .nc-title-text { font-weight: 800; color: #111827; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nc-card-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+    .stage-select-wrap { display: flex; align-items: center; gap: 8px; color: #64748b; white-space: nowrap; }
+    .stage-select {
+      height: 34px;
+      min-width: 260px;
+      padding: 0 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+      color: #334155;
+      outline: none;
+    }
+    .stage-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+    .nc-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+    .meta-grid { display: grid; grid-template-columns: minmax(240px, 1.45fr) minmax(180px, 1fr) minmax(96px, .58fr) minmax(110px, .65fr) minmax(120px, .7fr) minmax(150px, .86fr); gap: 10px; }
+    .meta-item { min-width: 0; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 8px; padding: 8px 10px; }
+    .meta-label { color: #94a3b8; font-size: 12px; margin-bottom: 2px; }
+    .meta-value { color: #1e293b; font-weight: 600; word-break: break-word; }
+    .nature-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 800; line-height: 1; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; white-space: nowrap; }
+    .nature-badge.severe { border-color: #fecaca; background: #fef2f2; color: #dc2626; }
+    .nature-badge.minor { border-color: #fed7aa; background: #fff7ed; color: #ea580c; }
+    .form-date-input { width: 100%; min-height: 30px; padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #1e293b; font: inherit; font-weight: 600; outline: none; }
+    .form-date-input:hover { border-color: #9ca3af; }
+    .form-date-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+    .form-date-input[disabled] { background: #f8fafc; border-color: #e2e8f0; color: #64748b; cursor: not-allowed; }
+    .form-section { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; overflow: hidden; }
+    .section-head { min-height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .section-title { display: flex; align-items: center; gap: 8px; font-weight: 800; color: #1e293b; }
+    .section-title i { color: #2563eb; }
+    .section-note { color: #94a3b8; font-size: 12px; white-space: nowrap; }
+    .section-note.locked { color: #b45309; }
+    .section-note.open { color: #047857; }
+    .section-body { padding: 12px; }
+    .form-label { display: block; margin-bottom: 6px; color: #64748b; font-size: 12px; font-weight: 700; }
+    .form-textarea {
+      width: 100%;
+      min-height: 76px;
+      padding: 9px 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+      color: #1e293b;
+      resize: vertical;
+      line-height: 1.6;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-textarea:hover { border-color: #9ca3af; }
+    .form-textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12); }
+    .form-textarea[readonly], .form-textarea:disabled {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+    .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .locked-tip { display: flex; align-items: flex-start; gap: 7px; margin-top: 8px; color: #b45309; font-size: 12px; line-height: 1.55; }
+    .locked-tip i { margin-top: 2px; }
+    .attachment-panel { margin-top: 10px; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; }
+    .attachment-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .attachment-title { display: flex; align-items: center; gap: 6px; color: #475569; font-weight: 700; font-size: 12px; }
+    .attachment-list { display: flex; flex-direction: column; gap: 6px; }
+    .attachment-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 34px; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+    .attachment-name { display: flex; align-items: center; gap: 7px; color: #334155; min-width: 0; }
+    .attachment-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .attachment-name i { color: #64748b; }
+    .attachment-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 30px;
+      padding: 0 11px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn:hover { border-color: #9ca3af; background: #f9fafb; }
+    .btn:disabled { opacity: .56; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+    .btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(37,99,235,0.2); }
+    .btn-success { background: #059669; border-color: #059669; color: #fff; }
+    .btn-success:hover { background: #047857; border-color: #047857; color: #fff; }
+    .btn-danger { border-color: #fca5a5; color: #dc2626; background: #fff; }
+    .btn-danger:hover { background: #fef2f2; border-color: #dc2626; }
+    .btn-link { min-height: 24px; padding: 0 6px; border: 0; background: transparent; color: #2563eb; }
+    .btn-link:hover { background: #eff6ff; color: #1d4ed8; }
+    .btn-link.danger { color: #dc2626; }
+    .btn-link.danger:hover { background: #fef2f2; color: #b91c1c; }
+    .conclusion-options { display: flex; flex-direction: column; gap: 8px; }
+    .radio-card { display: flex; align-items: flex-start; gap: 8px; min-height: 38px; padding: 9px 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; cursor: pointer; transition: all 0.2s; }
+    .radio-card:hover { border-color: #93c5fd; background: #eff6ff; }
+    .radio-card.locked { cursor: not-allowed; background: #f8fafc; color: #94a3b8; }
+    .radio-card input { width: 16px; height: 16px; margin-top: 2px; flex: 0 0 auto; }
+    .radio-card span { line-height: 1.6; }
+    .radio-card input:checked + span { color: #1d4ed8; font-weight: 800; }
+    .flow-panel { background: #fbfdff; padding: 14px 14px 12px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+    .flow-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
+    .flow-panel-title { display: flex; align-items: center; gap: 8px; color: #1e293b; font-weight: 800; }
+    .flow-panel-title i { color: #2563eb; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px; border-radius: 999px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-size: 12px; white-space: nowrap; }
+    .badge.current { border-color: #fed7aa; background: #fff7ed; color: #c2410c; }
+    .flow-list { position: relative; display: flex; flex-direction: column; gap: 0; padding: 2px 0; }
+    .flow-node { position: relative; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; padding-bottom: 14px; }
+    .flow-node:last-child { padding-bottom: 0; }
+    .flow-node:not(:last-child)::after { content: ""; position: absolute; left: 12px; top: 24px; bottom: 0; width: 2px; background: #dbe5f0; }
+    .flow-node.completed:not(:last-child)::after { background: #93c5fd; }
+    .flow-node.rejected:not(:last-child)::after { background: #fecaca; }
+    .node-dot { position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #cbd5e1; background: #fff; color: #94a3b8; font-size: 11px; }
+    .flow-node.completed .node-dot { border-color: #2563eb; background: #2563eb; color: #fff; }
+    .flow-node.current .node-dot { border-color: #f59e0b; background: #fff7ed; color: #d97706; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.14); }
+    .flow-node.rejected .node-dot { border-color: #dc2626; background: #dc2626; color: #fff; }
+    .node-name { font-weight: 800; color: #1e293b; line-height: 1.35; }
+    .node-desc { color: #94a3b8; font-size: 12px; margin-top: 2px; }
+    .node-status { display: inline-flex; align-items: center; height: 20px; margin-top: 5px; padding: 0 6px; border-radius: 999px; background: #f1f5f9; color: #64748b; font-size: 11px; }
+    .flow-node.completed .node-status { background: #eff6ff; color: #1d4ed8; }
+    .flow-node.current .node-status { background: #fff7ed; color: #c2410c; }
+    .flow-node.rejected .node-status { background: #fef2f2; color: #dc2626; }
+    .reject-reason { margin-top: 6px; padding: 6px 8px; border-radius: 6px; background: #fef2f2; color: #b91c1c; font-size: 12px; line-height: 1.5; }
+    .modal-mask { position: fixed; inset: 0; z-index: 50000; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(15,23,42,0.45); backdrop-filter: blur(3px); }
+    .modal-mask.show { display: flex; }
+    .modal { width: min(560px, 96vw); border-radius: 12px; background: #fff; overflow: hidden; box-shadow: 0 20px 45px rgba(15,23,42,0.24); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 800; color: #111827; background: #f8fafc; }
+    .modal-body { padding: 16px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #fff; }
+    .preview-box { min-height: 160px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: center; text-align: center; padding: 18px; color: #475569; }
+
+    /* 签字确认弹窗，参照审核计划组长签章的线上签章样式 */
+    .sign-modal-card { width: min(690px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: hidden; border-radius: 14px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28); display: flex; flex-direction: column; animation: signModalIn .22s ease-out; }
+    @keyframes signModalIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .sign-modal-header { flex: 0 0 auto; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 28px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .sign-modal-title { display: flex; align-items: center; gap: 10px; color: #0f172a; font-size: 17px; font-weight: 900; }
+    .sign-modal-subtitle { margin-top: 4px; color: #64748b; font-size: 12px; font-weight: 500; }
+    .sign-modal-close { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: #64748b; cursor: pointer; transition: all .18s; }
+    .sign-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+    .sign-modal-body { padding: 28px; overflow: auto; }
+    .sign-modal-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 18px 28px; border-top: 1px solid #e2e8f0; background: #fff; }
+    .sign-status-pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap; }
+    .sign-status-pending { background: #dbeafe; color: #1d4ed8; }
+    .sign-status-signing { background: #fef3c7; color: #92400e; }
+    .sign-status-signed { background: #dcfce7; color: #166534; }
+    .sign-platform-card { border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; padding: 24px; }
+    .sign-platform-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .sign-platform-info small { display: block; color: #64748b; font-size: 12px; margin-bottom: 4px; }
+    .sign-platform-info strong { color: #0f172a; font-size: 17px; }
+    .sign-process-list { display: grid; gap: 12px; margin-top: 20px; }
+    .sign-process-line { display: flex; align-items: center; gap: 12px; min-height: 50px; padding: 13px 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; color: #475569; font-size: 13px; font-weight: 700; }
+    .sign-process-line.running { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .sign-process-line.done { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+    .sign-process-line.failed { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+    /* PDF预览 */
+    .pdf-modal-mask { position: fixed; inset: 0; z-index: 90000; display: none; background: rgba(15,23,42,0.48); }
+    .pdf-modal-mask.show { display: block; }
+    .simple-pdf-mask { position: fixed; inset: 0; z-index: 90000; display: none; background: rgba(15,23,42,.55); }
+    .simple-pdf-mask.show { display: block; }
+    .simple-pdf-card { width: 100vw; height: 100vh; background: #dbe2ea; display: flex; flex-direction: column; }
+    .simple-pdf-head { height: 62px; flex: 0 0 62px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 22px; background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+    .simple-pdf-title { color: #0f172a; font-size: 16px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+    .simple-pdf-viewer { flex: 1 1 auto; overflow: auto; padding: 18px; }
+    .simple-pdf-page { width: min(980px, calc(100vw - 36px)); min-height: 1120px; margin: 0 auto 18px; padding: 34px 40px 58px; background: #fff; border: 1px solid #cbd5e1; box-shadow: 0 18px 45px rgba(15,23,42,.16); position: relative; color: #0f172a; }
+    .simple-pdf-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; line-height: 1.65; margin-bottom: 16px; }
+    .simple-pdf-table th, .simple-pdf-table td { border: 1px solid #111827; padding: 8px 10px; vertical-align: top; word-break: break-word; }
+    .simple-pdf-table th { width: 180px; background: #f8fafc; text-align: left; font-weight: 900; }
+    .simple-seal { width: 94px; height: 94px; border-radius: 50%; border: 3px solid #dc2626; color: #dc2626; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-12deg); font-weight: 900; position: relative; }
+    .simple-seal:before { content: ""; position: absolute; inset: 7px; border: 2px solid #dc2626; border-radius: 50%; }
+    .simple-seal span { position: relative; z-index: 1; }
+    .pdf-modal-card { width: 100vw; height: 100vh; background: #e2e8f0; display: flex; flex-direction: column; }
+    .pdf-modal-head { flex: 0 0 62px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 22px; background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+    .pdf-modal-title { display: flex; align-items: center; gap: 10px; color: #0f172a; font-size: 16px; font-weight: 900; }
+    .pdf-viewer { flex: 1 1 auto; overflow: auto; padding: 18px; }
+    .pdf-sheet { width: min(980px, 100%); min-height: 1280px; margin: 0 auto 18px; padding: 30px 38px 36px; background: #fff; border: 1px solid #cbd5e1; box-shadow: 0 18px 45px rgba(15, 23, 42, .18); color: #111827; position: relative; }
+    .inline-pdf-doc { width: min(1120px, calc(100vw - 36px)); margin: 0 auto; background: #e2e8f0; color: #0f172a; }
+    .inline-pdf-page { min-height: 1060px; margin: 0 auto 18px; padding: 34px 40px 58px; background: #fff; border: 1px solid #cbd5e1; box-shadow: 0 18px 45px rgba(15, 23, 42, .16); position: relative; }
+    .signature-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; line-height: 1.55; margin-bottom: 10px; }
+    .signature-table th, .signature-table td { border: 1px solid #111827; padding: 7px 9px; vertical-align: top; word-break: break-word; }
+    .signature-table th { background: #f8fafc; font-weight: 800; color: #111827; text-align: left; }
+    .signature-seal-title { font-size: 15px; font-weight: 900; margin: 2px 0 8px; color: #0f172a; }
+    .signature-seal-area { min-height: 154px; border: 1px solid #cbd5e1; border-radius: 12px; background: #f8fafc; padding: 14px; display: flex; align-items: flex-start; flex-wrap: wrap; gap: 18px; }
+    .signature-empty { color: #94a3b8; font-size: 13px; padding-top: 8px; }
+    .pdf-personal-seal-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 120px; }
+    .pdf-personal-seal { width: 92px; height: 92px; border-radius: 50%; border: 3px solid #dc2626; color: #dc2626; background: rgba(255,255,255,.92); box-shadow: 0 6px 16px rgba(220,38,38,.15); transform: rotate(-12deg); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; }
+    .pdf-personal-seal:before { content: ""; position: absolute; inset: 6px; border: 2px solid #dc2626; border-radius: 50%; }
+    .pdf-personal-seal .seal-role, .pdf-personal-seal .seal-name, .pdf-personal-seal .seal-mark { position: relative; z-index: 1; }
+    .pdf-personal-seal .seal-role { font-size: 11px; font-weight: 800; letter-spacing: .5px; }
+    .pdf-personal-seal .seal-name { margin-top: 3px; font-size: 16px; font-weight: 900; letter-spacing: 2px; }
+    .pdf-personal-seal .seal-mark { margin-top: 5px; font-size: 10px; font-weight: 700; }
+    .pdf-personal-seal-time { font-size: 11px; color: #64748b; font-family: monospace; }
+    .pdf-watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; font-weight: 900; letter-spacing: 8px; color: rgba(37, 99, 235, .045); transform: rotate(-28deg); pointer-events: none; user-select: none; }
+    .pdf-inner { position: relative; z-index: 1; }
+    .pdf-top { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; padding-bottom: 8px; border-bottom: 4px solid #777; margin-bottom: 22px; }
+    .pdf-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .pdf-logo-mark { width: 96px; height: 62px; border: 2px solid #263c8c; border-radius: 50%; color: #263c8c; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: -2px; }
+    .pdf-cn { color: #111827; font-size: 28px; font-weight: 900; letter-spacing: .5px; line-height: 1.12; }
+    .pdf-en { margin-top: 3px; color: #111827; font-size: 11px; font-weight: 800; letter-spacing: .6px; }
+    .pdf-meta { color: #374151; font-size: 18px; line-height: 1.55; text-align: left; font-weight: 800; min-width: 245px; }
+    .pdf-meta b { display: inline-block; color: #64748b; min-width: 100px; }
+    .pdf-title { margin: 0 0 24px; text-align: center; color: #111827; font-family: "SimSun", "Songti SC", serif; font-size: 28px; font-weight: 400; letter-spacing: 1px; }
+    .pdf-report-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-family: "SimSun", "Songti SC", serif; font-size: 21px; line-height: 1.6; background: rgba(255,255,255,.96); }
+    .pdf-report-table td { border: 1.5px solid #111827; padding: 6px 10px; vertical-align: top; word-break: break-word; }
+    .pdf-label { width: 25%; color: #111827; white-space: nowrap; }
+    .pdf-value { color: #111827; }
+    .pdf-red { color: #ef4444; }
+    .pdf-box { display: inline-block; width: 16px; height: 16px; border: 2px solid #111827; vertical-align: -1px; margin: 0 4px; position: relative; }
+    .pdf-box.checked::after { content: "✓"; position: absolute; left: 1px; top: -8px; font-family: Arial, sans-serif; font-size: 22px; font-weight: 900; color: #111827; }
+    .pdf-large-cell { min-height: 120px; white-space: pre-wrap; }
+    .pdf-sign-section { margin-top: 18px; border: 1px dashed #94a3b8; background: rgba(248,250,252,.82); padding: 15px; }
+    .pdf-sign-title { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #111827; font-size: 14px; font-weight: 900; }
+    .pdf-sign-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .pdf-sign-card { min-height: 136px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+    .personal-seal { width: 78px; height: 78px; border: 3px solid #dc2626; border-radius: 999px; color: #dc2626; background: rgba(255,255,255,.78); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transform: rotate(-12deg); font-weight: 900; box-shadow: 0 4px 12px rgba(220, 38, 38, .12); position: relative; }
+    .personal-seal::before { content: ''; position: absolute; inset: 6px; border: 1.5px solid #dc2626; border-radius: inherit; }
+    .personal-seal .role { font-size: 10px; line-height: 1; }
+    .personal-seal .name { font-size: 14px; letter-spacing: 1px; line-height: 1.1; }
+    .personal-seal-time { color: #334155; font-size: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: center; }
+    .pending-seal { color: #94a3b8; font-size: 13px; font-weight: 800; text-align: center; }
+    .pdf-footer { display: flex; justify-content: space-between; gap: 14px; margin-top: 22px; padding-top: 10px; border-top: 1px solid #94a3b8; color: #64748b; font-size: 11px; }
+
+    @media (max-width: 1380px) {
+      .nc-card { grid-template-columns: 1fr; }
+      .nc-main { border-right: 0; border-bottom: 1px solid #e2e8f0; }
+      .flow-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+      .flow-node { display: block; padding: 8px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+      .flow-node:not(:last-child)::after { display: none; }
+      .node-dot { margin-bottom: 6px; }
+    }
+    @media (max-width: 980px) {
+      .top-bar { height: auto; min-height: 56px; align-items: flex-start; flex-direction: column; padding: 12px 16px; }
+      .nc-header { align-items: flex-start; flex-direction: column; }
+      .nc-card-toolbar { justify-content: flex-start; width: 100%; }
+      .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-col { grid-template-columns: 1fr; }
+      .flow-list { grid-template-columns: 1fr; }
+      .pdf-top { grid-template-columns: 1fr; }
+      .pdf-meta { text-align: left; }
+      .pdf-report-table { font-size: 16px; }
+      .pdf-sign-grid { grid-template-columns: 1fr; }
+    }
+  
+    .pdf-log-box { margin-top: 18px; border: 1px solid #dbe5f0; background: rgba(248,250,252,.9); }
+    .pdf-log-note { margin: 0; padding: 12px 14px; border-bottom: 1px solid #dbe5f0; background: #eff6ff; color: #1d4ed8; font-size: 14px; line-height: 1.7; }
+    .pdf-sign-record-title { margin: 0; padding: 12px 0 14px; text-align: center; color: #111827; font-size: 18px; font-weight: 900; }
+    .pdf-sign-record-table { font-size: 16px; }
+    .pdf-sign-record-table th, .pdf-sign-record-table td { border: 1.5px solid #111827; padding: 9px 10px; }
+    .pdf-sign-record-table th { background: #f8fafc; font-weight: 800; text-align: left; }
+    .pdf-sign-record-table td.center, .pdf-sign-record-table th.center { text-align: center; }
+    .pdf-seal-strip { margin-top: 16px; }
+    .pdf-seal-strip .pdf-sign-title { margin-bottom: 10px; }
+    .pdf-file-list { width: min(980px, 100%); margin: 0 auto 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .pdf-file-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 72px; padding: 12px 14px; border: 1px solid #dbe5f0; border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+    .pdf-file-card .file-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .pdf-file-card i { color: #dc2626; font-size: 20px; }
+    .pdf-file-card strong { display: block; color: #0f172a; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 245px; }
+    .pdf-file-card small { display: block; margin-top: 2px; color: #64748b; font-size: 12px; }
+    .signed-pdf-strip { border: 1px dashed #bfdbfe; border-radius: 10px; background: #eff6ff; padding: 10px 12px; }
+    .signed-pdf-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; color: #1e3a8a; font-weight: 900; }
+    .signed-pdf-head span { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: #fff; border: 1px solid #bfdbfe; color: #1d4ed8; font-size: 12px; font-weight: 800; }
+    .signed-pdf-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+    .signed-pdf-item { min-height: 46px; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #dbeafe; border-radius: 8px; background: #fff; color: #334155; min-width: 0; }
+    .signed-pdf-item i { color: #dc2626; font-size: 16px; flex: 0 0 auto; }
+    .signed-pdf-item strong { display: block; color: #0f172a; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .signed-pdf-item small { display: block; color: #64748b; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .signed-pdf-item.pending { border-style: dashed; background: #f8fafc; }
+    .pdf-version-tag { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .pdf-version-title { width: min(980px, 100%); margin: 0 auto 8px; padding: 10px 14px; border: 1px solid #dbe5f0; border-radius: 10px; background: #fff; color: #0f172a; font-size: 14px; font-weight: 900; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .sign-mode-box { margin-top: 18px; border: 1px solid #dbe5f0; border-radius: 12px; background: #fff; overflow: hidden; }
+    .sign-mode-title { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #0f172a; font-weight: 900; }
+    .sign-mode-tabs { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; padding: 12px 14px; }
+    .sign-mode-tab { min-height: 58px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #334155; cursor: pointer; text-align: left; padding: 10px 12px; transition: all .18s; }
+    .sign-mode-tab strong { display: flex; align-items: center; gap: 7px; color: #0f172a; font-size: 13px; }
+    .sign-mode-tab span { display: block; margin-top: 4px; color: #64748b; font-size: 12px; line-height: 1.45; }
+    .sign-mode-tab.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+    .offline-sign-panel { display: none; padding: 0 14px 14px; }
+    .offline-sign-panel.show { display: block; }
+    .offline-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+    .offline-upload-box { margin-top: 10px; min-height: 54px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; color: #64748b; }
+    .offline-upload-box strong { color: #0f172a; }
+
+  
+    .return-modal-subtitle { margin-top: 4px; color: #64748b; font-size: 12px; line-height: 1.6; font-weight: 500; }
+    .return-tip { display: flex; align-items: flex-start; gap: 8px; margin-top: 16px; padding: 10px 12px; border-radius: 8px; background: #eff6ff; color: #1d4ed8; font-size: 12px; line-height: 1.5; }
+
+    .return-modal { width: min(676px, 96vw); border-radius: 8px; }
+    .return-modal .modal-head { min-height: 84px; align-items: flex-start; padding: 22px 26px 18px; background: #f8fafc; }
+    .return-modal-title { display:flex; align-items:center; gap:8px; color:#0f172a; font-size:18px; font-weight:800; }
+    .return-modal-close { border:0; background:transparent; color:#64748b; font-size:18px; cursor:pointer; line-height:1; padding:0; }
+    .return-modal .modal-body { padding: 28px 26px; }
+    .return-modal .modal-foot { padding: 20px 26px; gap:14px; }
+    .return-modal .form-label { display:block; margin-bottom:8px; color:#334155; font-size:14px; font-weight:700; }
+    .return-reason-textarea { width:100%; min-height:118px; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; color:#0f172a; font:inherit; font-size:13px; line-height:1.6; resize:vertical; outline:none; }
+    .return-reason-textarea:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+
+
+  </style>
+
+<style id="NC_VISIBLE_CLOSE_BUTTON_PATCH">
+  .pdf-modal-close {
+    width: auto !important;
+    min-width: 72px !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 8px !important;
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 1px 2px rgba(220, 38, 38, 0.10) !important;
+  }
+  .pdf-modal-close:hover {
+    background: #fee2e2 !important;
+    border-color: #fca5a5 !important;
+    color: #b91c1c !important;
+  }
+  .sign-modal-close {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+    color: #2563eb !important;
+  }
+  .sign-modal-close:hover {
+    background: #dbeafe !important;
+    border-color: #93c5fd !important;
+    color: #1d4ed8 !important;
+  }
+</style>
+
+
+<style id="NC_CONFIRM_INLINE_TITLE_STYLE">
+  body { overflow: auto !important; background: #f5f7fa !important; }
+  .nc-confirm-title-bar { height: 88px; display: flex; align-items: center; gap: 22px; padding: 0 28px; background: #fff; border-bottom: 1px solid #dbe3ee; box-shadow: 0 1px 2px rgba(15,23,42,.04); position: sticky; top: 0; z-index: 20000; }
+  .nc-confirm-title-left { display: flex; align-items: center; gap: 22px; min-width: 0; }
+  .nc-confirm-back { height: 36px; display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: #64748b; font: inherit; font-size: 17px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+  .nc-confirm-back:hover, .nc-confirm-back:hover .nc-confirm-back-icon { color: #2563eb; }
+  .nc-confirm-back-icon { font-size: 25px; line-height: 1; color: #64748b; transform: translateY(-1px); }
+  .nc-confirm-title-divider { width: 1px; height: 34px; background: #cbd5e1; flex: 0 0 auto; }
+  .nc-confirm-title { font-size: 26px; font-weight: 900; color: #0f172a; white-space: nowrap; letter-spacing: 0; }
+  .nc-confirm-tags { display: inline-flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+  .nc-confirm-tag { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 15px; border-radius: 999px; font-size: 14px; font-weight: 900; border: 1px solid; white-space: nowrap; }
+  .nc-confirm-tag.stage { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+  .nc-confirm-tag.system { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+  body > .page-shell > .top-bar { display: none !important; }
+  body > .page-shell { min-height: calc(100vh - 88px) !important; }
+  @media (max-width: 760px) {
+    .nc-confirm-title-bar { height: auto; min-height: 76px; flex-wrap: wrap; gap: 10px 16px; padding: 14px 18px; }
+    .nc-confirm-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nc-confirm-title-bar">
+  <div class="nc-confirm-title-left">
+    <button class="nc-confirm-back" type="button" onclick="history.back()"><span class="nc-confirm-back-icon" aria-hidden="true">&larr;</span><span>返回列表</span></button>
+    <div class="nc-confirm-title-divider" aria-hidden="true"></div>
+    <div class="nc-confirm-title">不符合项报告确认</div>
+  </div>
+  <div class="nc-confirm-tags" aria-label="标签">
+    <span class="nc-confirm-tag stage">二阶段</span>
+    <span class="nc-confirm-tag system">QMS+EMS</span>
+  </div>
+</header>
+
+  <div class="page-shell">
+    <header class="top-bar">
+      <div class="page-title">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span>不符合项报告</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="nc-list" id="ncList"></section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="rejectModal" onclick="maskClose(event, 'rejectModal')">
+    <div class="modal return-modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <div class="return-modal-title"><i class="fas fa-reply"></i> 退回原因</div>
+          <div class="return-modal-subtitle">退回后系统保留当前不符合项报告内容，等待重新调整后再次提交。</div>
+        </div>
+        <button type="button" class="return-modal-close" onclick="closeRejectModal()" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label" for="rejectReasonInput">请填写或者查看本次退回原因</label>
+        <textarea class="return-reason-textarea" id="rejectReasonInput" placeholder="请输入退回原因"></textarea>
+        <div class="return-tip"><i class="fas fa-circle-info"></i><span>点击“确认退回”后，系统将记录退回原因和退回时间；客户退回时返回至第一个审核员签字环节。</span></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeRejectModal()">取消</button>
+        <button class="btn btn-danger" onclick="confirmReject()">确认退回</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="attachmentPreviewModal" onclick="maskClose(event, 'attachmentPreviewModal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <span><i class="fas fa-eye"></i> 附件预览</span>
+        <button class="btn btn-link danger" onclick="closeAttachmentPreviewModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-box" id="attachmentPreviewBox"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeAttachmentPreviewModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="onlineSignModal" role="dialog" aria-modal="true" aria-labelledby="onlineSignTitle">
+    <div class="sign-modal-card" onclick="event.stopPropagation()">
+      <div class="sign-modal-header">
+        <div>
+          <div class="sign-modal-title" id="onlineSignTitle"><i class="fas fa-stamp" style="color:#2563eb;"></i>线上签章确认</div>
+          <div class="sign-modal-subtitle">以不符合项报告 PDF 内容发起个人签章，签章完成后自动流转至下一节点。</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="sign-status-pill sign-status-pending" id="modalSignStatus"><i class="fas fa-clock"></i>待签章</span>
+        </div>
+      </div>
+      <div class="sign-modal-body">
+        <div class="sign-platform-card">
+          <div class="sign-platform-info">
+            <div>
+              <small>当前不符合项报告</small>
+              <strong id="modalReportNo">NC-20260623-001</strong>
+            </div>
+            <div>
+              <small>当前签字节点</small>
+              <strong id="modalNodeName">审核员签字</strong>
+            </div>
+          </div>
+          <div id="signHelpText" style="color:#475569;font-size:13px;line-height:1.65;">当前文件将以不符合项报告 PDF 样式提交线上签章，完成后在 PDF 预览中生成该节点签署后的 PDF 文件版本。</div>
+          <div class="sign-mode-box" id="customerSignModeBox" style="display:none;">
+            <div class="sign-mode-title"><i class="fas fa-signature"></i>客户签字方式</div>
+            <div class="sign-mode-tabs">
+              <button type="button" class="sign-mode-tab active" id="onlineModeBtn" onclick="selectCustomerSignMode('online')">
+                <strong><i class="fas fa-cloud-arrow-up"></i>线上签章</strong>
+                <span>调用线上签章平台完成客户签章，系统自动生成客户线上签章版 PDF。</span>
+              </button>
+              <button type="button" class="sign-mode-tab" id="offlineModeBtn" onclick="selectCustomerSignMode('offline')">
+                <strong><i class="fas fa-file-arrow-up"></i>线下签章</strong>
+                <span>下载待签 PDF，客户线下签署后上传签章 PDF 文件。</span>
+              </button>
+            </div>
+            <div class="offline-sign-panel" id="offlineSignPanel">
+              <div class="offline-actions">
+                <button type="button" class="btn" onclick="downloadPendingCustomerPdf()"><i class="fas fa-download"></i>下载待签 PDF</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('offlineSignedPdfInput').click()"><i class="fas fa-upload"></i>上传签章 PDF</button>
+              </div>
+              <input type="file" id="offlineSignedPdfInput" accept="application/pdf,.pdf" style="display:none" onchange="handleOfflineSignedPdf(this.files)">
+              <div class="offline-upload-box" id="offlineUploadInfo"><span><i class="fas fa-circle-info"></i> 请先上传客户线下签署完成的 PDF 文件</span></div>
+            </div>
+          </div>
+          <div class="sign-process-list" id="platformProgress">
+            <div class="sign-process-line" data-progress="0"><i class="fas fa-file-pdf"></i><span>生成不符合项报告 PDF 签章文件</span></div>
+            <div class="sign-process-line" data-progress="1"><i class="fas fa-stamp"></i><span>线上签章平台执行个人签章</span></div>
+            <div class="sign-process-line" data-progress="2"><i class="fas fa-route"></i><span>更新签章进度并自动流转下一节点</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="sign-modal-footer">
+        <button type="button" class="btn" onclick="openSimplePdfPreview(signTarget ? signTarget.idx : 0)"><i class="fas fa-eye"></i>预览当前文件</button>
+        <button type="button" class="btn" onclick="closeSignModal()">取消</button>
+        <button type="button" class="btn btn-primary" id="confirmSignBtn" onclick="startSignConfirm()"><i class="fas fa-stamp"></i>确认签章</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pdf-modal-mask" id="pdfModal">
+    <div class="pdf-modal-card">
+      <div class="pdf-modal-head">
+        <div class="pdf-modal-title"><i class="fas fa-file-pdf" style="color:#dc2626;"></i><span id="pdfModalTitle">不符合项报告 PDF 预览</span></div>
+        <button class="btn pdf-modal-close" onclick="closePdfModal()"><i class="fas fa-times"></i><span>关闭</span></button>
+      </div>
+      <div class="pdf-viewer" id="pdfViewer"></div>
+    </div>
+  </div>
+
+  <div class="simple-pdf-mask" id="simplePdfModal">
+    <div class="simple-pdf-card">
+      <div class="simple-pdf-head">
+        <div class="simple-pdf-title"><i class="fas fa-file-pdf" style="color:#dc2626;"></i><span id="simplePdfTitle">PDF 文件预览</span></div>
+        <button class="btn" onclick="closeSimplePdfPreview()"><i class="fas fa-times"></i><span>关闭</span></button>
+      </div>
+      <div class="simple-pdf-viewer" id="simplePdfViewer"></div>
+    </div>
+  </div>
+
+  
+  <script>
+    const flowNodes = [
+      { id: 'auditorSign', name: '审核员签字', owner: '审核员', desc: '确认不符合项报告内容' },
+      { id: 'leaderSign', name: '审核组长签字', owner: '审核组长', desc: '审核组长签字确认' },
+      { id: 'customerSign', name: '客户签字', owner: '客户', desc: '客户签字确认' },
+      { id: 'customerFill', name: '客户填写原因分析、纠正和纠正措施', owner: '客户', desc: '填写原因分析与整改措施' },
+      { id: 'auditorConclusion', name: '审核员确认跟踪结论', owner: '审核员', desc: '填写跟踪结论' }
+    ];
+
+    const conclusionOptions = [
+      '纠正和纠正措施可以接受且证实有效。',
+      '纠正和纠正措施计划可以接受，将在下次审核中验证有效性。（仅针对轻微不符合）',
+      '纠正和纠正措施不能接受，或纠正措施未有效实施。'
+    ];
+
+    const signMeta = {
+      auditorSign: { role: '审核员', signerField: 'auditor', defaultName: '王审核' },
+      leaderSign: { role: '审核组长', signerField: null, defaultName: '武荣刚' },
+      customerSign: { role: '客户代表', signerField: null, defaultName: '刘海峰' }
+    };
+
+    let currentStage = 'customerSign';
+    let rejectTarget = null;
+    let signTarget = null;
+    let customerSignMode = 'online';
+
+    const ncReports = [
+      {
+        id: 'nc1',
+        no: 'NC-20260623-001',
+        nature: '轻微不符合',
+        standard: 'GB/T 19001-2016 / ISO 9001:2015',
+        clause: '8.5.1、8.5.2',
+        relatedDept: '生产部、质量管理部',
+        customerName: '北京华信智能制造有限公司',
+        auditDateCn: '2026 年 06 月 23 日',
+        dueDateCn: '2026 年 07 月 23 日之前',
+        dueDate: '2026-07-23',
+        auditor: '王审核',
+        auditDate: '2026-06-23',
+        description: '现场抽查生产过程控制记录时发现，M-202606-015批次的首件确认记录中缺少设备参数复核结果，且该记录未体现质量检验人员签字确认。上述情况与程序文件《生产过程控制程序》中关于关键工序记录完整性的要求不一致。',
+        cause: '',
+        correctionPlan: '',
+        conclusion: '',
+        templates: {
+          cause: '初步分析为生产班组对新版首件确认记录填写要求理解不充分，班组长复核时仅关注检验结论，未对设备参数复核栏和签字栏进行完整性检查。',
+          correctionPlan: '纠正：已补充M-202606-015批次首件确认记录中的设备参数复核结果，并由质量检验人员补签确认。\n纠正措施或纠正措施计划：1）对生产班组和质量检验人员开展新版记录填写培训；2）在班组长日常点检清单中增加关键工序记录完整性检查项；3）质量管理部在下月内抽查不少于10份首件确认记录，验证措施有效性。',
+          conclusion: '纠正和纠正措施可以接受且证实有效。'
+        },
+        stageStatus: { auditorSign: 'completed', leaderSign: 'completed', customerSign: 'current', customerFill: 'waiting', auditorConclusion: 'waiting' },
+        rejectHistory: [],
+        signRecords: {},
+        attachments: { cause: [], plan: [] },
+        attachmentTemplates: {
+          cause: [{ name: 'NC-20260623-001_原因分析说明.pdf', size: '286KB', source: 'default' }],
+          plan: [
+            { name: 'NC-20260623-001_首件确认记录补充件.pdf', size: '512KB', source: 'default' },
+            { name: 'NC-20260623-001_培训计划.xlsx', size: '96KB', source: 'default' }
+          ]
+        },
+        autoFillState: { customerFill: false, auditorConclusion: false }
+      },
+      {
+        id: 'nc2',
+        no: 'NC-20260623-002',
+        nature: '轻微不符合',
+        standard: 'GB/T 24001-2016 / ISO 14001:2015',
+        clause: '8.1、9.1.1',
+        relatedDept: '综合管理部、仓储部',
+        customerName: '北京华信智能制造有限公司',
+        auditDateCn: '2026 年 06 月 23 日',
+        dueDateCn: '2026 年 07 月 23 日之前',
+        dueDate: '2026-07-23',
+        auditor: '李审核',
+        auditDate: '2026-06-23',
+        description: '现场查看危险废物暂存区时发现，6月12日产生的一批废过滤棉已入库，但《危险废物暂存台账》中未记录对应重量和责任人，暂存标签信息填写不完整，不利于后续追溯和合规性评价。',
+        cause: '',
+        correctionPlan: '',
+        conclusion: '',
+        templates: {
+          cause: '仓储人员在交接期间只完成实物入库，未同步完成台账登记；综合管理部对危废台账的日常监督频次不足，未能及时发现记录缺失。',
+          correctionPlan: '纠正：已补录6月12日废过滤棉的重量、责任人和暂存标签信息。\n纠正措施或纠正措施计划：1）修订危废入库交接清单，明确实物、标签、台账三项同步确认；2）综合管理部每周对危废暂存区台账与实物进行一次核对；3）一个月后对台账完整性进行复查。',
+          conclusion: '纠正和纠正措施计划可以接受，将在下次审核中验证有效性。（仅针对轻微不符合）'
+        },
+        stageStatus: { auditorSign: 'completed', leaderSign: 'completed', customerSign: 'current', customerFill: 'waiting', auditorConclusion: 'waiting' },
+        rejectHistory: [],
+        signRecords: {},
+        attachments: { cause: [], plan: [] },
+        attachmentTemplates: {
+          cause: [{ name: 'NC-20260623-002_原因分析记录.docx', size: '188KB', source: 'default' }],
+          plan: [
+            { name: 'NC-20260623-002_危废台账补录截图.png', size: '742KB', source: 'default' },
+            { name: 'NC-20260623-002_危废交接清单修订稿.pdf', size: '354KB', source: 'default' }
+          ]
+        },
+        autoFillState: { customerFill: false, auditorConclusion: false }
+      }
+    ];
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, function (s) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s];
+      });
+    }
+
+    function reportStage(report) { return report.currentStage || currentStage; }
+    function currentStageIndex(stage) { return flowNodes.findIndex(n => n.id === (stage || currentStage)); }
+    function getStageMeta(id) { return flowNodes.find(n => n.id === id) || flowNodes[0]; }
+    function isSignStage(stage) { return ['auditorSign', 'leaderSign', 'customerSign'].includes(stage || currentStage); }
+    function isCustomerFillOpen(report) {
+      return false;
+    }
+    function getRejectReturnStage(stage) {
+      // 客户退回必须回到第一个审核员签字环节；其他节点默认退回上一节点。
+      if (stage === 'customerSign') return 'auditorSign';
+      return getPreviousStage(stage);
+    }
+    function resetReportToStage(report, stageId) {
+      const targetIdx = currentStageIndex(stageId);
+      report.currentStage = stageId;
+      report.finished = false;
+      flowNodes.forEach((node, idx) => {
+        if (idx < targetIdx) report.stageStatus[node.id] = 'completed';
+        else if (idx === targetIdx) report.stageStatus[node.id] = 'current';
+        else report.stageStatus[node.id] = 'waiting';
+        if (idx >= targetIdx && signStageIds().includes(node.id)) { delete report.signRecords[node.id]; if (Array.isArray(report.pdfVersions)) report.pdfVersions = report.pdfVersions.filter(v => v.stage !== node.id); }
+      });
+      if (currentStageIndex(stageId) <= currentStageIndex('customerFill')) {
+        report.stageStatus.customerFill = currentStageIndex(stageId) === currentStageIndex('customerFill') ? 'current' : 'waiting';
+      }
+      if (currentStageIndex(stageId) <= currentStageIndex('auditorConclusion')) {
+        report.stageStatus.auditorConclusion = currentStageIndex(stageId) === currentStageIndex('auditorConclusion') ? 'current' : 'waiting';
+      }
+    }
+
+    function ensureStageAutoData(report) {
+      const stage = reportStage(report);
+      if ((stage === 'customerFill' || stage === 'auditorConclusion' || report.finished) && !report.autoFillState.customerFill) {
+        report.cause = report.templates.cause;
+        report.correctionPlan = report.templates.correctionPlan;
+        report.attachments.cause = report.attachmentTemplates.cause.map(item => ({ ...item }));
+        report.attachments.plan = report.attachmentTemplates.plan.map(item => ({ ...item }));
+        report.autoFillState.customerFill = true;
+      }
+      if ((stage === 'auditorConclusion' || report.finished) && !report.autoFillState.auditorConclusion) {
+        report.conclusion = report.templates.conclusion;
+        report.autoFillState.auditorConclusion = true;
+      }
+    }
+
+    function syncStageStatus(report) {
+      ensureStageAutoData(report);
+      if (report.finished) {
+        flowNodes.forEach((node) => {
+          if (report.stageStatus[node.id] !== 'rejected') report.stageStatus[node.id] = 'completed';
+        });
+        return;
+      }
+      const idx = currentStageIndex(reportStage(report));
+      flowNodes.forEach((node, nodeIdx) => {
+        const existing = report.stageStatus[node.id];
+        if (existing === 'rejected') return;
+        if (nodeIdx < idx) report.stageStatus[node.id] = 'completed';
+        else if (nodeIdx === idx) report.stageStatus[node.id] = existing === 'completed' ? 'completed' : 'current';
+        else report.stageStatus[node.id] = 'waiting';
+      });
+    }
+
+    function render() {
+      ncReports.forEach(syncStageStatus);
+      document.getElementById('ncList').innerHTML = ncReports.map((report, idx) => renderCard(report, idx)).join('');
+    }
+
+    function getCardButtonText(report) {
+      const stage = reportStage(report);
+      if (stage === 'customerFill') return '<i class="fas fa-paper-plane"></i> 提交填写内容';
+      if (stage === 'auditorConclusion') return '<i class="fas fa-check-double"></i> 提交跟踪结论';
+      if (report.finished) return '<i class="fas fa-check"></i> 已完成';
+      return '<i class="fas fa-signature"></i> 签章确认';
+    }
+
+
+
+    function isDescriptionEditable(report) {
+      if (!report || report.finished) return false;
+      if (report.signRecords && report.signRecords.auditorSign) return false;
+      return reportStage(report) === 'auditorSign';
+    }
+
+    function isDueDateEditable(report) {
+      return false;
+    }
+
+    function formatDueDateCn(value) {
+      if (!value) return '';
+      const parts = String(value).split('-');
+      if (parts.length !== 3) return value;
+      return `${parts[0]} 年 ${parts[1]} 月 ${parts[2]} 日之前`;
+    }
+
+    function displayDueDate(report) {
+      if (!report) return '-';
+      return report.dueDateCn || formatDueDateCn(report.dueDate) || '-';
+    }
+
+    function displayNature(report) {
+      const value = String((report && report.nature) || '').trim();
+      if (!value) return '-';
+      if (value.indexOf('严重') >= 0) return '严重';
+      if (value.indexOf('轻微') >= 0) return '轻微';
+      return value;
+    }
+
+    function renderCard(report, idx) {
+      const stage = reportStage(report);
+      const fillOpen = isCustomerFillOpen(report);
+      const conclusionOpen = isConclusionOpen(report);
+      const showReject = !report.finished && (stage === 'leaderSign' || stage === 'customerSign');
+      const actionDisabled = report.finished ? 'disabled' : '';
+      const dueDateEditable = isDueDateEditable(report);
+      const descriptionEditable = isDescriptionEditable(report);
+      return `
+        <article class="nc-card">
+          <div class="nc-main">
+            <div class="nc-header">
+              <div class="nc-title">
+                <span class="nc-no"><i class="fas fa-file-lines"></i>${escapeHtml(report.no)}</span>
+                
+              </div>
+              <div class="nc-card-toolbar">
+                <button class="btn" onclick="openSimplePdfPreview(${idx})"><i class="fas fa-file-pdf"></i> 预览PDF文件</button>
+                ${showReject ? `<button class="btn btn-danger" onclick="openRejectModal(${idx}, '${stage}')"><i class="fas fa-reply"></i> 退回</button>` : ''}
+                ${report.finished ? '' : `<button class="btn btn-primary" onclick="submitCurrentStageForReport(${idx})" ${actionDisabled}>${getCardButtonText(report)}</button>`}
+              </div>
+            </div>
+            <div class="nc-body">
+              ${renderPdfVersionStrip(report)}
+              <div class="meta-grid">
+                <div class="meta-item"><div class="meta-label">涉及标准和条款内容</div><div class="meta-value">${escapeHtml((report.standard || '') + '；条款：' + (report.clause || ''))}</div></div>
+                <div class="meta-item"><div class="meta-label">受审核部门/过程</div><div class="meta-value">${escapeHtml(report.relatedDept || '-')}</div></div>
+                <div class="meta-item"><div class="meta-label">性质</div><div class="meta-value"><span class="nature-badge ${displayNature(report) === '严重' ? 'severe' : 'minor'}">${escapeHtml(displayNature(report))}</span></div></div>
+                <div class="meta-item"><div class="meta-label">审核人员</div><div class="meta-value">${escapeHtml(report.auditor)}</div></div>
+                <div class="meta-item"><div class="meta-label">审核日期</div><div class="meta-value">${escapeHtml(report.auditDate)}</div></div>
+                <div class="meta-item"><div class="meta-label">整改完成期限</div><div class="meta-value">${dueDateEditable ? `<input type="date" class="form-date-input" value="${escapeHtml(report.dueDate || '')}" onchange="updateField(${idx}, 'dueDate', this.value)">` : escapeHtml(displayDueDate(report))}</div></div>
+              </div>
+
+              <section class="form-section">
+                <div class="section-head">
+                  <div class="section-title"><i class="fas fa-clipboard-list"></i>不符合项描述</div>
+                </div>
+                <div class="section-body">
+                  <textarea class="form-textarea" rows="4" ${descriptionEditable ? '' : 'readonly'} onchange="updateField(${idx}, 'description', this.value)">${escapeHtml(report.description)}</textarea>
+                  ${descriptionEditable ? '' : `<div class="locked-tip"><i class="fas fa-lock"></i><span>审核员签章完成后，不符合项描述已锁定，仅可查看。</span></div>`}
+                </div>
+              </section>
+
+              <div class="two-col">
+                <section class="form-section">
+                  <div class="section-head"><div class="section-title"><i class="fas fa-magnifying-glass-chart"></i>原因分析</div></div>
+                  <div class="section-body">
+                    <textarea class="form-textarea" rows="5" ${fillOpen ? '' : 'readonly'} onchange="updateField(${idx}, 'cause', this.value)" placeholder="${fillOpen ? '请输入原因分析' : ''}">${escapeHtml(report.cause)}</textarea>
+                    ${renderAttachmentPanel(idx, 'cause', '原因分析附件', report.attachments.cause, fillOpen)}
+                  </div>
+                </section>
+
+                <section class="form-section">
+                  <div class="section-head"><div class="section-title"><i class="fas fa-screwdriver-wrench"></i>纠正、纠正措施或纠正措施计划</div></div>
+                  <div class="section-body">
+                    <textarea class="form-textarea" rows="5" ${fillOpen ? '' : 'readonly'} onchange="updateField(${idx}, 'correctionPlan', this.value)" placeholder="${fillOpen ? '请输入纠正、纠正措施或纠正措施计划' : ''}">${escapeHtml(report.correctionPlan)}</textarea>
+                    ${renderAttachmentPanel(idx, 'plan', '纠正及措施附件', report.attachments.plan, fillOpen)}
+                  </div>
+                </section>
+              </div>
+
+              <section class="form-section">
+                <div class="section-head"><div class="section-title"><i class="fas fa-clipboard-check"></i>跟踪结论</div></div>
+                <div class="section-body">
+                  <div class="conclusion-options">
+                    ${conclusionOptions.map((option, optIdx) => `
+                      <label class="radio-card ${conclusionOpen ? '' : 'locked'}">
+                        <input type="radio" name="conclusion-${idx}" value="${optIdx}" ${report.conclusion === option ? 'checked' : ''} ${conclusionOpen ? '' : 'disabled'} onchange="setConclusion(${idx}, ${optIdx})">
+                        <span>${escapeHtml(option)}</span>
+                      </label>
+                    `).join('')}
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <aside class="flow-panel">
+            <div class="flow-panel-head">
+              <div class="flow-panel-title"><i class="fas fa-diagram-project"></i>流程节点</div>
+              <span class="badge current">${escapeHtml(getStageMeta(stage).owner)}</span>
+            </div>
+            <div class="flow-list">${renderFlow(report)}</div>
+          </aside>
+        </article>
+      `;
+    }
+
+    function renderPdfVersionStrip(report) {
+      return '';
+    }
+
+    function renderAttachmentPanel(idx, type, title, list, editable) {
+      return `
+        <div class="attachment-panel">
+          <div class="attachment-head">
+            <div class="attachment-title"><i class="fas fa-paperclip"></i>${escapeHtml(title)}</div>
+            <div>
+              <input type="file" id="file-${idx}-${type}" style="display:none" multiple onchange="handleUpload(${idx}, '${type}', this.files)">
+              <button class="btn" ${editable ? '' : 'disabled'} onclick="document.getElementById('file-${idx}-${type}').click()"><i class="fas fa-upload"></i> 上传附件</button>
+            </div>
+          </div>
+          <div class="attachment-list">
+            ${list.map((att, attIdx) => `
+              <div class="attachment-item">
+                <div class="attachment-name"><i class="fas ${fileIcon(att.name)}"></i><span title="${escapeHtml(att.name)}">${escapeHtml(att.name)}</span><span style="color:#94a3b8;">${escapeHtml(att.size || '')}</span></div>
+                <div class="attachment-actions">
+                  <button class="btn btn-link" onclick="previewAttachment(${idx}, '${type}', ${attIdx})"><i class="fas fa-eye"></i>预览</button>
+                  <button class="btn btn-link" onclick="downloadAttachment(${idx}, '${type}', ${attIdx})"><i class="fas fa-download"></i>下载</button>
+                  <button class="btn btn-link danger" ${editable ? '' : 'disabled'} onclick="deleteAttachment(${idx}, '${type}', ${attIdx})"><i class="fas fa-trash"></i>删除</button>
+                </div>
+              </div>
+            `).join('') || '<div style="color:#94a3b8;font-size:12px;">暂无附件</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function fileIcon(name) {
+      const lower = String(name || '').toLowerCase();
+      if (lower.endsWith('.pdf')) return 'fa-file-pdf';
+      if (lower.endsWith('.doc') || lower.endsWith('.docx')) return 'fa-file-word';
+      if (lower.endsWith('.xls') || lower.endsWith('.xlsx')) return 'fa-file-excel';
+      if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'fa-file-image';
+      return 'fa-file-lines';
+    }
+
+    function renderFlow(report) {
+      const reportIdx = ncReports.indexOf(report);
+      return flowNodes.map((node, idx) => {
+        const status = report.stageStatus[node.id] || 'waiting';
+        const reject = report.rejectHistory.filter(item => item.stage === node.id).slice(-1)[0];
+        const icon = status === 'completed' ? 'fa-check' : status === 'rejected' ? 'fa-xmark' : status === 'current' ? 'fa-location-dot' : 'fa-circle';
+        const statusText = status === 'completed' ? '已完成' : status === 'rejected' ? '已退回' : status === 'current' ? '当前节点' : '待处理';
+        const rejectAction = reject ? `<button type="button" class="reject-node-action" onclick="showRejectInfo(${reportIdx}, '${node.id}')"><i class="fas fa-circle-info"></i> 退回信息</button>` : '';
+        return `
+          <div class="flow-node ${status}">
+            <div class="node-dot"><i class="fas ${icon}"></i></div>
+            <div>
+              <div class="node-name">${idx + 1}. ${escapeHtml(node.name)}</div>
+              <div class="node-desc">${escapeHtml(node.desc)}</div>
+              <span class="node-status">${statusText}</span>
+              ${rejectAction}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateField(idx, field, value) {
+      const report = ncReports[idx];
+      if (!report) return;
+      if (field === 'description') {
+        if (!isDescriptionEditable(report)) return;
+      }
+      if (field === 'dueDate') {
+        if (!isDueDateEditable(report)) return;
+        report.dueDate = value;
+        report.dueDateCn = formatDueDateCn(value);
+        return;
+      }
+      if (field === 'cause' || field === 'correctionPlan') {
+        if (!isCustomerFillOpen(report)) return;
+      }
+      report[field] = value;
+    }
+
+    function setConclusion(idx, optionIdx) {
+      const report = ncReports[idx];
+      if (!isConclusionOpen(report)) return;
+      report.conclusion = conclusionOptions[optionIdx];
+    }
+
+    function handleUpload(idx, type, files) {
+      const report = ncReports[idx];
+      if (!isCustomerFillOpen(report)) return;
+      Array.from(files || []).forEach(file => {
+        report.attachments[type].push({ name: file.name, size: prettySize(file.size), source: 'local' });
+      });
+      render();
+    }
+
+    function prettySize(size) {
+      if (!size && size !== 0) return '';
+      if (size < 1024) return size + 'B';
+      if (size < 1024 * 1024) return Math.round(size / 1024) + 'KB';
+      return (size / 1024 / 1024).toFixed(1) + 'MB';
+    }
+
+    function previewAttachment(idx, type, attIdx) {
+      const att = ncReports[idx].attachments[type][attIdx];
+      document.getElementById('attachmentPreviewBox').innerHTML = `
+        <div>
+          <div style="font-size:38px;color:#2563eb;margin-bottom:10px;"><i class="fas ${fileIcon(att.name)}"></i></div>
+          <div style="font-weight:800;color:#1e293b;margin-bottom:4px;">${escapeHtml(att.name)}</div>
+          <div style="color:#64748b;">原型预览：此处展示附件预览区域，实际系统可根据文件类型调用 PDF、图片或 Office 预览服务。</div>
+        </div>
+      `;
+      document.getElementById('attachmentPreviewModal').classList.add('show');
+    }
+
+    function downloadAttachment(idx, type, attIdx) {
+      const att = ncReports[idx].attachments[type][attIdx];
+      const blob = new Blob(['附件下载示例：' + att.name + '\n该文件为原型演示生成的占位下载内容。'], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = att.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function deleteAttachment(idx, type, attIdx) {
+      const report = ncReports[idx];
+      if (!isCustomerFillOpen(report)) return;
+      if (!confirm('确定删除该附件？')) return;
+      report.attachments[type].splice(attIdx, 1);
+      render();
+    }
+
+    function openRejectModal(idx, stage) {
+      if (!(stage === 'leaderSign' || stage === 'customerSign')) return;
+      rejectTarget = { idx, stage };
+      const report = ncReports[idx];
+      const returnStage = getRejectReturnStage(stage);
+      const tip = document.querySelector('#rejectModal .return-tip span');
+      if (tip) tip.textContent = `点击“确认退回”后，系统将记录退回原因和退回时间，并退回至“${getStageMeta(returnStage).name}”。`;
+      document.getElementById('rejectReasonInput').value = `审核计划中的审核时间与项目实际安排不一致，请调整后重新提交。`;
+      document.getElementById('rejectModal').classList.add('show');
+    }
+
+    function closeRejectModal() {
+      document.getElementById('rejectModal').classList.remove('show');
+      rejectTarget = null;
+    }
+
+    function confirmReject() {
+      const reason = document.getElementById('rejectReasonInput').value.trim();
+      if (!reason) { alert('请填写退回原因'); return; }
+      if (!rejectTarget) return;
+      const report = ncReports[rejectTarget.idx];
+      const fromStage = rejectTarget.stage;
+      const prevStage = getRejectReturnStage(fromStage);
+      report.rejectHistory.push({ stage: fromStage, fromStage, returnToStage: prevStage, reason, time: new Date().toLocaleString('zh-CN') });
+      resetReportToStage(report, prevStage);
+      closeRejectModal();
+      render();
+      alert('已退回：' + report.no + '，流程已返回至“' + getStageMeta(prevStage).name + '”。');
+    }
+
+    function submitCurrentStageForReport(idx) {
+      const report = ncReports[idx];
+      const stage = reportStage(report);
+      if (report.finished) return;
+      if (stage === 'customerFill') {
+        submitCustomerFill(idx);
+        return;
+      }
+      if (stage === 'auditorConclusion') {
+        submitConclusion(idx);
+        return;
+      }
+      openSignModal(idx);
+    }
+
+    function openSignModal(idx) {
+      const report = ncReports[idx];
+      const stage = reportStage(report);
+      if (!isSignStage(stage)) return;
+      signTarget = { idx, stage, offlineFile: null };
+      customerSignMode = 'online';
+      const meta = getSignerInfo(report, stage);
+      document.getElementById('modalReportNo').textContent = report.no;
+      document.getElementById('modalNodeName').textContent = getStageMeta(stage).name;
+      const isCustomer = stage === 'customerSign';
+      document.getElementById('customerSignModeBox').style.display = isCustomer ? 'block' : 'none';
+      document.getElementById('signHelpText').textContent = isCustomer
+        ? '客户签字环节支持线上签章和线下签章。线上签章完成后系统生成客户线上签章 PDF；线下签章需先下载待签 PDF，再上传客户签署后的 PDF。'
+        : '当前文件将以不符合项报告 PDF 样式提交线上签章，完成后在 PDF 预览中生成该节点签署后的 PDF 文件版本。';
+      selectCustomerSignMode('online', true);
+      const status = document.getElementById('modalSignStatus');
+      status.className = 'sign-status-pill sign-status-pending';
+      status.innerHTML = '<i class="fas fa-clock"></i>待签章';
+      document.querySelectorAll('#platformProgress .sign-process-line').forEach(line => {
+        line.classList.remove('running', 'done', 'failed');
+        line.querySelector('i').className = line.dataset.progress === '0' ? 'fas fa-file-pdf' : line.dataset.progress === '1' ? 'fas fa-stamp' : 'fas fa-route';
+      });
+      document.getElementById('confirmSignBtn').disabled = false;
+      document.getElementById('confirmSignBtn').innerHTML = '<i class="fas fa-stamp"></i>确认签章';
+      document.getElementById('onlineSignModal').classList.add('show');
+    }
+
+    function selectCustomerSignMode(mode, silent) {
+      customerSignMode = mode === 'offline' ? 'offline' : 'online';
+      const onlineBtn = document.getElementById('onlineModeBtn');
+      const offlineBtn = document.getElementById('offlineModeBtn');
+      const offlinePanel = document.getElementById('offlineSignPanel');
+      const progress = document.getElementById('platformProgress');
+      if (onlineBtn) onlineBtn.classList.toggle('active', customerSignMode === 'online');
+      if (offlineBtn) offlineBtn.classList.toggle('active', customerSignMode === 'offline');
+      if (offlinePanel) offlinePanel.classList.toggle('show', customerSignMode === 'offline');
+      if (progress) progress.style.display = customerSignMode === 'offline' ? 'none' : 'grid';
+      const btn = document.getElementById('confirmSignBtn');
+      if (btn) btn.innerHTML = customerSignMode === 'offline' ? '<i class="fas fa-check"></i>确认线下签章完成' : '<i class="fas fa-stamp"></i>确认签章';
+      const status = document.getElementById('modalSignStatus');
+      if (status && !silent) {
+        status.className = 'sign-status-pill sign-status-pending';
+        status.innerHTML = customerSignMode === 'offline' ? '<i class="fas fa-file-upload"></i>待上传' : '<i class="fas fa-clock"></i>待签章';
+      }
+    }
+
+    function closeSignModal() {
+      document.getElementById('onlineSignModal').classList.remove('show');
+      signTarget = null;
+    }
+
+    function startSignConfirm() {
+      if (!signTarget) return;
+      const report = ncReports[signTarget.idx];
+      const btn = document.getElementById('confirmSignBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>签章中';
+      const status = document.getElementById('modalSignStatus');
+      if (status) {
+        status.className = 'sign-status-pill sign-status-signing';
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i>签章中';
+      }
+      const lines = Array.from(document.querySelectorAll('#platformProgress .sign-process-line'));
+      lines.forEach((line, index) => {
+        line.classList.remove('running', 'done', 'failed');
+        const icon = line.querySelector('i');
+        if (icon) icon.className = index === 0 ? 'fas fa-file-pdf' : index === 1 ? 'fas fa-stamp' : 'fas fa-route';
+      });
+      if (signTarget.stage === 'customerSign' && customerSignMode === 'offline') {
+        if (!signTarget.offlineFile) {
+          signTarget.offlineFile = { name: `${report.no}_客户线下签章文件.pdf`, size: '已签章' };
+        }
+        runSignStep(lines, 0, () => runSignStep(lines, 1, () => runSignStep(lines, 2, completeCustomerSignWithPreview)));
+        setTimeout(completeCustomerSignWithPreview, 1600);
+        return;
+      }
+      runSignStep(lines, 0, () => runSignStep(lines, 1, () => runSignStep(lines, 2, completeCustomerSignWithPreview)));
+      setTimeout(completeCustomerSignWithPreview, 1600);
+    }
+
+    function handleOfflineSignedPdf(files) {
+      if (!signTarget) return;
+      const file = Array.from(files || [])[0];
+      if (!file) return;
+      const isPdf = file.type === 'application/pdf' || String(file.name || '').toLowerCase().endsWith('.pdf');
+      if (!isPdf) { alert('请上传 PDF 格式的签章文件'); return; }
+      signTarget.offlineFile = { name: file.name, size: prettySize(file.size), uploadedAt: new Date().toLocaleString('zh-CN') };
+      renderOfflineSignedFile();
+      const status = document.getElementById('modalSignStatus');
+      status.className = 'sign-status-pill sign-status-signing';
+      status.innerHTML = '<i class="fas fa-file-circle-check"></i>待确认';
+    }
+
+    function renderOfflineSignedFile() {
+      const box = document.getElementById('offlineUploadInfo');
+      if (!box) return;
+      if (!signTarget || !signTarget.offlineFile) {
+        box.innerHTML = '<span><i class="fas fa-circle-info"></i> 请先上传客户线下签署完成的 PDF 文件</span>';
+        return;
+      }
+      const file = signTarget.offlineFile;
+      box.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;width:100%;">
+          <span><i class="fas fa-file-pdf" style="color:#dc2626;"></i> 已上传：<strong>${escapeHtml(file.name)}</strong> <span style="color:#94a3b8;">${escapeHtml(file.size || '')}</span></span>
+          <span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="mini-link-btn" onclick="previewOfflineSignedPdf()"><i class="fas fa-eye"></i> 预览</button>
+            <button type="button" class="mini-link-btn" onclick="downloadOfflineSignedPdf()"><i class="fas fa-download"></i> 下载</button>
+            <button type="button" class="mini-link-btn" onclick="deleteOfflineSignedPdf()"><i class="fas fa-trash"></i> 删除</button>
+          </span>
+        </div>
+      `;
+    }
+
+    function previewOfflineSignedPdf() {
+      if (!signTarget || !signTarget.offlineFile) return;
+      openSimplePdfPreview(signTarget.idx);
+    }
+
+    function downloadOfflineSignedPdf() {
+      if (!signTarget || !signTarget.offlineFile) return;
+      const report = ncReports[signTarget.idx];
+      const content = `线下签章 PDF 文件\n报告编号：${report ? report.no : '-'}\n文件名称：${signTarget.offlineFile.name}\n上传时间：${signTarget.offlineFile.uploadedAt || '-'}`;
+      const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = signTarget.offlineFile.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function deleteOfflineSignedPdf() {
+      if (!signTarget || !signTarget.offlineFile) return;
+      signTarget.offlineFile = null;
+      const input = document.getElementById('offlineSignedPdfInput');
+      if (input) input.value = '';
+      renderOfflineSignedFile();
+      const status = document.getElementById('modalSignStatus');
+      if (status) {
+        status.className = 'sign-status-pill sign-status-pending';
+        status.innerHTML = '<i class="fas fa-file-upload"></i>待上传';
+      }
+    }
+
+    function downloadPendingCustomerPdf() {
+      if (!signTarget) return;
+      const report = ncReports[signTarget.idx];
+      const content = `不符合项报告线下签章待签文件\n报告编号：${report.no}\n客户名称：${report.customerName}\n说明：原型演示中生成待签 PDF 下载文件，实际系统应下载正式 PDF。`;
+      const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${report.no}_客户待签PDF.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function finishOfflineCustomerSign(report) {
+      if (!signTarget) return;
+      if (!signTarget.offlineFile) {
+        signTarget.offlineFile = { name: `${report.no}_客户线下签章文件.pdf`, size: '已签章' };
+      }
+      const meta = getSignerInfo(report, 'customerSign');
+      report.stageStatus.customerSign = 'completed';
+      report.signRecords.customerSign = { role: meta.role, signer: meta.signer, time: new Date().toLocaleString('zh-CN'), method: '线下签章', fileName: signTarget.offlineFile.name };
+      addSignedPdfVersion(report, 'customerSign', '线下签章', signTarget.offlineFile.name);
+      const status = document.getElementById('modalSignStatus');
+      if (status) {
+        status.className = 'sign-status-pill sign-status-signed';
+        status.innerHTML = '<i class="fas fa-check-circle"></i>线下签章完成';
+      }
+      advanceToNextStage(report);
+      const previewIdx = signTarget.idx;
+      render();
+      setTimeout(() => {
+        closeSignModal();
+        openSimplePdfPreview(previewIdx);
+      }, 260);
+    }
+
+    function runSignStep(lines, index, done) {
+      const line = lines[index];
+      if (!line) {
+        if (typeof done === 'function') done();
+        return;
+      }
+      line.classList.add('running');
+      setTimeout(() => {
+        line.classList.remove('running');
+        line.classList.add('done');
+        const icon = line.querySelector('i');
+        if (icon) icon.className = 'fas fa-check';
+        if (typeof done === 'function') done();
+      }, 420);
+    }
+
+    function completeCustomerSignWithPreview() {
+      if (!signTarget) return;
+      const target = signTarget;
+      const report = ncReports[target.idx];
+      if (!report || report.signCompleteOpeningPreview) return;
+      report.signCompleteOpeningPreview = true;
+      const mode = customerSignMode === 'offline' ? '线下签章' : '线上签章';
+      const meta = getSignerInfo(report, 'customerSign');
+      const fileName = mode === '线下签章'
+        ? ((target.offlineFile && target.offlineFile.name) || `${report.no}_客户线下签章文件.pdf`)
+        : undefined;
+      report.stageStatus.customerSign = 'completed';
+      report.currentStage = 'customerSign';
+      report.finished = true;
+      report.signRecords.customerSign = {
+        role: meta.role,
+        signer: meta.signer,
+        time: new Date().toLocaleString('zh-CN'),
+        method: mode,
+        fileName
+      };
+      const status = document.getElementById('modalSignStatus');
+      if (status) {
+        status.className = 'sign-status-pill sign-status-signed';
+        status.innerHTML = '<i class="fas fa-check-circle"></i>已签章';
+      }
+      const btn = document.getElementById('confirmSignBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-check"></i>已完成';
+      }
+      try {
+        addSignedPdfVersion(report, 'customerSign', mode, fileName);
+      } catch (err) {
+        console.error(err);
+      }
+      const previewIdx = target.idx;
+      setTimeout(() => {
+        try {
+          render();
+          openSimplePdfPreview(previewIdx);
+        } catch (err) {
+          console.error(err);
+          render();
+        }
+      }, 260);
+    }
+
+    function finishSignConfirm() {
+      const target = signTarget;
+      if (!target) return;
+      const report = ncReports[target.idx];
+      const meta = getSignerInfo(report, target.stage);
+      report.stageStatus[target.stage] = 'completed';
+      report.signRecords[target.stage] = { role: meta.role, signer: meta.signer, time: new Date().toLocaleString('zh-CN'), method: '线上签章' };
+      addSignedPdfVersion(report, target.stage, '线上签章');
+      const status = document.getElementById('modalSignStatus');
+      if (status) {
+        status.className = 'sign-status-pill sign-status-signed';
+        status.innerHTML = '<i class="fas fa-check-circle"></i>签章完成';
+      }
+      const btn = document.getElementById('confirmSignBtn');
+      if (btn) btn.innerHTML = '<i class="fas fa-check"></i>已完成';
+      advanceToNextStage(report);
+      render();
+      setTimeout(() => {
+        closeSignModal();
+        previewPdf(target.idx);
+      }, 280);
+    }
+
+    function getSignerInfo(report, stage) {
+      const meta = signMeta[stage] || signMeta.auditorSign;
+      return { role: meta.role, signer: meta.signerField ? (report[meta.signerField] || meta.defaultName) : meta.defaultName };
+    }
+
+    function advanceToNextStage(report) {
+      if (reportStage(report) === 'customerSign') {
+        report.currentStage = 'customerSign';
+        report.stageStatus.customerSign = 'completed';
+        report.finished = true;
+        ensureStageAutoData(report);
+        return;
+      }
+      const next = flowNodes[currentStageIndex(reportStage(report)) + 1];
+      if (next) report.currentStage = next.id;
+      else report.finished = true;
+      ensureStageAutoData(report);
+    }
+
+    function submitCustomerFill(idx) {
+      const report = ncReports[idx];
+      if (!report.cause.trim()) { alert('请填写原因分析'); return; }
+      if (!report.correctionPlan.trim()) { alert('请填写纠正、纠正措施或纠正措施计划'); return; }
+      report.stageStatus.customerFill = 'completed';
+      report.currentStage = 'auditorConclusion';
+      ensureStageAutoData(report);
+      render();
+      alert(report.no + ' 已提交填写内容');
+    }
+
+    function submitConclusion(idx) {
+      const report = ncReports[idx];
+      if (!report.conclusion) { alert('请选择跟踪结论'); return; }
+      report.stageStatus.auditorConclusion = 'completed';
+      report.finished = true;
+      render();
+      alert(report.no + ' 跟踪结论已提交');
+    }
+
+    function getPreviewVersions(report) {
+      const signed = ensurePdfVersions(report).filter(version => !version.pending);
+      if (signed.length) return signed;
+      const stage = reportStage(report) || 'customerSign';
+      return [{
+        stage,
+        name: `${report.no}_${getStageMeta(stage).name}_待签PDF.pdf`,
+        method: '待签章文件',
+        time: new Date().toLocaleString('zh-CN'),
+        stages: [],
+        pending: true
+      }];
+    }
+
+    function buildInlinePdfDocument(report, version) {
+      const pending = !!(version && version.pending);
+      const seals = pending ? '' : buildInlineSealBlocks(report, version);
+      return `
+        <div class="inline-pdf-doc">
+          <section class="inline-pdf-page">
+            <div class="pdf-doc-header">
+              <div>
+                <div class="pdf-org">CQC 中国质量认证中心</div>
+                <div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div>
+              </div>
+            </div>
+            <h1 class="pdf-main-title">不符合项报告</h1>
+            <div class="pdf-table-section">
+              <div class="pdf-section-title">一、基本信息</div>
+              <table class="plan-pdf-table"><tbody>
+                <tr><th>报告编号</th><td>${escapeHtml(report.no)}</td><th>客户名称</th><td>${escapeHtml(report.customerName)}</td></tr>
+                <tr><th>审核日期</th><td>${escapeHtml(report.auditDateCn || report.auditDate)}</td><th>整改完成期限</th><td>${escapeHtml(displayDueDate(report))}</td></tr>
+                <tr><th>涉及标准和条款内容</th><td colspan="3">${escapeHtml((report.standard || '') + '；条款：' + (report.clause || ''))}</td></tr>
+                <tr><th>受审核部门/过程</th><td>${escapeHtml(report.relatedDept)}</td><th>性质</th><td>${escapeHtml(report.nature)}</td></tr>
+              </tbody></table>
+            </div>
+            <div class="pdf-table-section">
+              <div class="pdf-section-title">二、不符合项描述</div>
+              <table class="plan-pdf-table"><tbody><tr><td>${escapeHtml(report.description)}</td></tr></tbody></table>
+            </div>
+            <div class="pdf-table-section">
+              <div class="pdf-section-title">三、签章记录</div>
+              <table class="signature-table">
+                <thead><tr><th>序号</th><th>节点</th><th>签章人</th><th>角色</th><th>签章时间</th><th>状态</th><th>签章方式</th></tr></thead>
+                <tbody>${buildSignRecordRows(report, version)}</tbody>
+              </table>
+            </div>
+            <div class="signature-seal-title">${pending ? '待签章文件' : '线上签章结果'}</div>
+            <div class="signature-seal-area">${seals || `<div class="signature-empty">${pending ? '当前为待签章 PDF 文件，完成签章后将展示个人签章印。' : '待完成线上签章后，本页展示个人签章印。'}</div>`}</div>
+            <div class="pdf-page-number">第 1 页 / 共 1 页</div>
+          </section>
+        </div>
+      `;
+    }
+
+    function buildInlineSealBlocks(report, version) {
+      if (!version || version.pending) return '';
+      return signStageIds().map(stage => {
+        const info = getSignerInfo(report, stage);
+        const record = recordVisibleInVersion(report, stage, version);
+        if (!record) return '';
+        return `
+          <div class="pdf-personal-seal-wrap">
+            <div class="pdf-personal-seal">
+              <div class="seal-role">${escapeHtml(info.role)}</div>
+              <div class="seal-name">${escapeHtml(record.signer || info.signer)}</div>
+              <div class="seal-mark">电子签章</div>
+            </div>
+            <div class="pdf-personal-seal-time">${escapeHtml(record.time || '-')}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeSimplePdfPreview() {
+      const modal = document.getElementById('simplePdfModal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function simplePdfVersion(report) {
+      const signed = ensurePdfVersions(report).filter(version => !version.pending);
+      if (signed.length) return signed[signed.length - 1];
+      const stage = reportStage(report) || 'customerSign';
+      return {
+        stage,
+        name: `${report.no}_${getStageMeta(stage).name}_待签PDF.pdf`,
+        method: '待签章文件',
+        time: new Date().toLocaleString('zh-CN'),
+        stages: [],
+        pending: true
+      };
+    }
+
+    function simpleSignRows(report, version) {
+      return signStageIds().map((stage, index) => {
+        const info = getSignerInfo(report, stage);
+        const record = version && !version.pending ? recordVisibleInVersion(report, stage, version) : null;
+        const isPending = version && version.pending && version.stage === stage;
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${escapeHtml(getStageMeta(stage).name)}</td>
+            <td>${escapeHtml(record ? record.signer : info.signer)}</td>
+            <td>${escapeHtml(info.role)}</td>
+            <td>${escapeHtml(record ? record.time : '-')}</td>
+            <td>${escapeHtml(record ? '已签章' : (isPending ? '待签章' : '未签章'))}</td>
+            <td>${escapeHtml(record ? (record.method || '线上签章') : '-')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function simpleSealBlock(report, version) {
+      if (!version || version.pending) return '<div class="signature-empty">当前为待签章 PDF 文件，完成签章后将展示个人签章印。</div>';
+      const record = report.signRecords.customerSign;
+      if (!record) return '<div class="signature-empty">待完成签章后，本页展示个人签章印。</div>';
+      return `
+        <div>
+          <div class="simple-seal"><span>客户代表</span><span>${escapeHtml(record.signer || '客户')}</span><span>电子签章</span></div>
+          <div class="pdf-personal-seal-time">${escapeHtml(record.time || '-')}</div>
+        </div>
+      `;
+    }
+
+    function openSimplePdfPreview(idx) {
+      const reportIdx = typeof idx === 'number' ? idx : 0;
+      const report = ncReports[reportIdx];
+      if (!report) return;
+      const version = simplePdfVersion(report);
+      const modal = document.getElementById('simplePdfModal');
+      const title = document.getElementById('simplePdfTitle');
+      const viewer = document.getElementById('simplePdfViewer');
+      if (!modal || !viewer) return;
+      if (title) title.textContent = version.pending ? '待签章 PDF 文件预览' : '已签章 PDF 文件预览';
+      viewer.innerHTML = `
+        <section class="simple-pdf-page">
+          <div class="pdf-doc-header">
+            <div>
+              <div class="pdf-org">CQC 中国质量认证中心</div>
+              <div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div>
+            </div>
+          </div>
+          <h1 class="pdf-main-title">不符合项报告</h1>
+          <table class="simple-pdf-table"><tbody>
+            <tr><th>报告编号</th><td>${escapeHtml(report.no)}</td><th>客户名称</th><td>${escapeHtml(report.customerName)}</td></tr>
+            <tr><th>审核日期</th><td>${escapeHtml(report.auditDateCn || report.auditDate)}</td><th>整改完成期限</th><td>${escapeHtml(displayDueDate(report))}</td></tr>
+            <tr><th>涉及标准和条款内容</th><td colspan="3">${escapeHtml((report.standard || '') + '；条款：' + (report.clause || ''))}</td></tr>
+            <tr><th>受审核部门/过程</th><td>${escapeHtml(report.relatedDept)}</td><th>性质</th><td>${escapeHtml(report.nature)}</td></tr>
+          </tbody></table>
+          <div class="pdf-section-title">不符合项描述</div>
+          <table class="simple-pdf-table"><tbody><tr><td>${escapeHtml(report.description)}</td></tr></tbody></table>
+          <div class="pdf-section-title">签章记录</div>
+          <table class="simple-pdf-table">
+            <thead><tr><th>序号</th><th>节点</th><th>签章人</th><th>角色</th><th>签章时间</th><th>状态</th><th>签章方式</th></tr></thead>
+            <tbody>${simpleSignRows(report, version)}</tbody>
+          </table>
+          <div class="signature-seal-title">${version.pending ? '待签章文件' : '签章结果'}</div>
+          <div class="signature-seal-area">${simpleSealBlock(report, version)}</div>
+          <div class="pdf-page-number">第 1 页 / 共 1 页</div>
+        </section>
+      `;
+      modal.classList.add('show');
+    }
+
+    function openInlinePdfPreview(idx, versionIdx) {
+      const reportIdx = typeof idx === 'number' ? idx : 0;
+      const report = ncReports[reportIdx];
+      if (!report) return;
+      const versions = getPreviewVersions(report);
+      const active = typeof versionIdx === 'number' ? versionIdx : Math.max(0, versions.length - 1);
+      const version = versions[active] || versions[0];
+      const modal = document.getElementById('pdfModal');
+      const title = document.getElementById('pdfModalTitle');
+      const viewer = document.getElementById('pdfViewer');
+      if (!modal || !viewer) return;
+      if (title) title.textContent = version.pending ? '待签章 PDF 文件预览' : '已签章 PDF 文件预览';
+      viewer.innerHTML = `
+        <div class="signature-file-list show">
+          <div class="signature-file-title"><i class="fas fa-folder-open"></i><span>签章文件清单</span></div>
+          <div class="signature-file-grid">
+            ${versions.map((item, itemIdx) => `
+              <div class="signature-file-card ${itemIdx === active ? 'active' : ''}">
+                <span class="signature-file-icon"><i class="fas fa-file-pdf"></i></span>
+                <div class="signature-file-main">
+                  <div class="signature-file-name">${escapeHtml(item.name)}</div>
+                  <div class="signature-file-desc">${escapeHtml(item.method || (item.pending ? '待签章文件' : '线上签章'))}；${escapeHtml(item.time || '-')}</div>
+                  <div class="signature-file-actions">
+                    <button type="button" class="mini-link-btn" onclick="openInlinePdfPreview(${reportIdx}, ${itemIdx})"><i class="fas fa-eye"></i> 预览PDF</button>
+                    <button type="button" class="mini-link-btn" onclick="downloadPdfVersion(${reportIdx}, ${itemIdx})"><i class="fas fa-download"></i> 下载</button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ${buildInlinePdfDocument(report, version)}
+      `;
+      modal.classList.add('show');
+    }
+
+    function previewPdf(idx) {
+      const reports = typeof idx === 'number' ? [ncReports[idx]] : ncReports;
+      document.getElementById('pdfModalTitle').textContent = reports.length === 1 ? reports[0].no + ' PDF 文件预览' : '不符合项报告 PDF 文件预览';
+      document.getElementById('pdfViewer').innerHTML = reports.map((report, i) => {
+        const realIdx = typeof idx === 'number' ? idx : i;
+        return buildPdfVersionPreview(report, realIdx);
+      }).join('');
+      document.getElementById('pdfModal').classList.add('show');
+    }
+
+    function ensurePdfVersions(report) {
+      if (!Array.isArray(report.pdfVersions)) report.pdfVersions = [];
+      signStageIds().forEach(stage => {
+        if (report.signRecords[stage] && !report.pdfVersions.some(v => v.stage === stage && !v.pending)) {
+          addSignedPdfVersion(report, stage, report.signRecords[stage].method || '线上签章', report.signRecords[stage].fileName, true);
+        }
+      });
+      return buildDisplayPdfVersions(report);
+    }
+
+    function getStoredPdfVersion(report, stage) {
+      return (report.pdfVersions || []).find(v => v.stage === stage && !v.pending);
+    }
+
+    function buildDisplayPdfVersions(report) {
+      return signStageIds()
+        .map(stage => getStoredPdfVersion(report, stage))
+        .filter(Boolean)
+        .sort((a, b) => signStageIds().indexOf(a.stage) - signStageIds().indexOf(b.stage));
+    }
+
+    function addSignedPdfVersion(report, stage, method, fileName, silent) {
+      if (!Array.isArray(report.pdfVersions)) report.pdfVersions = [];
+      report.pdfVersions = report.pdfVersions.filter(v => v.stage !== stage || v.pending);
+      report.pdfVersions = report.pdfVersions.filter(v => v.stage !== stage);
+      const idx = signStageIds().indexOf(stage);
+      const stages = signStageIds().filter((_, i) => i <= idx && report.signRecords[signStageIds()[i]]);
+      const name = fileName || `${report.no}_${getStageMeta(stage).name}_${method || '线上签章'}版.pdf`;
+      report.pdfVersions.push({ stage, name, method: method || '线上签章', time: report.signRecords[stage] ? report.signRecords[stage].time : new Date().toLocaleString('zh-CN'), stages, pending: false });
+      report.pdfVersions.sort((a, b) => {
+        const order = signStageIds();
+        return order.indexOf(a.stage) - order.indexOf(b.stage);
+      });
+      if (!silent) return name;
+    }
+
+    function buildPdfVersionPreview(report, idx) {
+      const versions = ensurePdfVersions(report);
+      const cards = `
+        <div class="pdf-file-list">
+          ${versions.map((version, vIdx) => `
+            <div class="pdf-file-card">
+              <div class="file-main">
+                <i class="fas fa-file-pdf"></i>
+                <div>
+                  <strong title="${escapeHtml(version.name)}">${escapeHtml(version.name)}</strong>
+                  <small>${escapeHtml(version.method)} · ${escapeHtml(version.time || '-')}</small>
+                </div>
+              </div>
+              <span class="pdf-version-tag">${version.pending ? '待签' : `第 ${vIdx + 1} 份`}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      return cards + versions.map((version, vIdx) => buildPdfSheet(report, idx, version, vIdx)).join('');
+    }
+
+    function recordVisibleInVersion(report, stage, version) {
+      if (!version || version.stage === 'current') return report.signRecords[stage];
+      if (version.stage === 'original') return null;
+      return (version.stages || []).includes(stage) ? report.signRecords[stage] : null;
+    }
+
+    function signStageStatusLabel(report, stage, version) {
+      const record = recordVisibleInVersion(report, stage, version);
+      if (record) return '已签章';
+      if (version && version.pending && version.stage === stage) return '待签章';
+      if (version) return '未签章';
+      const signIds = signStageIds();
+      const stageIdx = signIds.indexOf(stage);
+      const curIdx = signIds.indexOf(reportStage(report));
+      if (report.finished || reportStage(report) === 'customerFill' || reportStage(report) === 'auditorConclusion') return '未开始';
+      if (stage === reportStage(report)) return '待签章';
+      if (stageIdx > curIdx) return '未开始';
+      return '待签章';
+    }
+
+    function buildSignRecordRows(report, version) {
+      return signStageIds().map((stage, index) => {
+        const info = getSignerInfo(report, stage);
+        const record = recordVisibleInVersion(report, stage, version);
+        return `
+          <tr>
+            <td class="center">${index + 1}</td>
+            <td>${escapeHtml(getStageMeta(stage).name)}</td>
+            <td>${escapeHtml(record ? record.signer : info.signer)}</td>
+            <td>${escapeHtml(info.role)}</td>
+            <td>${escapeHtml(record ? (record.method || '线上签章') : '-')}</td>
+            <td>${escapeHtml(record ? record.time : '-')}</td>
+            <td>${escapeHtml(signStageStatusLabel(report, stage, version))}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function buildPdfSheet(report, idx, version, versionIdx) {
+      const isSevere = report.nature.indexOf('严重') > -1;
+      const versionName = version ? version.name : report.no + '_当前预览.pdf';
+      const versionMethod = version ? version.method : '当前预览';
+      const versionTime = version ? version.time : new Date().toLocaleString('zh-CN');
+      return `
+        <section class="pdf-sheet">
+          <div class="pdf-watermark">CQC</div>
+          <div class="pdf-inner">
+            <div class="pdf-top">
+              <div class="pdf-brand">
+                <div class="pdf-logo-mark">CQC</div>
+                <div>
+                  <div class="pdf-cn">中国质量认证中心</div>
+                  <div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div>
+                </div>
+              </div>
+            </div>
+            <h1 class="pdf-title">不符合项报告</h1>
+            <table class="pdf-report-table">
+              <tr><td class="pdf-label" colspan="1">客户名称：</td><td class="pdf-value" colspan="3">${escapeHtml(report.customerName)}</td></tr>
+              <tr>
+                <td class="pdf-label">审核日期：</td><td class="pdf-value">${escapeHtml(report.auditDateCn)}</td>
+                <td class="pdf-label pdf-red">整改完成期限：</td><td class="pdf-value pdf-red">${escapeHtml(displayDueDate(report))}</td>
+              </tr>
+              <tr>
+                <td class="pdf-label" colspan="2">受审核部门/过程：</td><td class="pdf-value" colspan="1">${escapeHtml(report.relatedDept)}</td>
+                <td class="pdf-value">性质：<span class="pdf-box ${isSevere ? 'checked' : ''}"></span>严重&nbsp;&nbsp;&nbsp;<span class="pdf-box ${!isSevere ? 'checked' : ''}"></span>轻微</td>
+              </tr>
+              <tr><td class="pdf-label" colspan="4">不符合项描述：</td></tr>
+              <tr><td class="pdf-value pdf-large-cell" colspan="4">${escapeHtml(report.description)}</td></tr>
+            </table>
+
+            <div class="pdf-log-box">
+              <h3 class="pdf-sign-record-title">不符合项报告签章记录</h3>
+              <p class="pdf-log-note"><b>说明：</b>本页汇总当前 PDF 文件版本对应的签章记录。线上签章由系统生成签章版 PDF；客户线下签章时，系统保留客户上传的签章 PDF 文件。</p>
+              <table class="pdf-report-table pdf-sign-record-table">
+                <thead>
+                  <tr>
+                    <th class="center" style="width:8%;">序号</th>
+                    <th style="width:21%;">节点</th>
+                    <th style="width:18%;">签章人</th>
+                    <th style="width:16%;">角色</th>
+                    <th style="width:15%;">签署方式</th>
+                    <th style="width:18%;">签章时间</th>
+                    <th style="width:14%;">状态</th>
+                  </tr>
+                </thead>
+                <tbody>${buildSignRecordRows(report, version)}</tbody>
+              </table>
+              <div class="pdf-sign-section pdf-seal-strip">
+                <div class="pdf-sign-title"><i class="fas fa-stamp"></i>个人签章信息</div>
+                <div class="pdf-sign-grid">
+                  ${renderPdfSignSlot(report, 'auditorSign', version)}
+                  ${renderPdfSignSlot(report, 'leaderSign', version)}
+                  ${renderPdfSignSlot(report, 'customerSign', version)}
+                </div>
+              </div>
+            </div>
+            <div class="pdf-footer">
+              <span>报告编号：${escapeHtml(report.no)}</span>
+              <span>第 ${idx + 1} 项报告 / 第 ${versionIdx + 1} 份PDF文件</span>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPdfSignSlot(report, stage, version) {
+      const info = getSignerInfo(report, stage);
+      const record = recordVisibleInVersion(report, stage, version);
+      const completed = !!record;
+      const signer = record ? record.signer : info.signer;
+      const time = record ? record.time : '-';
+      if (completed) {
+        return `
+          <div class="pdf-sign-card">
+            <div class="personal-seal"><span class="role">${escapeHtml(info.role)}</span><span class="name">${escapeHtml(signer)}</span></div>
+            <div class="personal-seal-time">${escapeHtml(record.method || '线上签章')} · ${escapeHtml(time)}</div>
+            ${record.fileName ? `<div class="personal-seal-time" title="${escapeHtml(record.fileName)}">${escapeHtml(record.fileName)}</div>` : ''}
+          </div>
+        `;
+      }
+      return `
+        <div class="pdf-sign-card">
+          <div class="pending-seal"><i class="fas fa-clock"></i><br>${escapeHtml(info.role)}待签章<br><span style="font-weight:600;">${escapeHtml(signer)}</span></div>
+        </div>
+      `;
+    }
+
+    function closePdfModal() { document.getElementById('pdfModal').classList.remove('show'); }
+    function closeAttachmentPreviewModal() { document.getElementById('attachmentPreviewModal').classList.remove('show'); }
+
+    function maskClose(event, id) {
+      if (event.target && event.target.id === id) {
+        document.getElementById(id).classList.remove('show');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
+  </script>
+
+<style id="INNER_PDF_REFERENCE_STYLE_DIRECT_V2">
+  .pdf-modal-mask { position: fixed; inset: 0; z-index: 60000; display: none; background: rgba(15,23,42,0.48); backdrop-filter: blur(3px); }
+  .pdf-modal-mask.show { display: block; }
+  .pdf-modal-card { width: 100vw; height: 100vh; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+  .pdf-modal-head { flex: 0 0 auto; min-height: 52px; padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; box-shadow: none; }
+  .pdf-modal-title { display: flex !important; align-items: center; gap: 8px; min-width: 0; color: #0f172a; font-size: 16px; font-weight: 900; }\n  .pdf-modal-title > i { display: none !important; }
+  .pdf-preview-title-line { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 900; line-height: 1.3; color: #0f172a; }
+  .pdf-preview-title-line i { color: #dc2626; }
+  .pdf-preview-subtitle { margin-top: 4px; color: #64748b; font-size: 12px; font-weight: 500; line-height: 1.45; }
+  .pdf-modal-actions { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+  .pdf-modal-download { height: 34px; padding: 0 14px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 700; }
+  .pdf-modal-close { width: 34px; height: 34px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: #64748b; }
+  .pdf-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+  .pdf-viewer { flex: 1 1 auto; overflow: auto; background: #dbe2ea; padding: 18px; }
+  .signature-file-list { display: none; margin: 0 auto 14px; width: calc(100vw - 36px); max-width: none; border: 1px solid #dbeafe; border-radius: 14px; background: #f8fbff; padding: 14px; }
+  .signature-file-list.show { display: block; }
+  .signature-file-title { display: flex; align-items: center; gap: 8px; color: #0f172a; font-size: 14px; font-weight: 900; margin-bottom: 10px; }
+  .signature-file-desc { margin-top: 4px; color: #64748b; font-size: 12px; line-height: 1.55; }
+  .signature-file-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .signature-file-card { display: flex; align-items: flex-start; gap: 14px; min-width: 0; min-height: 92px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+  .signature-file-card.active { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+  .signature-file-icon { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-size: 17px; }
+  .signature-file-main { min-width: 0; flex: 1 1 auto; }
+  .signature-file-name { color: #0f172a; font-size: 13px; font-weight: 900; line-height: 1.35; word-break: break-word; }
+  .signature-file-actions { margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .mini-link-btn { height: 30px; padding: 0 10px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; color: #1d4ed8; cursor: pointer; font-size: 12px; font-weight: 800; }
+  .mini-link-btn:hover { background: #dbeafe; }
+  .pdf-preview-document { width: min(1120px, calc(100vw - 36px)); min-height: 520px; margin: 0 auto; background: #e2e8f0; display: block; }
+  .signed-pdf-strip { display: none !important; }\n  .pdf-modal-download { display: none !important; }\n  .pdf-empty-state { width: min(760px, calc(100vw - 36px)); min-height: 180px; margin: 80px auto 0; border: 1px dashed #bfdbfe; border-radius: 14px; background: #f8fbff; display: flex; align-items: center; justify-content: center; text-align: center; color: #64748b; font-size: 14px; font-weight: 700; }
+  .reject-reason { display: none !important; }
+  .reject-node-action { margin-top: 7px; height: 24px; padding: 0 8px; border: 1px solid #fecaca; border-radius: 999px; background: #fff7f7; color: #dc2626; cursor: pointer; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
+  .reject-node-action:hover { background: #fef2f2; border-color: #f87171; }
+  .reject-info-mask { position: fixed; inset: 0; z-index: 1200; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(15,23,42,.45); backdrop-filter: blur(3px); }
+  .reject-info-mask.show { display: flex; }
+  .reject-info-card { width: min(520px, calc(100vw - 40px)); border-radius: 12px; background: #fff; overflow: hidden; box-shadow: 0 24px 60px rgba(15,23,42,.24); border: 1px solid #e2e8f0; }
+  .reject-info-head { min-height: 52px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #0f172a; font-size: 15px; font-weight: 900; }
+  .reject-info-close { width: 32px; height: 32px; border: 0; border-radius: 999px; background: transparent; color: #64748b; cursor: pointer; }
+  .reject-info-close:hover { background: #e2e8f0; color: #0f172a; }
+  .reject-info-body { padding: 16px; display: grid; gap: 10px; }
+  .reject-info-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; line-height: 1.65; }
+  .reject-info-label { color: #64748b; font-weight: 800; }
+  .reject-info-value { color: #0f172a; word-break: break-word; }
+  @media (max-width: 1200px) { .signature-file-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }\n  @media (max-width: 760px) { .signature-file-grid { grid-template-columns: 1fr; } .signature-file-list { width: calc(100vw - 24px); } }
+  .pdf-file-list, .pdf-version-title, #pdfViewer > .pdf-sheet { display: none !important; }
+</style>
+<script id="INNER_PDF_REFERENCE_STYLE_DIRECT_V2">
+(function () {
+  function esc(value) {
+    return String(value || '').replace(/[&<>"']/g, function (s) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s];
+    });
+  }
+  function versionsOf(report) {
+    var signed = ensurePdfVersions(report).filter(function (version) { return !version.pending; });
+    if (signed.length) return signed;
+    var stage = reportStage(report) || 'customerSign';
+    return [{
+      stage: stage,
+      name: report.no + '_' + getStageMeta(stage).name + '_待签PDF.pdf',
+      method: '待签章文件',
+      time: new Date().toLocaleString('zh-CN'),
+      stages: [],
+      pending: true
+    }];
+  }
+  function fileTitle(report, version) {
+    return version.name || (report.no + '_' + getStageMeta(version.stage).name + (version.pending ? '_待签PDF.pdf' : '_线上签章版.pdf'));
+  }
+  function cardTitle(report, version) {
+    if (version.pending) return report.no + '_' + getStageMeta(version.stage).name + '_待签PDF';
+    var order = signStageIds();
+    var stageIndex = order.indexOf(version.stage);
+    var owners = order.filter(function (stage, index) { return index <= stageIndex && report.signRecords[stage]; }).map(function (stage) { return getStageMeta(stage).owner; });
+    return report.no + '_' + (owners.length ? owners.join('、') : getStageMeta(version.stage).owner) + '签字_线上签章版';
+  }
+  function cardDesc(report, version) {
+    var signer = version.pending ? '-' : (getSignerInfo(report, version.stage).signer || '-');
+    var method = version.pending ? '待签章' : (version.method || '线上签章');
+    return method + '：' + signer + '；签章时间：' + (version.time || '-');
+  }
+  function ensureViewer() {
+    var viewer = document.getElementById('pdfViewer');
+    if (viewer && !document.getElementById('pdfPreviewDocument')) {
+      viewer.innerHTML = '<div class="signature-file-list" id="signatureFileList"></div><div id="pdfPreviewDocument" class="pdf-preview-document" role="document" aria-label="不符合项报告PDF预览"></div>';
+    }
+    return viewer;
+  }
+  function renderList(report, idx, active) {
+    var list = document.getElementById('signatureFileList');
+    if (!list) return;
+    var versions = versionsOf(report);
+    list.classList.add('show');
+    list.innerHTML = '<div class="signature-file-title"><i class="fas fa-folder-open"></i><span>签章文件清单</span></div>' +
+      '<div class="signature-file-grid">' + versions.map(function (version, vIdx) {
+        return '<div class="signature-file-card ' + (vIdx === active ? 'active' : '') + '">' +
+          '<span class="signature-file-icon"><i class="fas fa-file-pdf"></i></span>' +
+          '<div class="signature-file-main">' +
+            '<div class="signature-file-name">' + esc(cardTitle(report, version)) + '</div>' +
+            '<div class="signature-file-desc">' + esc(cardDesc(report, version)) + '</div>' +
+            '<div class="signature-file-actions">' +
+              '<button type="button" class="mini-link-btn" onclick="openPdfVersion(' + idx + ', ' + vIdx + ')"><i class="fas fa-eye"></i> 预览PDF</button>' +
+              '<button type="button" class="mini-link-btn" onclick="downloadPdfVersion(' + idx + ', ' + vIdx + ')"><i class="fas fa-download"></i> 下载</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+  }
+  function signRows(report, version) {
+    return signStageIds().map(function (stage, index) {
+      var info = getSignerInfo(report, stage);
+      var record = version && version.pending ? null : recordVisibleInVersion(report, stage, version);
+      var pending = version && version.pending && version.stage === stage;
+      return '<tr><td>' + (index + 1) + '</td><td>' + esc(getStageMeta(stage).name) + '</td><td>' + esc(record ? record.signer : info.signer) + '</td><td>' + esc(info.role) + '</td><td>' + esc(record ? record.time : '-') + '</td><td>' + esc(record ? '已签章' : (pending ? '待签章' : '未签章')) + '</td><td>' + esc(record ? (record.method || '线上签章') : '-') + '</td></tr>';
+    }).join('');
+  }
+  function sealBlocks(report, version) {
+    return signStageIds().map(function (stage) {
+      var info = getSignerInfo(report, stage);
+      var record = recordVisibleInVersion(report, stage, version);
+      if (!record) return '';
+      return '<div class="pdf-personal-seal-wrap"><div class="pdf-personal-seal"><div class="seal-role">' + esc(info.role) + '</div><div class="seal-name">' + esc(record.signer || info.signer) + '</div><div class="seal-mark">电子签章</div></div><div class="pdf-personal-seal-time">' + esc(record.time || '-') + '</div></div>';
+    }).join('');
+  }
+  function previewDocument(report, version) {
+    var isPending = !!(version && version.pending);
+    var sealHtml = sealBlocks(report, version);
+    return '<style>' +
+      '.pdf-preview-shell{padding:16px;background:#e2e8f0;color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;}' +
+      '.pdf-page{width:min(1120px,calc(100vw - 32px));margin:0 auto 16px;background:#fff;border:1px solid #cbd5e1;box-shadow:0 18px 45px rgba(15,23,42,.16);position:relative;padding:34px 40px 58px;}' +
+      '.report-page{min-height:1060px}.pdf-page-number{position:absolute;right:28px;bottom:18px;color:#64748b;font-size:12px;}' +
+      '.pdf-doc-header{display:flex;align-items:flex-start;justify-content:flex-start;gap:24px;padding-bottom:14px;margin-bottom:18px;border-bottom:2px solid #0f172a;}' +
+      '.pdf-org{font-size:24px;font-weight:900;letter-spacing:.5px}.pdf-en{margin-top:4px;color:#64748b;font-size:12px;letter-spacing:.8px}.pdf-main-title{text-align:center;font-size:28px;font-weight:900;margin:8px 0 22px;color:#111827;letter-spacing:2px;}' +
+      '.pdf-table-section{margin-bottom:16px}.pdf-section-title{font-size:15px;font-weight:900;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:8px}.pdf-section-title:before{content:"";width:4px;height:16px;border-radius:2px;background:#2563eb;display:inline-block;}' +
+      '.plan-pdf-table,.signature-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;line-height:1.55;margin-bottom:10px}.plan-pdf-table th,.plan-pdf-table td,.signature-table th,.signature-table td{border:1px solid #111827;padding:7px 9px;vertical-align:top;word-break:break-word}.plan-pdf-table th,.signature-table th{background:#f8fafc;font-weight:800;color:#111827;text-align:left}.plan-pdf-table:not(.matrix) th{width:180px;}' +
+      '.signature-seal-title{font-size:15px;font-weight:900;margin:2px 0 8px;color:#0f172a}.signature-seal-area{min-height:154px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;padding:14px;display:flex;align-items:flex-start;flex-wrap:wrap;gap:18px}.signature-empty{color:#94a3b8;font-size:13px;padding-top:8px;}' +
+      '.pdf-personal-seal-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:120px}.pdf-personal-seal{width:92px;height:92px;border-radius:50%;border:3px solid #dc2626;color:#dc2626;background:rgba(255,255,255,.92);box-shadow:0 6px 16px rgba(220,38,38,.15);transform:rotate(-12deg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative}.pdf-personal-seal:before{content:"";position:absolute;inset:6px;border:2px solid #dc2626;border-radius:50%}.pdf-personal-seal .seal-role,.pdf-personal-seal .seal-name,.pdf-personal-seal .seal-mark{position:relative;z-index:1}.pdf-personal-seal .seal-role{font-size:11px;font-weight:800;letter-spacing:.5px}.pdf-personal-seal .seal-name{margin-top:3px;font-size:16px;font-weight:900;letter-spacing:2px}.pdf-personal-seal .seal-mark{margin-top:5px;font-size:10px;font-weight:700}.pdf-personal-seal-time{font-size:11px;color:#64748b;font-family:monospace;}' +
+      '</style>' +
+      '<div class="pdf-preview-shell"><div class="pdf-page report-page"><div class="pdf-doc-header"><div><div class="pdf-org">CQC 中国质量认证中心</div><div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div></div></div><h1 class="pdf-main-title">不符合项报告</h1>' +
+      '<div class="pdf-table-section"><div class="pdf-section-title">一、基本信息</div><table class="plan-pdf-table"><tbody><tr><th>报告编号</th><td>' + esc(report.no) + '</td><th>客户名称</th><td>' + esc(report.customerName) + '</td></tr><tr><th>审核日期</th><td>' + esc(report.auditDateCn || report.auditDate) + '</td><th>整改完成期限</th><td>' + esc(displayDueDate(report)) + '</td></tr><tr><th>涉及标准和条款内容</th><td colspan="3">' + esc((report.standard || '') + '；条款：' + (report.clause || '')) + '</td></tr><tr><th>受审核部门/过程</th><td>' + esc(report.relatedDept) + '</td><th>性质</th><td>' + esc(report.nature) + '</td></tr></tbody></table></div>' +
+      '<div class="pdf-table-section"><div class="pdf-section-title">二、不符合项描述</div><table class="plan-pdf-table"><tbody><tr><td>' + esc(report.description) + '</td></tr></tbody></table></div>' +
+      '<div class="pdf-table-section"><div class="pdf-section-title">三、签章记录</div><table class="signature-table"><thead><tr><th>序号</th><th>节点</th><th>签章人</th><th>角色</th><th>签章时间</th><th>状态</th><th>签章方式</th></tr></thead><tbody>' + signRows(report, version) + '</tbody></table></div>' +
+      '<div class="signature-seal-title">' + (isPending ? '待签章文件' : '线上签章结果') + '</div><div class="signature-seal-area">' + (sealHtml || '<div class="signature-empty">' + (isPending ? '当前为待签章 PDF 文件，完成签章后将展示个人签章印。' : '待完成线上签章后，本页展示个人签章印。') + '</div>') + '</div><div class="pdf-page-number">第 1 页 / 共 1 页</div></div></div>';
+  }
+  function rejectPerson(report, reject) {
+    var stage = reject.fromStage || reject.stage;
+    var info = getSignerInfo(report, stage);
+    return reject.rejecter || reject.signer || info.signer || getStageMeta(stage).owner || '-';
+  }
+  window.showRejectInfo = function (idx, stageId) {
+    var report = ncReports[idx];
+    if (!report) return;
+    var reject = report.rejectHistory.filter(function (item) { return item.stage === stageId; }).slice(-1)[0];
+    if (!reject) return;
+    var mask = document.getElementById('rejectInfoModal');
+    if (!mask) {
+      mask = document.createElement('div');
+      mask.id = 'rejectInfoModal';
+      mask.className = 'reject-info-mask';
+      mask.onclick = function (event) { if (event.target === mask) mask.classList.remove('show'); };
+      mask.innerHTML = '<div class="reject-info-card"><div class="reject-info-head"><span><i class="fas fa-circle-info"></i> 退回信息</span><button type="button" class="reject-info-close" onclick="document.getElementById(\'rejectInfoModal\').classList.remove(\'show\')" aria-label="关闭"><i class="fas fa-times"></i></button></div><div class="reject-info-body" id="rejectInfoBody"></div></div>';
+      document.body.appendChild(mask);
+    }
+    var body = document.getElementById('rejectInfoBody');
+    if (body) {
+      body.innerHTML = '<div class="reject-info-row"><div class="reject-info-label">退回节点</div><div class="reject-info-value">' + esc(getStageMeta(reject.stage || stageId).name) + '</div></div>' +
+        '<div class="reject-info-row"><div class="reject-info-label">退回人</div><div class="reject-info-value">' + esc(rejectPerson(report, reject)) + '</div></div>' +
+        '<div class="reject-info-row"><div class="reject-info-label">退回时间</div><div class="reject-info-value">' + esc(reject.time || '-') + '</div></div>' +
+        '<div class="reject-info-row"><div class="reject-info-label">退回原因</div><div class="reject-info-value">' + esc(reject.reason || '-') + '</div></div>';
+    }
+    mask.classList.add('show');
+  };
+  function preparePdfHead() {
+    var head = document.querySelector('#pdfModal .pdf-modal-head');
+    if (head && !head.querySelector('.pdf-modal-actions')) {
+      Array.from(head.querySelectorAll('button')).forEach(function (btn) { btn.remove(); });
+      var actions = document.createElement('div');
+      actions.className = 'pdf-modal-actions';
+      actions.innerHTML = '<button type="button" class="btn pdf-modal-close" onclick="closePdfModal()" aria-label="关闭"><i class="fas fa-times"></i><span>关闭</span></button>';
+      head.appendChild(actions);
+    }
+    var legacyIcon = document.querySelector('#pdfModal .pdf-modal-title > i');
+    if (legacyIcon) legacyIcon.remove();
+    return head;
+  }
+  function showEmptyPreview(reportIdx) {
+    var report = ncReports[reportIdx];
+    preparePdfHead();
+    ensureViewer();
+    window.__currentPdfPreview = { idx: reportIdx, versionIdx: -1 };
+    var title = document.getElementById('pdfModalTitle');
+    if (title) title.innerHTML = '<i class="fas fa-file-signature"></i><span>不符合报告签章文件</span>';
+    var list = document.getElementById('signatureFileList');
+    if (list) {
+      list.classList.remove('show');
+      list.innerHTML = '';
+    }
+    var pane = document.getElementById('pdfPreviewDocument');
+    if (pane) {
+      pane.innerHTML = '<div class="pdf-empty-state">暂无已完成签章 PDF 文件</div>';
+    }
+    document.getElementById('pdfModal').classList.add('show');
+  }
+  window.openPdfVersion = function (idx, versionIdx) {
+    var report = ncReports[idx];
+    if (!report) return;
+    var versions = versionsOf(report);
+    var version = versions[versionIdx] || versions[versions.length - 1];
+    if (!version) return;
+    window.__currentPdfPreview = { idx: idx, versionIdx: versionIdx };
+    ensureViewer();
+    var title = document.getElementById('pdfModalTitle');
+    if (title) title.innerHTML = '<i class="fas fa-file-signature"></i><span>不符合报告签章文件</span>';
+    renderList(report, idx, versionIdx);
+    var pane = document.getElementById('pdfPreviewDocument');
+    if (pane) {
+      pane.innerHTML = previewDocument(report, version);
+    }
+    document.getElementById('pdfModal').classList.add('show');
+  };
+  window.previewPdf = function (idx) {
+    var reportIdx = typeof idx === 'number' ? idx : 0;
+    var report = ncReports[reportIdx];
+    if (!report) return;
+    var versions = versionsOf(report);
+    var activeIndex = Math.max(0, versions.length - 1);
+    preparePdfHead();
+    window.openPdfVersion(reportIdx, activeIndex);
+  };
+  window.downloadCurrentPdfVersion = function () {
+    var cur = window.__currentPdfPreview || { idx: 0, versionIdx: 0 };
+    window.downloadPdfVersion(cur.idx, cur.versionIdx);
+  };
+  window.downloadPdfVersion = function (idx, versionIdx) {
+    var report = ncReports[idx];
+    if (!report) return;
+    var version = versionsOf(report)[versionIdx];
+    if (!version) return;
+    var content = ['不符合项报告 PDF 文件', '报告编号：' + report.no, '客户名称：' + report.customerName, '文件名称：' + fileTitle(report, version), '签章节点：' + getStageMeta(version.stage).name, '签章状态：' + (version.pending ? '待签章' : '已签章'), '生成时间：' + (version.time || '-')].join('\n');
+    var blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = fileTitle(report, version);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+  };
+})();
+</script>
+
+
+<script id="STAGE2_CONFIRMED_RECTIFY_SUMMARY_AND_LOCK_PATCH">
+(function () {
+  function isConclusionConfirmed(report) {
+    return !!(report && (report.conclusionLocked || report.finished || (report.stageStatus && report.stageStatus.auditorConclusion === 'completed')));
+  }
+
+  function calcSummary() {
+    var total = Array.isArray(ncReports) ? ncReports.length : 0;
+    var confirmed = Array.isArray(ncReports) ? ncReports.filter(isConclusionConfirmed).length : 0;
+    return { total: total, confirmed: confirmed, pending: Math.max(total - confirmed, 0) };
+  }
+
+  function ensureSummaryBoard() {
+    var list = document.getElementById('ncList');
+    if (!list || document.getElementById('ncSummaryBoard')) return;
+    var board = document.createElement('div');
+    board.id = 'ncSummaryBoard';
+    board.className = 'nc-summary-board';
+    list.parentElement.insertBefore(board, list);
+  }
+
+  function renderSummaryBoard() {
+    ensureSummaryBoard();
+    var board = document.getElementById('ncSummaryBoard');
+    if (!board) return;
+    var summary = calcSummary();
+    board.innerHTML = [
+      '<div class="nc-summary-item"><span class="nc-summary-label"><i class="fas fa-triangle-exclamation"></i> 不符合项数量</span><strong>' + summary.total + '</strong></div>',
+      '<div class="nc-summary-item ok"><span class="nc-summary-label"><i class="fas fa-circle-check"></i> 已确认跟踪结论</span><strong>' + summary.confirmed + '</strong></div>',
+      '<div class="nc-summary-item warn"><span class="nc-summary-label"><i class="fas fa-clock"></i> 未确认跟踪结论</span><strong>' + summary.pending + '</strong></div>'
+    ].join('');
+  }
+
+  function lockConfirmedConclusions() {
+    if (!Array.isArray(ncReports)) return;
+    ncReports.forEach(function (report, idx) {
+      if (!isConclusionConfirmed(report)) return;
+      document.querySelectorAll('input[name="conclusion-' + idx + '"]').forEach(function (input) {
+        input.disabled = true;
+        input.closest('.radio-card') && input.closest('.radio-card').classList.add('locked', 'confirmed-locked');
+      });
+    });
+  }
+
+  function latestReject(report, stageId) {
+    return ((report && report.rejectHistory) || []).filter(function (item) { return item.stage === stageId; }).slice(-1)[0];
+  }
+
+  function renderRejectInline(report, node) {
+    var reject = latestReject(report, node.id);
+    if (!reject) return '';
+    var returnStage = reject.returnToStage || reject.fromStage || 'auditorSign';
+    return '<div class="flow-reject-inline">' +
+      '<div><span>退回人</span><strong>' + escapeHtml(reject.rejecter || reject.signer || '-') + '</strong></div>' +
+      '<div><span>退回时间</span><strong>' + escapeHtml(reject.time || '-') + '</strong></div>' +
+      '<div><span>退回至</span><strong>' + escapeHtml(getStageMeta(returnStage).name || '审核员签字') + '</strong></div>' +
+      '<div class="flow-reject-reason"><span>退回原因</span><strong>' + escapeHtml(reject.reason || '-') + '</strong></div>' +
+      '<div class="flow-restart-note"><i class="fas fa-rotate-left"></i> 驳回后流程从“审核员签字”开始重新完整记录。</div>' +
+    '</div>';
+  }
+
+  window.renderFlow = function (report) {
+    return flowNodes.map(function (node, idx) {
+      var status = (report.stageStatus && report.stageStatus[node.id]) || 'waiting';
+      var reject = latestReject(report, node.id);
+      var icon = status === 'completed' ? 'fa-check' : status === 'rejected' ? 'fa-xmark' : status === 'current' ? 'fa-location-dot' : 'fa-circle';
+      var statusText = status === 'completed' ? '已完成' : status === 'rejected' ? '已退回' : status === 'current' ? '当前节点' : '待处理';
+      if (reject && status !== 'rejected') statusText += ' / 曾退回';
+      return '<div class="flow-node ' + status + '">' +
+        '<div class="node-dot"><i class="fas ' + icon + '"></i></div>' +
+        '<div>' +
+          '<div class="node-name">' + (idx + 1) + '. ' + escapeHtml(node.name) + '</div>' +
+          '<div class="node-desc">' + escapeHtml(node.desc) + '</div>' +
+          '<span class="node-status">' + statusText + '</span>' +
+          renderRejectInline(report, node) +
+        '</div>' +
+      '</div>';
+    }).join('');
+  };
+
+  function ensureFlowModal() {
+    var modal = document.getElementById('flowNodeModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'flowNodeModal';
+    modal.className = 'modal-mask';
+    modal.onclick = function (event) {
+      if (event.target === modal) modal.classList.remove('show');
+    };
+    modal.innerHTML = '<div class="modal flow-node-modal" onclick="event.stopPropagation()">' +
+      '<div class="modal-head"><span><i class="fas fa-diagram-project"></i> 流程节点</span><button class="btn btn-link danger" onclick="closeFlowNodeModal()"><i class="fas fa-times"></i></button></div>' +
+      '<div class="modal-body"><div class="flow-modal-report" id="flowModalReportNo"></div><div class="flow-list flow-list-modal" id="flowModalList"></div></div>' +
+      '<div class="modal-foot"><button class="btn" onclick="closeFlowNodeModal()">关闭</button></div>' +
+    '</div>';
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  window.openFlowNodeModal = function (idx) {
+    var report = ncReports[idx];
+    if (!report) return;
+    var modal = ensureFlowModal();
+    var title = document.getElementById('flowModalReportNo');
+    var list = document.getElementById('flowModalList');
+    if (title) title.innerHTML = '<i class="fas fa-file-lines"></i> ' + escapeHtml(report.no);
+    if (list) list.innerHTML = renderFlow(report);
+    modal.classList.add('show');
+  };
+
+  window.closeFlowNodeModal = function () {
+    var modal = document.getElementById('flowNodeModal');
+    if (modal) modal.classList.remove('show');
+  };
+
+  function addFlowButtons() {
+    document.querySelectorAll('.nc-card').forEach(function (card, idx) {
+      var toolbar = card.querySelector('.nc-card-toolbar');
+      if (!toolbar || toolbar.querySelector('[data-flow-node-btn]')) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn';
+      btn.setAttribute('data-flow-node-btn', String(idx));
+      btn.innerHTML = '<i class="fas fa-diagram-project"></i> 流程节点';
+      btn.onclick = function () { openFlowNodeModal(idx); };
+      toolbar.insertBefore(btn, toolbar.firstElementChild || null);
+    });
+  }
+
+  var nativeIsConclusionOpen = window.isConclusionOpen;
+  window.isConclusionOpen = function (report) {
+    if (isConclusionConfirmed(report)) return false;
+    return typeof nativeIsConclusionOpen === 'function' ? nativeIsConclusionOpen(report) : false;
+  };
+
+  var nativeSetConclusion = window.setConclusion;
+  window.setConclusion = function (idx, optionIdx) {
+    var report = ncReports[idx];
+    if (isConclusionConfirmed(report)) return;
+    if (typeof nativeSetConclusion === 'function') nativeSetConclusion(idx, optionIdx);
+  };
+
+  var nativeSubmitConclusion = window.submitConclusion;
+  window.submitConclusion = function (idx) {
+    var report = ncReports[idx];
+    if (!report || isConclusionConfirmed(report)) return;
+    if (!report.conclusion) { alert('请选择跟踪结论'); return; }
+    report.conclusionLocked = true;
+    report.conclusionConfirmed = true;
+    report.conclusionConfirmTime = new Date().toLocaleString('zh-CN');
+    if (typeof nativeSubmitConclusion === 'function') nativeSubmitConclusion(idx);
+    renderSummaryBoard();
+    lockConfirmedConclusions();
+  };
+
+  var nativeRender = window.render;
+  window.render = function () {
+    if (typeof nativeRender === 'function') nativeRender();
+    renderSummaryBoard();
+    lockConfirmedConclusions();
+    addFlowButtons();
+  };
+
+  var style = document.createElement('style');
+  style.textContent = [
+    '.nc-summary-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 10px;}',
+    '.nc-summary-item{min-height:42px;padding:8px 12px;border:1px solid #dbeafe;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 1px 2px rgba(15,23,42,.04);}',
+    '.nc-summary-item strong{font-size:20px;line-height:1;color:#1d4ed8;}',
+    '.nc-summary-label{display:inline-flex;align-items:center;gap:6px;min-width:0;color:#64748b;font-size:12px;font-weight:700;white-space:nowrap;}',
+    '.nc-summary-item.ok{border-color:#bbf7d0;background:#f0fdf4;}',
+    '.nc-summary-item.ok strong{color:#16a34a;}',
+    '.nc-summary-item.warn{border-color:#fed7aa;background:#fff7ed;}',
+    '.nc-summary-item.warn strong{color:#ea580c;}',
+    '.radio-card.confirmed-locked{background:#f8fafc!important;color:#64748b!important;cursor:not-allowed!important;}',
+    '.radio-card.confirmed-locked input{cursor:not-allowed!important;}',
+    '.nc-card{grid-template-columns:minmax(0,1fr)!important;}',
+    '.nc-main{border-right:0!important;}',
+    '.flow-panel{display:none!important;}',
+    '.flow-node-modal{width:min(760px,calc(100vw - 40px));max-height:86vh;}',
+    '.flow-node-modal .modal-body{max-height:calc(86vh - 112px);overflow:auto;}',
+    '.flow-modal-report{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:5px 10px;border:1px solid #bfdbfe;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-weight:800;}',
+    '.flow-list-modal{display:flex;flex-direction:column;gap:10px;}',
+    '.flow-reject-inline{margin-top:8px;padding:8px 10px;border:1px solid #fecaca;border-radius:8px;background:#fff7f7;color:#7f1d1d;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 10px;font-size:12px;}',
+    '.flow-reject-inline span{display:block;color:#991b1b;font-weight:700;margin-bottom:2px;}',
+    '.flow-reject-inline strong{font-weight:600;color:#7f1d1d;word-break:break-word;}',
+    '.flow-reject-reason,.flow-restart-note{grid-column:1/-1;}',
+    '.flow-restart-note{display:flex;align-items:center;gap:6px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:5px 7px;font-weight:700;}',
+    '@media (max-width:760px){.nc-summary-board{grid-template-columns:1fr;}.nc-summary-item{min-height:38px;}}'
+  ].join('\n');
+  document.head.appendChild(style);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      renderSummaryBoard();
+      lockConfirmedConclusions();
+      addFlowButtons();
+    });
+  } else {
+    renderSummaryBoard();
+    lockConfirmedConclusions();
+    addFlowButtons();
+  }
+})();
+</script>
+
+<script id="FINAL_SIMPLE_PDF_PREVIEW_OVERRIDE">
+(function () {
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (s) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s];
+    });
+  }
+  function customerRecord(report) {
+    return report && report.signRecords && report.signRecords.customerSign ? report.signRecords.customerSign : null;
+  }
+  function fileItems(report) {
+    var record = customerRecord(report);
+    var prior = {
+      name: report.no + '_审核员、审核组长签字_线上签章版.pdf',
+      desc: '线上签章；审核员、审核组长已签章',
+      active: !record,
+      signed: true
+    };
+    var current = {
+      name: record && record.fileName ? record.fileName : report.no + '_客户签字_待签PDF.pdf',
+      desc: record ? ((record.method || '线上签章') + '；' + (record.time || '-')) : '待签章文件；-',
+      active: !!record,
+      signed: !!record
+    };
+    return [prior, current];
+  }
+  function recordRows(report) {
+    var record = customerRecord(report);
+    var now = new Date().toLocaleString('zh-CN');
+    var customerTime = record ? (record.time || now) : '-';
+    var customerStatus = record ? '已签章' : '待签章';
+    var customerMethod = record ? (record.method || '线上签章') : '待签章文件';
+    return '' +
+      '<tr><td>1</td><td>审核员签字</td><td>' + esc(report.auditor || '王审核') + '</td><td>审核员</td><td>2026/6/23 16:10:23</td><td>已签章</td><td>线上签章</td></tr>' +
+      '<tr><td>2</td><td>审核组长签字</td><td>武荣刚</td><td>审核组长</td><td>2026/6/23 16:22:51</td><td>已签章</td><td>线上签章</td></tr>' +
+      '<tr><td>3</td><td>客户签字</td><td>' + esc(record ? (record.signer || '客户') : '客户') + '</td><td>客户代表</td><td>' + esc(customerTime) + '</td><td>' + esc(customerStatus) + '</td><td>' + esc(customerMethod) + '</td></tr>';
+  }
+  function sealArea(report) {
+    var record = customerRecord(report);
+    var parts = [
+      '<div><div class="simple-seal"><span>审核员</span><span>' + esc(report.auditor || '王审核') + '</span><span>电子签章</span></div><div class="pdf-personal-seal-time">2026/6/23 16:10:23</div></div>',
+      '<div><div class="simple-seal"><span>审核组长</span><span>武荣刚</span><span>电子签章</span></div><div class="pdf-personal-seal-time">2026/6/23 16:22:51</div></div>'
+    ];
+    if (record) {
+      parts.push('<div><div class="simple-seal"><span>客户代表</span><span>' + esc(record.signer || '客户') + '</span><span>电子签章</span></div><div class="pdf-personal-seal-time">' + esc(record.time || '-') + '</div></div>');
+    } else {
+      parts.push('<div class="signature-empty">当前为客户待签章 PDF 文件，完成签章后将展示客户签章印。</div>');
+    }
+    return parts.join('');
+  }
+  function reportPdf(report) {
+    return '<section class="simple-pdf-page">' +
+      '<div class="pdf-doc-header"><div><div class="pdf-org">CQC 中国质量认证中心</div><div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div></div></div>' +
+      '<h1 class="pdf-main-title">不符合项报告</h1>' +
+      '<table class="simple-pdf-table"><tbody>' +
+        '<tr><th>报告编号</th><td>' + esc(report.no) + '</td><th>客户名称</th><td>' + esc(report.customerName) + '</td></tr>' +
+        '<tr><th>审核日期</th><td>' + esc(report.auditDateCn || report.auditDate) + '</td><th>整改完成期限</th><td>' + esc(report.dueDateCn || report.dueDate || '-') + '</td></tr>' +
+        '<tr><th>涉及标准和条款内容</th><td colspan="3">' + esc((report.standard || '') + '；条款：' + (report.clause || '')) + '</td></tr>' +
+        '<tr><th>受审核部门/过程</th><td>' + esc(report.relatedDept || '-') + '</td><th>性质</th><td>' + esc(report.nature || '-') + '</td></tr>' +
+      '</tbody></table>' +
+      '<div class="pdf-section-title">不符合项描述</div>' +
+      '<table class="simple-pdf-table"><tbody><tr><td>' + esc(report.description || '-') + '</td></tr></tbody></table>' +
+      '<div class="signature-seal-title">签章结果</div>' +
+      '<div class="signature-seal-area">' + sealArea(report) + '</div>' +
+      '<div class="pdf-page-number">第 1 页 / 共 1 页</div>' +
+    '</section>';
+  }
+  window.closeSimplePdfPreview = function () {
+    var modal = document.getElementById('simplePdfModal');
+    if (modal) modal.classList.remove('show');
+    var signModal = document.getElementById('onlineSignModal');
+    if (signModal) signModal.classList.remove('show');
+    if (typeof signTarget !== 'undefined') signTarget = null;
+    if (typeof render === 'function') render();
+  };
+  window.openSimplePdfPreview = function (idx) {
+    var reportIdx = typeof idx === 'number' ? idx : 0;
+    var report = typeof ncReports !== 'undefined' && Array.isArray(ncReports) ? ncReports[reportIdx] : null;
+    var modal = document.getElementById('simplePdfModal');
+    var title = document.getElementById('simplePdfTitle');
+    var viewer = document.getElementById('simplePdfViewer');
+    if (!report || !modal || !viewer) {
+      alert('PDF 预览容器未初始化');
+      return;
+    }
+    var record = customerRecord(report);
+    var files = fileItems(report);
+    if (title) title.textContent = record ? '已签章 PDF 文件预览' : '待签章 PDF 文件预览';
+    viewer.innerHTML =
+      '<div class="signature-file-list show"><div class="signature-file-title"><i class="fas fa-folder-open"></i><span>签章文件清单</span></div>' +
+      '<div class="signature-file-grid">' + files.map(function (item, index) {
+        return '<div class="signature-file-card ' + (item.active ? 'active' : '') + '">' +
+          '<span class="signature-file-icon"><i class="fas fa-file-pdf"></i></span>' +
+          '<div class="signature-file-main"><div class="signature-file-name">' + esc(item.name) + '</div>' +
+          '<div class="signature-file-desc">' + esc(item.desc) + '</div>' +
+          '<div class="signature-file-actions"><button type="button" class="mini-link-btn" onclick="openSimplePdfPreview(' + reportIdx + ')"><i class="fas fa-eye"></i> 预览PDF</button></div>' +
+          '</div></div>';
+      }).join('') + '</div></div>' +
+      reportPdf(report);
+    modal.classList.add('show');
+  };
+  window.previewPdf = window.openSimplePdfPreview;
+})();
+</script>
+
+</body>
+</html>

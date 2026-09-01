@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -13,7 +14,7 @@
     html,
     body {
       width: 600px;
-      height: 480px;
+      height: 560px;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -31,7 +32,7 @@
 
     .upload-modal {
       width: 600px;
-      height: 480px;
+      height: 560px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -92,7 +93,7 @@
       flex: 1 1 auto;
       min-height: 0;
       padding: 24px 28px;
-      overflow: auto;
+      overflow: visible;
       background: #fff;
     }
 
@@ -200,6 +201,16 @@
       box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .08);
     }
 
+    .upload-container.has-file {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    .upload-container.has-file .upload-icon {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
     .upload-icon {
       width: 46px;
       height: 46px;
@@ -279,20 +290,40 @@
       font-weight: 600;
     }
 
+    .file-actions {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .file-download,
     .file-delete {
       flex: 0 0 auto;
       border: 0;
       border-radius: 8px;
       background: transparent;
-      color: #ef4444;
       cursor: pointer;
       font-size: 12px;
       font-weight: 700;
       padding: 6px 8px;
+      text-decoration: none;
+    }
+
+    .file-download {
+      color: #2563eb;
+    }
+
+    .file-download:hover {
+      background: #dbeafe;
     }
 
     .file-delete:hover {
       background: #fee2e2;
+    }
+
+    .file-delete {
+      color: #ef4444;
     }
 
     .modal-footer {
@@ -391,11 +422,11 @@
       </div>
 
       <div class="upload-container" id="dropZone" onclick="document.getElementById('fileInput').click()">
-        <input type="file" id="fileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this.files)">
-        <div class="upload-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+        <input type="file" id="fileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files)">
+        <div class="upload-icon" id="uploadIcon"><i class="fas fa-cloud-arrow-up"></i></div>
         <div class="upload-text">
-          <p class="primary-text">点击或拖拽文件至此处上传</p>
-          <p class="secondary-text">支持 PDF、JPG、PNG 格式，单个文件不超过 20MB</p>
+          <p class="primary-text" id="uploadPrimaryText">点击或拖拽文件至此处上传</p>
+          <p class="secondary-text" id="uploadSecondaryText">支持 PDF、JPG、PNG 格式，单个文件不超过 20MB</p>
         </div>
       </div>
 
@@ -411,40 +442,79 @@
   </div>
 
   <script>
-    let uploadedFiles = [];
+    let uploadedFile = null;
+    let uploadedFileUrl = '';
 
     function handleFiles(files) {
+      if (!files || files.length === 0) return;
+
+      if (files.length > 1) {
+        alert('一次只能上传一个文件，请重新选择');
+        document.getElementById('fileInput').value = '';
+        return;
+      }
+
+      if (uploadedFile) {
+        alert('当前已上传一个文件，如需更换请先删除现有文件');
+        document.getElementById('fileInput').value = '';
+        return;
+      }
+
+      const file = files[0];
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      const validExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+      const extension = file.name.split('.').pop().toLowerCase();
+      if (!validTypes.includes(file.type) && !validExtensions.includes(extension)) {
+        alert('不支持的文件格式：' + file.name);
+        document.getElementById('fileInput').value = '';
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        alert('文件大小超过20MB限制：' + file.name);
+        document.getElementById('fileInput').value = '';
+        return;
+      }
+
+      uploadedFile = file;
+      uploadedFileUrl = URL.createObjectURL(file);
+      renderUploadedFile();
+      document.getElementById('fileInput').value = '';
+    }
+
+    function renderUploadedFile() {
       const fileList = document.getElementById('fileList');
+      const dropZone = document.getElementById('dropZone');
+      const uploadIcon = document.getElementById('uploadIcon');
+      const uploadPrimaryText = document.getElementById('uploadPrimaryText');
+      const uploadSecondaryText = document.getElementById('uploadSecondaryText');
 
-      Array.from(files).forEach(function (file) {
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-        if (!validTypes.includes(file.type)) {
-          alert('不支持的文件格式：' + file.name);
-          return;
-        }
+      if (!uploadedFile) {
+        fileList.innerHTML = '';
+        dropZone.classList.remove('has-file');
+        uploadIcon.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>';
+        uploadPrimaryText.textContent = '点击或拖拽文件至此处上传';
+        uploadSecondaryText.textContent = '支持 PDF、JPG、PNG 格式，单个文件不超过 20MB';
+        return;
+      }
 
-        if (file.size > 20 * 1024 * 1024) {
-          alert('文件大小超过20MB限制：' + file.name);
-          return;
-        }
-
-        uploadedFiles.push(file);
-
-        const fileSize = formatFileSize(file.size);
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.innerHTML =
+      const fileName = escapeHtml(uploadedFile.name);
+      dropZone.classList.add('has-file');
+      uploadIcon.innerHTML = '<i class="fas fa-circle-check"></i>';
+      uploadPrimaryText.textContent = '已选择：' + uploadedFile.name;
+      uploadSecondaryText.textContent = '下方可下载或删除，删除后可重新上传';
+      fileList.innerHTML =
+        '<div class="file-item">' +
           '<div class="file-info">' +
             '<i class="file-icon fas fa-file-lines"></i>' +
-            '<span class="file-name" title="' + escapeHtml(file.name) + '">' + escapeHtml(file.name) + '</span>' +
-            '<span class="file-size">' + fileSize + '</span>' +
+            '<span class="file-name" title="' + fileName + '">' + fileName + '</span>' +
+            '<span class="file-size">' + formatFileSize(uploadedFile.size) + '</span>' +
           '</div>' +
-          '<button class="file-delete" onclick="removeFile(this, ' + JSON.stringify(file.name).replace(/"/g, '&quot;') + ')">删除</button>';
-
-        fileList.appendChild(fileItem);
-      });
-
-      document.getElementById('fileInput').value = '';
+          '<div class="file-actions">' +
+            '<a class="file-download" href="' + uploadedFileUrl + '" download="' + fileName + '">下载</a>' +
+            '<button class="file-delete" type="button" onclick="removeFile()">删除</button>' +
+          '</div>' +
+        '</div>';
     }
 
     function formatFileSize(bytes) {
@@ -455,26 +525,26 @@
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
-    function removeFile(btn, fileName) {
-      const item = btn.closest('.file-item');
-      if (item) item.remove();
-      uploadedFiles = uploadedFiles.filter(function (file) { return file.name !== fileName; });
+    function removeFile() {
+      if (uploadedFileUrl) {
+        URL.revokeObjectURL(uploadedFileUrl);
+      }
+      uploadedFile = null;
+      uploadedFileUrl = '';
+      renderUploadedFile();
     }
 
     function submitUpload() {
-      if (uploadedFiles.length === 0) {
+      if (!uploadedFile) {
         alert('请先选择要上传的文件');
         return;
       }
 
-      alert('成功上传 ' + uploadedFiles.length + ' 个文件，申请单状态将更新为待受理');
       closeModal();
     }
 
     function closeModal() {
-      if (confirm('确定要关闭弹窗吗？未上传的文件将丢失。')) {
-        document.querySelector('.upload-modal').style.display = 'none';
-      }
+      document.querySelector('.upload-modal').style.display = 'none';
     }
 
     function escapeHtml(value) {

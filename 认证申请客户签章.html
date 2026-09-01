@@ -53,12 +53,12 @@
 
         .sign-modal-header {
             flex: 0 0 auto;
-            min-height: 76px;
+            min-height: 82px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            padding: 20px 28px;
+            padding: 18px 28px;
             background: #f8fafc;
             border-bottom: 1px solid #e2e8f0;
         }
@@ -121,15 +121,21 @@
         }
 
         .sign-modal-body {
-            padding: 28px;
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            padding: 26px 28px;
             background: #fff;
         }
 
         .mobile-sign-panel {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
             background: #f8fafc;
-            padding: 24px;
+            padding: 26px 24px;
         }
 
         .mobile-sign-heading {
@@ -137,13 +143,15 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            margin-bottom: 18px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 0;
         }
 
         .mobile-sign-heading strong {
             display: block;
             color: #0f172a;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 800;
         }
 
@@ -156,8 +164,8 @@
         }
 
         .mobile-sign-icon {
-            width: 42px;
-            height: 42px;
+            width: 46px;
+            height: 46px;
             flex: 0 0 auto;
             display: inline-flex;
             align-items: center;
@@ -169,16 +177,19 @@
         }
 
         .sign-process-list {
+            flex: 1 1 auto;
             display: grid;
-            gap: 8px;
+            align-content: center;
+            gap: 12px;
+            padding-top: 14px;
         }
 
         .sign-process-line {
-            height: 58px;
+            height: 64px;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0 16px;
+            padding: 0 18px;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             background: #fff;
@@ -225,7 +236,7 @@
             align-items: center;
             justify-content: flex-end;
             gap: 14px;
-            padding: 20px 28px;
+            padding: 18px 28px;
             border-top: 1px solid #e2e8f0;
             background: #fff;
         }

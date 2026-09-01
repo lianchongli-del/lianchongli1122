@@ -4,6 +4,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -322,6 +323,19 @@
             font-weight: 800;
         }
         .mini-link-btn:hover { background: #dbeafe; }
+        .mini-link-btn.danger {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .mini-link-btn.danger:hover { background: #fee2e2; }
+        .mini-link-btn.as-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
         .signature-file-list {
             display: none;
             margin-bottom: 14px;
@@ -863,7 +877,7 @@
                     </div>
                     <div class="customer-sign-methods" id="customerSignMethods" aria-label="客户签章方式选择">
                         <button type="button" class="customer-sign-method" data-method="online" onclick="selectCustomerSignMethod('online')">
-                            <span class="customer-sign-method-icon"><i class="fas fa-cloud-signature-alt"></i></span>
+                            <span class="customer-sign-method-icon"><i class="fas fa-file-signature"></i></span>
                             <span>
                                 <span class="customer-sign-method-title">线上签章</span>
                                 <span class="customer-sign-method-desc">进入线上签章平台完成客户电子签章，系统生成含客户签章的审核计划 PDF。</span>
@@ -878,10 +892,11 @@
                         </button>
                     </div>
                     <div class="sign-mode-panel" id="onlineSignPanel">
-                        <div style="color:#475569;font-size:13px;line-height:1.65;">当前文件将以审核计划 PDF 样式提交线上签章，完成后在 PDF 预览中展示个人签章印。</div>
+                        <div style="color:#475569;font-size:13px;line-height:1.65;">当前文件将发送至移动端完成客户电子签章，签署完成后系统自动更新签章状态。</div>
                         <div class="sign-process-list" id="platformProgress">
-                            <div class="sign-process-line" data-progress="0"><i class="fas fa-stamp"></i><span>线上签章平台执行盖章</span></div>
-                            <div class="sign-process-line" data-progress="1"><i class="fas fa-route"></i><span>更新签章进度并流转下一节点</span></div>
+                            <div class="sign-process-line" data-progress="0"><i class="fas fa-file-pdf"></i><span>发送PDF文件</span></div>
+                            <div class="sign-process-line" data-progress="1"><i class="fas fa-mobile-screen-button"></i><span>移动端签署中</span></div>
+                            <div class="sign-process-line" data-progress="2"><i class="fas fa-circle-check"></i><span>签署完成</span></div>
                         </div>
                     </div>
                     <div class="sign-mode-panel" id="offlineSignPanel" style="display:none;">
@@ -899,7 +914,7 @@
                 </div>
             </div>
             <div class="sign-modal-footer">
-                <button type="button" class="action-btn" onclick="openPdfPreview()"><i class="fas fa-eye"></i>预览签章文件</button>
+                <button type="button" class="action-btn" id="previewSignFileBtn" onclick="openPdfPreview()"><i class="fas fa-eye"></i>预览签章文件</button>
                 <button type="button" class="action-btn primary" id="confirmSignBtn" onclick="confirmCurrentSign()"><i class="fas fa-paper-plane"></i>签章</button>
             </div>
         </div>
@@ -1124,11 +1139,12 @@
             const node = signNodes[signingIndex] || {};
             const name = (offlinePdfFile && offlinePdfFile.name) || node.offlineFileName;
             const size = (offlinePdfFile && offlinePdfFile.size) || node.offlineFileSize;
+            const url = offlinePdfUrl || node.offlinePdfUrl;
             if (!name) {
                 info.innerHTML = '尚未上传客户线下签章 PDF。';
                 return;
             }
-            info.innerHTML = '<div class="offline-file-row"><div><div class="offline-file-name"><i class="fas fa-file-pdf" style="color:#dc2626;"></i><span>' + escapeHtml(name) + '</span></div><div style="margin-top:4px;">文件大小：' + escapeHtml(formatFileSize(size)) + '</div></div><div class="offline-file-actions"><button type="button" class="mini-link-btn" onclick="previewOfflineUploadedPdf()"><i class="fas fa-eye"></i> 预览PDF</button></div></div>';
+            info.innerHTML = '<div class="offline-file-row"><div><div class="offline-file-name"><i class="fas fa-file-pdf" style="color:#dc2626;"></i><span>' + escapeHtml(name) + '</span></div><div style="margin-top:4px;">文件大小：' + escapeHtml(formatFileSize(size)) + '</div></div><div class="offline-file-actions"><a class="mini-link-btn as-link" href="' + escapeHtml(url) + '" download="' + escapeHtml(name) + '"><i class="fas fa-download"></i> 下载</a><button type="button" class="mini-link-btn danger" onclick="removeOfflineUploadedPdf()"><i class="fas fa-trash"></i> 删除</button></div></div>';
         }
 
         function selectCustomerSignMethod(method) {
@@ -1146,6 +1162,7 @@
             const onlinePanel = document.getElementById('onlineSignPanel');
             const offlinePanel = document.getElementById('offlineSignPanel');
             const btn = document.getElementById('confirmSignBtn');
+            const previewBtn = document.getElementById('previewSignFileBtn');
             if (title) {
                 title.innerHTML = isCustomer ? '<i class="fas fa-signature text-blue-600"></i>客户签章处理' : '<i class="fas fa-stamp text-blue-600"></i>线上签章平台处理';
             }
@@ -1161,9 +1178,10 @@
             });
             if (onlinePanel) onlinePanel.style.display = customerSignMethod === 'online' ? '' : 'none';
             if (offlinePanel) offlinePanel.style.display = isCustomer && customerSignMethod === 'offline' ? '' : 'none';
+            if (previewBtn) previewBtn.style.display = isCustomer && customerSignMethod === 'offline' ? 'none' : 'inline-flex';
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = isCustomer && customerSignMethod === 'offline' ? '<i class="fas fa-upload"></i>确认线下签章' : '<i class="fas fa-paper-plane"></i>签章';
+                btn.innerHTML = isCustomer && customerSignMethod === 'offline' ? '<i class="fas fa-upload"></i>确认线下签章' : '<i class="fas fa-paper-plane"></i>开始签章';
             }
             renderOfflineFileInfo();
         }
@@ -1185,25 +1203,22 @@
             showSignToast('已选择线下签章 PDF：' + file.name);
         }
 
-        function previewOfflineUploadedPdf() {
+        function removeOfflineUploadedPdf() {
             const node = signNodes[signingIndex] || signNodes.find(function (item) { return item.key === 'customer'; }) || {};
-            const url = offlinePdfUrl || node.offlinePdfUrl;
-            if (!url) {
-                showSignToast('请先上传线下签章 PDF');
-                return;
+            if (offlinePdfUrl && offlinePdfUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(offlinePdfUrl);
             }
-            const title = document.getElementById('pdfPreviewTitle');
-            const subtitle = document.getElementById('pdfPreviewSubtitle');
-            const frame = document.getElementById('pdfPreviewFrame');
-            const name = (offlinePdfFile && offlinePdfFile.name) || node.offlineFileName || '客户线下签章文件.pdf';
-            if (title) title.innerHTML = '<i class="fas fa-file-pdf text-red-500"></i>客户线下签章 PDF 预览';
-            if (subtitle) subtitle.textContent = '当前显示客户上传的线下签章 PDF；该文件作为客户节点签署完成后的独立文件保存。';
-            renderSignatureFileList('customer-offline');
-            if (frame) {
-                frame.removeAttribute('srcdoc');
-                frame.src = url;
+            offlinePdfFile = null;
+            offlinePdfUrl = '';
+            if (node.key === 'customer') {
+                node.offlineFileName = '';
+                node.offlineFileSize = '';
+                node.offlinePdfUrl = '';
             }
-            openSignModalById('pdfPreviewModal');
+            const input = document.getElementById('offlinePdfInput');
+            if (input) input.value = '';
+            renderOfflineFileInfo();
+            showSignToast('已删除线下签章 PDF');
         }
 
         function confirmCurrentSign() {
@@ -1239,7 +1254,6 @@
             if (btn) btn.innerHTML = '<i class="fas fa-circle-check"></i>线下签章完成';
             closeSignModalById('onlineSignModal');
             showSignToast('客户节点已完成线下签章，系统已保存3份签章文件');
-            setTimeout(function () { openPdfPreview(signingIndex); }, 260);
         }
 
         function nowText() {
@@ -1369,20 +1383,22 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>处理中';
             const lines = Array.from(document.querySelectorAll('#platformProgress .sign-process-line'));
             lines.forEach(function (line) { line.classList.remove('running', 'done'); });
-            lines.forEach(function (line, index) {
-                setTimeout(function () {
-                    if (index > 0) {
-                        lines[index - 1].classList.remove('running');
-                        lines[index - 1].classList.add('done');
-                    }
-                    line.classList.add('running');
-                }, index * 520);
-            });
+            if (lines[0]) lines[0].classList.add('running');
             setTimeout(function () {
-                lines[lines.length - 1].classList.remove('running');
-                lines[lines.length - 1].classList.add('done');
+                if (lines[0]) {
+                    lines[0].classList.remove('running');
+                    lines[0].classList.add('done');
+                }
+                if (lines[1]) lines[1].classList.add('running');
+            }, 600);
+            setTimeout(function () {
+                if (lines[1]) {
+                    lines[1].classList.remove('running');
+                    lines[1].classList.add('done');
+                }
+                if (lines[2]) lines[2].classList.add('done');
                 finishCurrentSign();
-            }, lines.length * 520 + 360);
+            }, 5600);
         }
 
         function finishCurrentSign() {

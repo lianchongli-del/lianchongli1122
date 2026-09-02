@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>不符合项报告确认</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; }
     html, body {
@@ -339,8 +341,6 @@
     }
   
     .pdf-log-box { margin-top: 18px; border: 1px solid #dbe5f0; background: rgba(248,250,252,.9); }
-    .pdf-log-note { margin: 0; padding: 12px 14px; border-bottom: 1px solid #dbe5f0; background: #eff6ff; color: #1d4ed8; font-size: 14px; line-height: 1.7; }
-    .pdf-sign-record-title { margin: 0; padding: 12px 0 14px; text-align: center; color: #111827; font-size: 18px; font-weight: 900; }
     .pdf-sign-record-table { font-size: 16px; }
     .pdf-sign-record-table th, .pdf-sign-record-table td { border: 1.5px solid #111827; padding: 9px 10px; }
     .pdf-sign-record-table th { background: #f8fafc; font-weight: 800; text-align: left; }
@@ -517,8 +517,8 @@
     <div class="sign-modal-card" onclick="event.stopPropagation()">
       <div class="sign-modal-header">
         <div>
-          <div class="sign-modal-title" id="onlineSignTitle"><i class="fas fa-stamp" style="color:#2563eb;"></i>线上签章确认</div>
-          <div class="sign-modal-subtitle">以不符合项报告 PDF 内容发起个人签章，签章完成后自动流转至下一节点。</div>
+          <div class="sign-modal-title" id="onlineSignTitle"><i class="fas fa-file-signature" style="color:#2563eb;"></i>线上签章确认</div>
+          <div class="sign-modal-subtitle">以不符合项报告 PDF 内容发起移动端签章，签章完成后自动流转至下一节点。</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="sign-status-pill sign-status-pending" id="modalSignStatus"><i class="fas fa-clock"></i>待签章</span>
@@ -536,13 +536,13 @@
               <strong id="modalNodeName">审核员签字</strong>
             </div>
           </div>
-          <div id="signHelpText" style="color:#475569;font-size:13px;line-height:1.65;">当前文件将以不符合项报告 PDF 样式提交线上签章，完成后在 PDF 预览中生成该节点签署后的 PDF 文件版本。</div>
+          <div id="signHelpText" style="color:#475569;font-size:13px;line-height:1.65;">当前文件将发送至移动端完成电子签章，签署完成后系统自动更新签章状态。</div>
           <div class="sign-mode-box" id="customerSignModeBox" style="display:none;">
             <div class="sign-mode-title"><i class="fas fa-signature"></i>客户签字方式</div>
             <div class="sign-mode-tabs">
               <button type="button" class="sign-mode-tab active" id="onlineModeBtn" onclick="selectCustomerSignMode('online')">
-                <strong><i class="fas fa-cloud-arrow-up"></i>线上签章</strong>
-                <span>调用线上签章平台完成客户签章，系统自动生成客户线上签章版 PDF。</span>
+                <strong><i class="fas fa-file-signature"></i>线上签章</strong>
+                <span>发送 PDF 至移动端完成客户签章，系统自动生成客户线上签章版 PDF。</span>
               </button>
               <button type="button" class="sign-mode-tab" id="offlineModeBtn" onclick="selectCustomerSignMode('offline')">
                 <strong><i class="fas fa-file-arrow-up"></i>线下签章</strong>
@@ -559,16 +559,16 @@
             </div>
           </div>
           <div class="sign-process-list" id="platformProgress">
-            <div class="sign-process-line" data-progress="0"><i class="fas fa-file-pdf"></i><span>生成不符合项报告 PDF 签章文件</span></div>
-            <div class="sign-process-line" data-progress="1"><i class="fas fa-stamp"></i><span>线上签章平台执行个人签章</span></div>
-            <div class="sign-process-line" data-progress="2"><i class="fas fa-route"></i><span>更新签章进度并自动流转下一节点</span></div>
+            <div class="sign-process-line" data-progress="0"><i class="fas fa-file-pdf"></i><span>发送PDF文件</span></div>
+            <div class="sign-process-line" data-progress="1"><i class="fas fa-mobile-screen-button"></i><span>移动端签署中</span></div>
+            <div class="sign-process-line" data-progress="2"><i class="fas fa-circle-check"></i><span>签署完成</span></div>
           </div>
         </div>
       </div>
       <div class="sign-modal-footer">
-        <button type="button" class="btn" onclick="openSimplePdfPreview(signTarget ? signTarget.idx : 0)"><i class="fas fa-eye"></i>预览当前文件</button>
+        <button type="button" class="btn" id="previewCurrentPdfBtn" onclick="openNcPdfPreview(signTarget ? signTarget.idx : 0)"><i class="fas fa-eye"></i>预览当前文件</button>
         <button type="button" class="btn" onclick="closeSignModal()">取消</button>
-        <button type="button" class="btn btn-primary" id="confirmSignBtn" onclick="startSignConfirm()"><i class="fas fa-stamp"></i>确认签章</button>
+        <button type="button" class="btn btn-primary" id="confirmSignBtn" onclick="startSignConfirm()"><i class="fas fa-paper-plane"></i>开始签章</button>
       </div>
     </div>
   </div>
@@ -577,7 +577,9 @@
     <div class="pdf-modal-card">
       <div class="pdf-modal-head">
         <div class="pdf-modal-title"><i class="fas fa-file-pdf" style="color:#dc2626;"></i><span id="pdfModalTitle">不符合项报告 PDF 预览</span></div>
-        <button class="btn pdf-modal-close" onclick="closePdfModal()"><i class="fas fa-times"></i><span>关闭</span></button>
+        <div class="pdf-modal-actions">
+          <button class="btn pdf-modal-close" onclick="closePdfModal()"><i class="fas fa-times"></i><span>关闭</span></button>
+        </div>
       </div>
       <div class="pdf-viewer" id="pdfViewer"></div>
     </div>
@@ -704,7 +706,7 @@
     function getStageMeta(id) { return flowNodes.find(n => n.id === id) || flowNodes[0]; }
     function isSignStage(stage) { return ['auditorSign', 'leaderSign', 'customerSign'].includes(stage || currentStage); }
     function isCustomerFillOpen(report) {
-      return false;
+      return !!report && !report.finished && reportStage(report) === 'customerFill';
     }
     function getRejectReturnStage(stage) {
       // 客户退回必须回到第一个审核员签字环节；其他节点默认退回上一节点。
@@ -770,7 +772,6 @@
     function getCardButtonText(report) {
       const stage = reportStage(report);
       if (stage === 'customerFill') return '<i class="fas fa-paper-plane"></i> 提交填写内容';
-      if (stage === 'auditorConclusion') return '<i class="fas fa-check-double"></i> 提交跟踪结论';
       if (report.finished) return '<i class="fas fa-check"></i> 已完成';
       return '<i class="fas fa-signature"></i> 签章确认';
     }
@@ -813,6 +814,7 @@
       const conclusionOpen = isConclusionOpen(report);
       const showReject = !report.finished && (stage === 'leaderSign' || stage === 'customerSign');
       const actionDisabled = report.finished ? 'disabled' : '';
+      const showPrimaryAction = !report.finished && stage !== 'auditorConclusion';
       const dueDateEditable = isDueDateEditable(report);
       const descriptionEditable = isDescriptionEditable(report);
       return `
@@ -824,9 +826,9 @@
                 
               </div>
               <div class="nc-card-toolbar">
-                <button class="btn" onclick="openSimplePdfPreview(${idx})"><i class="fas fa-file-pdf"></i> 预览PDF文件</button>
+                <button class="btn" onclick="openNcPdfPreview(${idx})"><i class="fas fa-file-pdf"></i> 预览PDF文件</button>
                 ${showReject ? `<button class="btn btn-danger" onclick="openRejectModal(${idx}, '${stage}')"><i class="fas fa-reply"></i> 退回</button>` : ''}
-                ${report.finished ? '' : `<button class="btn btn-primary" onclick="submitCurrentStageForReport(${idx})" ${actionDisabled}>${getCardButtonText(report)}</button>`}
+                ${showPrimaryAction ? `<button class="btn btn-primary" onclick="handlePrimaryAction(${idx})" ${actionDisabled}>${getCardButtonText(report)}</button>` : ''}
               </div>
             </div>
             <div class="nc-body">
@@ -1064,11 +1066,18 @@
       const stage = reportStage(report);
       if (report.finished) return;
       if (stage === 'customerFill') {
-        submitCustomerFill(idx);
+        if (!report.cause.trim()) { alert('请填写原因分析'); return; }
+        if (!report.correctionPlan.trim()) { alert('请填写纠正、纠正措施或纠正措施计划'); return; }
+        report.stageStatus.customerFill = 'completed';
+        report.stageStatus.auditorConclusion = 'current';
+        report.currentStage = 'auditorConclusion';
+        report.finished = false;
+        ensureStageAutoData(report);
+        render();
+        alert(report.no + ' 已提交填写内容');
         return;
       }
       if (stage === 'auditorConclusion') {
-        submitConclusion(idx);
         return;
       }
       openSignModal(idx);
@@ -1087,7 +1096,7 @@
       document.getElementById('customerSignModeBox').style.display = isCustomer ? 'block' : 'none';
       document.getElementById('signHelpText').textContent = isCustomer
         ? '客户签字环节支持线上签章和线下签章。线上签章完成后系统生成客户线上签章 PDF；线下签章需先下载待签 PDF，再上传客户签署后的 PDF。'
-        : '当前文件将以不符合项报告 PDF 样式提交线上签章，完成后在 PDF 预览中生成该节点签署后的 PDF 文件版本。';
+        : '当前文件将发送至移动端完成电子签章，签署完成后系统自动更新签章状态。';
       selectCustomerSignMode('online', true);
       const status = document.getElementById('modalSignStatus');
       status.className = 'sign-status-pill sign-status-pending';
@@ -1097,7 +1106,7 @@
         line.querySelector('i').className = line.dataset.progress === '0' ? 'fas fa-file-pdf' : line.dataset.progress === '1' ? 'fas fa-stamp' : 'fas fa-route';
       });
       document.getElementById('confirmSignBtn').disabled = false;
-      document.getElementById('confirmSignBtn').innerHTML = '<i class="fas fa-stamp"></i>确认签章';
+      document.getElementById('confirmSignBtn').innerHTML = '<i class="fas fa-paper-plane"></i>开始签章';
       document.getElementById('onlineSignModal').classList.add('show');
     }
 
@@ -1111,8 +1120,10 @@
       if (offlineBtn) offlineBtn.classList.toggle('active', customerSignMode === 'offline');
       if (offlinePanel) offlinePanel.classList.toggle('show', customerSignMode === 'offline');
       if (progress) progress.style.display = customerSignMode === 'offline' ? 'none' : 'grid';
+      const previewBtn = document.getElementById('previewCurrentPdfBtn');
+      if (previewBtn) previewBtn.style.display = customerSignMode === 'offline' ? 'none' : 'inline-flex';
       const btn = document.getElementById('confirmSignBtn');
-      if (btn) btn.innerHTML = customerSignMode === 'offline' ? '<i class="fas fa-check"></i>确认线下签章完成' : '<i class="fas fa-stamp"></i>确认签章';
+      if (btn) btn.innerHTML = customerSignMode === 'offline' ? '<i class="fas fa-check"></i>确认线下签章完成' : '<i class="fas fa-paper-plane"></i>开始签章';
       const status = document.getElementById('modalSignStatus');
       if (status && !silent) {
         status.className = 'sign-status-pill sign-status-pending';
@@ -1140,18 +1151,43 @@
       lines.forEach((line, index) => {
         line.classList.remove('running', 'done', 'failed');
         const icon = line.querySelector('i');
-        if (icon) icon.className = index === 0 ? 'fas fa-file-pdf' : index === 1 ? 'fas fa-stamp' : 'fas fa-route';
+        if (icon) icon.className = index === 0 ? 'fas fa-file-pdf' : index === 1 ? 'fas fa-mobile-screen-button' : 'fas fa-circle-check';
       });
       if (signTarget.stage === 'customerSign' && customerSignMode === 'offline') {
         if (!signTarget.offlineFile) {
-          signTarget.offlineFile = { name: `${report.no}_客户线下签章文件.pdf`, size: '已签章' };
+          alert('请先上传客户线下签署完成的 PDF 文件');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check"></i>确认线下签章完成';
+          if (status) {
+            status.className = 'sign-status-pill sign-status-pending';
+            status.innerHTML = '<i class="fas fa-file-upload"></i>待上传';
+          }
+          return;
         }
-        runSignStep(lines, 0, () => runSignStep(lines, 1, () => runSignStep(lines, 2, completeCustomerSignWithPreview)));
-        setTimeout(completeCustomerSignWithPreview, 1600);
+        completeCustomerSignWithPreview();
         return;
       }
-      runSignStep(lines, 0, () => runSignStep(lines, 1, () => runSignStep(lines, 2, completeCustomerSignWithPreview)));
-      setTimeout(completeCustomerSignWithPreview, 1600);
+      runMobileSignFlow(lines, completeCustomerSignWithPreview);
+    }
+
+    function runMobileSignFlow(lines, done) {
+      lines.forEach(line => line.classList.remove('running', 'done', 'failed'));
+      if (lines[0]) lines[0].classList.add('running');
+      setTimeout(() => {
+        if (lines[0]) {
+          lines[0].classList.remove('running');
+          lines[0].classList.add('done');
+        }
+        if (lines[1]) lines[1].classList.add('running');
+      }, 600);
+      setTimeout(() => {
+        if (lines[1]) {
+          lines[1].classList.remove('running');
+          lines[1].classList.add('done');
+        }
+        if (lines[2]) lines[2].classList.add('done');
+        if (typeof done === 'function') done();
+      }, 5600);
     }
 
     function handleOfflineSignedPdf(files) {
@@ -1160,7 +1196,8 @@
       if (!file) return;
       const isPdf = file.type === 'application/pdf' || String(file.name || '').toLowerCase().endsWith('.pdf');
       if (!isPdf) { alert('请上传 PDF 格式的签章文件'); return; }
-      signTarget.offlineFile = { name: file.name, size: prettySize(file.size), uploadedAt: new Date().toLocaleString('zh-CN') };
+      if (signTarget.offlineFile && signTarget.offlineFile.url) URL.revokeObjectURL(signTarget.offlineFile.url);
+      signTarget.offlineFile = { name: file.name, size: prettySize(file.size), uploadedAt: new Date().toLocaleString('zh-CN'), url: URL.createObjectURL(file) };
       renderOfflineSignedFile();
       const status = document.getElementById('modalSignStatus');
       status.className = 'sign-status-pill sign-status-signing';
@@ -1179,21 +1216,24 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;width:100%;">
           <span><i class="fas fa-file-pdf" style="color:#dc2626;"></i> 已上传：<strong>${escapeHtml(file.name)}</strong> <span style="color:#94a3b8;">${escapeHtml(file.size || '')}</span></span>
           <span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="mini-link-btn" onclick="previewOfflineSignedPdf()"><i class="fas fa-eye"></i> 预览</button>
             <button type="button" class="mini-link-btn" onclick="downloadOfflineSignedPdf()"><i class="fas fa-download"></i> 下载</button>
-            <button type="button" class="mini-link-btn" onclick="deleteOfflineSignedPdf()"><i class="fas fa-trash"></i> 删除</button>
+            <button type="button" class="mini-link-btn danger" onclick="deleteOfflineSignedPdf()"><i class="fas fa-trash"></i> 删除</button>
           </span>
         </div>
       `;
     }
 
-    function previewOfflineSignedPdf() {
-      if (!signTarget || !signTarget.offlineFile) return;
-      openSimplePdfPreview(signTarget.idx);
-    }
-
     function downloadOfflineSignedPdf() {
       if (!signTarget || !signTarget.offlineFile) return;
+      if (signTarget.offlineFile.url) {
+        const a = document.createElement('a');
+        a.href = signTarget.offlineFile.url;
+        a.download = signTarget.offlineFile.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return;
+      }
       const report = ncReports[signTarget.idx];
       const content = `线下签章 PDF 文件\n报告编号：${report ? report.no : '-'}\n文件名称：${signTarget.offlineFile.name}\n上传时间：${signTarget.offlineFile.uploadedAt || '-'}`;
       const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
@@ -1209,6 +1249,7 @@
 
     function deleteOfflineSignedPdf() {
       if (!signTarget || !signTarget.offlineFile) return;
+      if (signTarget.offlineFile.url) URL.revokeObjectURL(signTarget.offlineFile.url);
       signTarget.offlineFile = null;
       const input = document.getElementById('offlineSignedPdfInput');
       if (input) input.value = '';
@@ -1238,7 +1279,8 @@
     function finishOfflineCustomerSign(report) {
       if (!signTarget) return;
       if (!signTarget.offlineFile) {
-        signTarget.offlineFile = { name: `${report.no}_客户线下签章文件.pdf`, size: '已签章' };
+        alert('请先上传客户线下签署完成的 PDF 文件');
+        return;
       }
       const meta = getSignerInfo(report, 'customerSign');
       report.stageStatus.customerSign = 'completed';
@@ -1254,7 +1296,7 @@
       render();
       setTimeout(() => {
         closeSignModal();
-        openSimplePdfPreview(previewIdx);
+        previewPdf(previewIdx);
       }, 260);
     }
 
@@ -1286,8 +1328,10 @@
         ? ((target.offlineFile && target.offlineFile.name) || `${report.no}_客户线下签章文件.pdf`)
         : undefined;
       report.stageStatus.customerSign = 'completed';
-      report.currentStage = 'customerSign';
-      report.finished = true;
+      report.stageStatus.customerFill = 'current';
+      report.stageStatus.auditorConclusion = 'waiting';
+      report.currentStage = 'customerFill';
+      report.finished = false;
       report.signRecords.customerSign = {
         role: meta.role,
         signer: meta.signer,
@@ -1314,7 +1358,8 @@
       setTimeout(() => {
         try {
           render();
-          openSimplePdfPreview(previewIdx);
+          closeSignModal();
+          openNcPdfPreview(previewIdx);
         } catch (err) {
           console.error(err);
           render();
@@ -1352,9 +1397,11 @@
 
     function advanceToNextStage(report) {
       if (reportStage(report) === 'customerSign') {
-        report.currentStage = 'customerSign';
         report.stageStatus.customerSign = 'completed';
-        report.finished = true;
+        report.stageStatus.customerFill = 'current';
+        report.stageStatus.auditorConclusion = 'waiting';
+        report.currentStage = 'customerFill';
+        report.finished = false;
         ensureStageAutoData(report);
         return;
       }
@@ -1386,16 +1433,32 @@
 
     function getPreviewVersions(report) {
       const signed = ensurePdfVersions(report).filter(version => !version.pending);
-      if (signed.length) return signed;
-      const stage = reportStage(report) || 'customerSign';
-      return [{
-        stage,
-        name: `${report.no}_${getStageMeta(stage).name}_待签PDF.pdf`,
+      const customerSigned = signed.find(version => version.stage === 'customerSign');
+      const priorSigned = signed
+        .filter(version => version.stage !== 'customerSign')
+        .slice(-1)[0];
+      const versions = [];
+      if (priorSigned) {
+        versions.push(priorSigned);
+      } else {
+        versions.push({
+          stage: 'leaderSign',
+          name: `${report.no}_审核员、审核组长签字_线上签章版.pdf`,
+          method: '线上签章',
+          time: '2026/6/23 16:22:51',
+          stages: ['auditorSign', 'leaderSign'],
+          pending: false
+        });
+      }
+      versions.push(customerSigned || {
+        stage: 'customerSign',
+        name: `${report.no}_客户签字_待签PDF.pdf`,
         method: '待签章文件',
-        time: new Date().toLocaleString('zh-CN'),
+        time: '-',
         stages: [],
         pending: true
-      }];
+      });
+      return versions;
     }
 
     function buildInlinePdfDocument(report, version) {
@@ -1423,13 +1486,6 @@
             <div class="pdf-table-section">
               <div class="pdf-section-title">二、不符合项描述</div>
               <table class="plan-pdf-table"><tbody><tr><td>${escapeHtml(report.description)}</td></tr></tbody></table>
-            </div>
-            <div class="pdf-table-section">
-              <div class="pdf-section-title">三、签章记录</div>
-              <table class="signature-table">
-                <thead><tr><th>序号</th><th>节点</th><th>签章人</th><th>角色</th><th>签章时间</th><th>状态</th><th>签章方式</th></tr></thead>
-                <tbody>${buildSignRecordRows(report, version)}</tbody>
-              </table>
             </div>
             <div class="signature-seal-title">${pending ? '待签章文件' : '线上签章结果'}</div>
             <div class="signature-seal-area">${seals || `<div class="signature-empty">${pending ? '当前为待签章 PDF 文件，完成签章后将展示个人签章印。' : '待完成线上签章后，本页展示个人签章印。'}</div>`}</div>
@@ -1535,11 +1591,6 @@
           </tbody></table>
           <div class="pdf-section-title">不符合项描述</div>
           <table class="simple-pdf-table"><tbody><tr><td>${escapeHtml(report.description)}</td></tr></tbody></table>
-          <div class="pdf-section-title">签章记录</div>
-          <table class="simple-pdf-table">
-            <thead><tr><th>序号</th><th>节点</th><th>签章人</th><th>角色</th><th>签章时间</th><th>状态</th><th>签章方式</th></tr></thead>
-            <tbody>${simpleSignRows(report, version)}</tbody>
-          </table>
           <div class="signature-seal-title">${version.pending ? '待签章文件' : '签章结果'}</div>
           <div class="signature-seal-area">${simpleSealBlock(report, version)}</div>
           <div class="pdf-page-number">第 1 页 / 共 1 页</div>
@@ -1596,6 +1647,17 @@
 
     function ensurePdfVersions(report) {
       if (!Array.isArray(report.pdfVersions)) report.pdfVersions = [];
+      signStageIds().forEach(stage => {
+        if (report.stageStatus[stage] === 'completed' && !report.signRecords[stage]) {
+          const info = getSignerInfo(report, stage);
+          report.signRecords[stage] = {
+            role: info.role,
+            signer: info.signer,
+            time: stage === 'auditorSign' ? '2026/6/23 16:10:23' : '2026/6/23 16:22:51',
+            method: '线上签章'
+          };
+        }
+      });
       signStageIds().forEach(stage => {
         if (report.signRecords[stage] && !report.pdfVersions.some(v => v.stage === stage && !v.pending)) {
           addSignedPdfVersion(report, stage, report.signRecords[stage].method || '线上签章', report.signRecords[stage].fileName, true);
@@ -1722,30 +1784,12 @@
               <tr><td class="pdf-value pdf-large-cell" colspan="4">${escapeHtml(report.description)}</td></tr>
             </table>
 
-            <div class="pdf-log-box">
-              <h3 class="pdf-sign-record-title">不符合项报告签章记录</h3>
-              <p class="pdf-log-note"><b>说明：</b>本页汇总当前 PDF 文件版本对应的签章记录。线上签章由系统生成签章版 PDF；客户线下签章时，系统保留客户上传的签章 PDF 文件。</p>
-              <table class="pdf-report-table pdf-sign-record-table">
-                <thead>
-                  <tr>
-                    <th class="center" style="width:8%;">序号</th>
-                    <th style="width:21%;">节点</th>
-                    <th style="width:18%;">签章人</th>
-                    <th style="width:16%;">角色</th>
-                    <th style="width:15%;">签署方式</th>
-                    <th style="width:18%;">签章时间</th>
-                    <th style="width:14%;">状态</th>
-                  </tr>
-                </thead>
-                <tbody>${buildSignRecordRows(report, version)}</tbody>
-              </table>
-              <div class="pdf-sign-section pdf-seal-strip">
-                <div class="pdf-sign-title"><i class="fas fa-stamp"></i>个人签章信息</div>
-                <div class="pdf-sign-grid">
-                  ${renderPdfSignSlot(report, 'auditorSign', version)}
-                  ${renderPdfSignSlot(report, 'leaderSign', version)}
-                  ${renderPdfSignSlot(report, 'customerSign', version)}
-                </div>
+            <div class="pdf-sign-section pdf-seal-strip">
+              <div class="pdf-sign-title"><i class="fas fa-stamp"></i>签章结果</div>
+              <div class="pdf-sign-grid">
+                ${renderPdfSignSlot(report, 'auditorSign', version)}
+                ${renderPdfSignSlot(report, 'leaderSign', version)}
+                ${renderPdfSignSlot(report, 'customerSign', version)}
               </div>
             </div>
             <div class="pdf-footer">
@@ -1818,6 +1862,8 @@
   .signature-file-actions { margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .mini-link-btn { height: 30px; padding: 0 10px; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; color: #1d4ed8; cursor: pointer; font-size: 12px; font-weight: 800; }
   .mini-link-btn:hover { background: #dbeafe; }
+  .mini-link-btn.danger { border-color: #fecaca; background: #fef2f2; color: #dc2626; }
+  .mini-link-btn.danger:hover { background: #fee2e2; }
   .pdf-preview-document { width: min(1120px, calc(100vw - 36px)); min-height: 520px; margin: 0 auto; background: #e2e8f0; display: block; }
   .signed-pdf-strip { display: none !important; }\n  .pdf-modal-download { display: none !important; }\n  .pdf-empty-state { width: min(760px, calc(100vw - 36px)); min-height: 180px; margin: 80px auto 0; border: 1px dashed #bfdbfe; border-radius: 14px; background: #f8fbff; display: flex; align-items: center; justify-content: center; text-align: center; color: #64748b; font-size: 14px; font-weight: 700; }
   .reject-reason { display: none !important; }
@@ -1845,16 +1891,26 @@
   }
   function versionsOf(report) {
     var signed = ensurePdfVersions(report).filter(function (version) { return !version.pending; });
-    if (signed.length) return signed;
-    var stage = reportStage(report) || 'customerSign';
-    return [{
-      stage: stage,
-      name: report.no + '_' + getStageMeta(stage).name + '_待签PDF.pdf',
+    var customerSigned = signed.find(function (version) { return version.stage === 'customerSign'; });
+    var priorSigned = signed.filter(function (version) { return version.stage !== 'customerSign'; }).slice(-1)[0];
+    var versions = [];
+    versions.push(priorSigned || {
+      stage: 'leaderSign',
+      name: report.no + '_审核员、审核组长签字_线上签章版.pdf',
+      method: '线上签章',
+      time: '2026/6/23 16:22:51',
+      stages: ['auditorSign', 'leaderSign'],
+      pending: false
+    });
+    versions.push(customerSigned || {
+      stage: 'customerSign',
+      name: report.no + '_客户签字_待签PDF.pdf',
       method: '待签章文件',
-      time: new Date().toLocaleString('zh-CN'),
+      time: '-',
       stages: [],
       pending: true
-    }];
+    });
+    return versions;
   }
   function fileTitle(report, version) {
     return version.name || (report.no + '_' + getStageMeta(version.stage).name + (version.pending ? '_待签PDF.pdf' : '_线上签章版.pdf'));
@@ -1931,7 +1987,6 @@
       '<div class="pdf-preview-shell"><div class="pdf-page report-page"><div class="pdf-doc-header"><div><div class="pdf-org">CQC 中国质量认证中心</div><div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div></div></div><h1 class="pdf-main-title">不符合项报告</h1>' +
       '<div class="pdf-table-section"><div class="pdf-section-title">一、基本信息</div><table class="plan-pdf-table"><tbody><tr><th>报告编号</th><td>' + esc(report.no) + '</td><th>客户名称</th><td>' + esc(report.customerName) + '</td></tr><tr><th>审核日期</th><td>' + esc(report.auditDateCn || report.auditDate) + '</td><th>整改完成期限</th><td>' + esc(displayDueDate(report)) + '</td></tr><tr><th>涉及标准和条款内容</th><td colspan="3">' + esc((report.standard || '') + '；条款：' + (report.clause || '')) + '</td></tr><tr><th>受审核部门/过程</th><td>' + esc(report.relatedDept) + '</td><th>性质</th><td>' + esc(report.nature) + '</td></tr></tbody></table></div>' +
       '<div class="pdf-table-section"><div class="pdf-section-title">二、不符合项描述</div><table class="plan-pdf-table"><tbody><tr><td>' + esc(report.description) + '</td></tr></tbody></table></div>' +
-      '<div class="pdf-table-section"><div class="pdf-section-title">三、签章记录</div><table class="signature-table"><thead><tr><th>序号</th><th>节点</th><th>签章人</th><th>角色</th><th>签章时间</th><th>状态</th><th>签章方式</th></tr></thead><tbody>' + signRows(report, version) + '</tbody></table></div>' +
       '<div class="signature-seal-title">' + (isPending ? '待签章文件' : '线上签章结果') + '</div><div class="signature-seal-area">' + (sealHtml || '<div class="signature-empty">' + (isPending ? '当前为待签章 PDF 文件，完成签章后将展示个人签章印。' : '待完成线上签章后，本页展示个人签章印。') + '</div>') + '</div><div class="pdf-page-number">第 1 页 / 共 1 页</div></div></div>';
   }
   function rejectPerson(report, reject) {
@@ -2018,10 +2073,6 @@
     var activeIndex = Math.max(0, versions.length - 1);
     preparePdfHead();
     window.openPdfVersion(reportIdx, activeIndex);
-  };
-  window.downloadCurrentPdfVersion = function () {
-    var cur = window.__currentPdfPreview || { idx: 0, versionIdx: 0 };
-    window.downloadPdfVersion(cur.idx, cur.versionIdx);
   };
   window.downloadPdfVersion = function (idx, versionIdx) {
     var report = ncReports[idx];
@@ -2323,6 +2374,10 @@
     if (typeof render === 'function') render();
   };
   window.openSimplePdfPreview = function (idx) {
+    if (typeof window.previewPdf === 'function' && window.previewPdf !== window.openSimplePdfPreview) {
+      window.previewPdf(idx);
+      return;
+    }
     var reportIdx = typeof idx === 'number' ? idx : 0;
     var report = typeof ncReports !== 'undefined' && Array.isArray(ncReports) ? ncReports[reportIdx] : null;
     var modal = document.getElementById('simplePdfModal');
@@ -2342,13 +2397,279 @@
           '<span class="signature-file-icon"><i class="fas fa-file-pdf"></i></span>' +
           '<div class="signature-file-main"><div class="signature-file-name">' + esc(item.name) + '</div>' +
           '<div class="signature-file-desc">' + esc(item.desc) + '</div>' +
-          '<div class="signature-file-actions"><button type="button" class="mini-link-btn" onclick="openSimplePdfPreview(' + reportIdx + ')"><i class="fas fa-eye"></i> 预览PDF</button></div>' +
+          '<div class="signature-file-actions"><button type="button" class="mini-link-btn" onclick="openSimplePdfPreview(' + reportIdx + ')"><i class="fas fa-eye"></i> 预览PDF</button><button type="button" class="mini-link-btn" onclick="downloadPdfVersion(' + reportIdx + ', ' + index + ')"><i class="fas fa-download"></i> 下载</button></div>' +
           '</div></div>';
       }).join('') + '</div></div>' +
       reportPdf(report);
     modal.classList.add('show');
   };
-  window.previewPdf = window.openSimplePdfPreview;
+})();
+</script>
+
+<script id="NC_FINAL_VISIBLE_PDF_PREVIEW">
+(function () {
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (s) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s];
+    });
+  }
+
+  function reportAt(idx) {
+    if (typeof ncReports === 'undefined' || !Array.isArray(ncReports)) return null;
+    return ncReports[typeof idx === 'number' ? idx : 0] || ncReports[0] || null;
+  }
+
+  function stageName(stage) {
+    if (typeof getStageMeta === 'function') return getStageMeta(stage).name;
+    return stage === 'customerSign' ? '客户签字' : '审核员、审核组长签字';
+  }
+
+  function ensureBaseRecords(report) {
+    if (!report.signRecords) report.signRecords = {};
+    if (!report.signRecords.auditorSign) {
+      report.signRecords.auditorSign = { role: '审核员', signer: report.auditor || '王审核', time: '2026/6/23 16:10:23', method: '线上签章' };
+    }
+    if (!report.signRecords.leaderSign) {
+      report.signRecords.leaderSign = { role: '审核组长', signer: '武荣刚', time: '2026/6/23 16:22:51', method: '线上签章' };
+    }
+  }
+
+  function previewFiles(report) {
+    ensureBaseRecords(report);
+    var customer = report.signRecords && report.signRecords.customerSign;
+    var files = [
+      {
+        stage: 'leaderSign',
+        name: report.no + '_审核员、审核组长签字_线上签章版.pdf',
+        desc: '线上签章；审核员、审核组长已签章',
+        method: '线上签章',
+        time: report.signRecords.leaderSign.time,
+        pending: false,
+        stages: ['auditorSign', 'leaderSign']
+      }
+    ];
+    if (customer) {
+      files.push({
+        stage: 'customerSign',
+        name: customer.fileName ? customer.fileName : report.no + '_客户签字_线上签章版.pdf',
+        desc: (customer.method || '线上签章') + '；' + (customer.time || '-'),
+        method: customer.method || '线上签章',
+        time: customer.time || '-',
+        pending: false,
+        stages: ['auditorSign', 'leaderSign', 'customerSign']
+      });
+    }
+    return files;
+  }
+
+  function recordFor(report, stage, version) {
+    if (!report.signRecords) return null;
+    if (version.pending) return null;
+    return version.stages.indexOf(stage) !== -1 ? report.signRecords[stage] : null;
+  }
+
+  function signerInfo(report, stage) {
+    if (typeof getSignerInfo === 'function') return getSignerInfo(report, stage);
+    if (stage === 'leaderSign') return { role: '审核组长', signer: '武荣刚' };
+    if (stage === 'customerSign') return { role: '客户代表', signer: '客户' };
+    return { role: '审核员', signer: report.auditor || '王审核' };
+  }
+
+  function recordRows(report, version) {
+    var stages = version.stages && version.stages.length ? version.stages : ['auditorSign', 'leaderSign'];
+    return stages.map(function (stage, index) {
+      var info = signerInfo(report, stage);
+      var record = recordFor(report, stage, version);
+      return '<tr><td>' + (index + 1) + '</td><td>' + esc(stageName(stage)) + '</td><td>' + esc(record ? record.signer : info.signer) + '</td><td>' + esc(info.role) + '</td><td>' + esc(record ? record.time : '-') + '</td><td>' + esc(record ? '已签章' : '未签章') + '</td><td>' + esc(record ? (record.method || '线上签章') : '-') + '</td></tr>';
+    }).join('');
+  }
+
+  function sealBlocks(report, version) {
+    var html = ['auditorSign', 'leaderSign', 'customerSign'].map(function (stage) {
+      var info = signerInfo(report, stage);
+      var record = recordFor(report, stage, version);
+      if (!record) return '';
+      return '<div class="pdf-personal-seal-wrap"><div class="pdf-personal-seal"><div class="seal-role">' + esc(info.role) + '</div><div class="seal-name">' + esc(record.signer || info.signer) + '</div><div class="seal-mark">电子签章</div></div><div class="pdf-personal-seal-time">' + esc(record.time || '-') + '</div></div>';
+    }).join('');
+    return html || '<div class="signature-empty">当前为客户待签章 PDF 文件，完成签章后将展示客户签章印。</div>';
+  }
+
+  function pdfDocument(report, version) {
+    return '<div class="inline-pdf-doc"><section class="inline-pdf-page">' +
+      '<div class="pdf-doc-header"><div><div class="pdf-org">CQC 中国质量认证中心</div><div class="pdf-en">CHINA QUALITY CERTIFICATION CENTRE</div></div></div>' +
+      '<h1 class="pdf-main-title">不符合项报告</h1>' +
+      '<div class="pdf-table-section"><div class="pdf-section-title">一、基本信息</div><table class="plan-pdf-table"><tbody>' +
+      '<tr><th>报告编号</th><td>' + esc(report.no) + '</td><th>客户名称</th><td>' + esc(report.customerName) + '</td></tr>' +
+      '<tr><th>审核日期</th><td>' + esc(report.auditDateCn || report.auditDate || '-') + '</td><th>整改完成期限</th><td>' + esc(report.dueDateCn || report.dueDate || '-') + '</td></tr>' +
+      '<tr><th>涉及标准和条款内容</th><td colspan="3">' + esc((report.standard || '') + '；条款：' + (report.clause || '')) + '</td></tr>' +
+      '<tr><th>受审核部门/过程</th><td>' + esc(report.relatedDept || '-') + '</td><th>性质</th><td>' + esc(report.nature || '-') + '</td></tr>' +
+      '</tbody></table></div>' +
+      '<div class="pdf-table-section"><div class="pdf-section-title">二、不符合项描述</div><table class="plan-pdf-table"><tbody><tr><td>' + esc(report.description || '-') + '</td></tr></tbody></table></div>' +
+      '<div class="signature-seal-title">' + (version.pending ? '待签章文件' : '签章结果') + '</div><div class="signature-seal-area">' + sealBlocks(report, version) + '</div>' +
+      '<div class="pdf-footer"><span>报告编号：' + esc(report.no) + '</span><span>文件名称：' + esc(version.name) + '</span></div>' +
+      '</section></div>';
+  }
+
+  function renderPreview(idx, versionIdx) {
+    var report = reportAt(idx);
+    var modal = document.getElementById('pdfModal');
+    var title = document.getElementById('pdfModalTitle');
+    var viewer = document.getElementById('pdfViewer');
+    if (!report || !modal || !viewer) return;
+    var files = previewFiles(report);
+    var hasCustomerSigned = !!(report.signRecords && report.signRecords.customerSign);
+    var active = typeof versionIdx === 'number' ? versionIdx : (hasCustomerSigned ? files.length - 1 : 0);
+    var version = files[active] || files[0];
+    window.__currentPdfPreview = { idx: idx || 0, versionIdx: active };
+    if (title) title.innerHTML = '<i class="fas fa-file-signature"></i><span>不符合报告签章文件</span>';
+    viewer.innerHTML =
+      '<div class="signature-file-list show"><div class="signature-file-title"><i class="fas fa-folder-open"></i><span>签章文件清单</span></div><div class="signature-file-grid">' +
+      files.map(function (file, fileIndex) {
+        return '<div class="signature-file-card ' + (fileIndex === active ? 'active' : '') + '">' +
+          '<span class="signature-file-icon"><i class="fas fa-file-pdf"></i></span>' +
+          '<div class="signature-file-main"><div class="signature-file-name">' + esc(file.name) + '</div><div class="signature-file-desc">' + esc(file.desc) + '</div><div class="signature-file-actions">' +
+          '<button type="button" class="mini-link-btn" onclick="openNcPdfVersion(' + (idx || 0) + ', ' + fileIndex + ')"><i class="fas fa-eye"></i> 预览PDF</button>' +
+          '<button type="button" class="mini-link-btn" onclick="downloadNcPdfVersion(' + (idx || 0) + ', ' + fileIndex + ')"><i class="fas fa-download"></i> 下载</button>' +
+          '</div></div></div>';
+      }).join('') +
+      '</div></div>' + pdfDocument(report, version);
+    modal.classList.add('show');
+  }
+
+  window.openNcPdfVersion = renderPreview;
+  window.openNcPdfPreview = function (idx) { renderPreview(typeof idx === 'number' ? idx : 0); };
+  window.previewPdf = window.openNcPdfPreview;
+  window.openSimplePdfPreview = window.openNcPdfPreview;
+  window.downloadNcPdfVersion = function (idx, versionIdx) {
+    var report = reportAt(idx);
+    if (!report) return;
+    var file = previewFiles(report)[versionIdx || 0];
+    if (!file) return;
+    var content = ['不符合项报告 PDF 文件', '报告编号：' + report.no, '客户名称：' + report.customerName, '文件名称：' + file.name, '签章节点：' + stageName(file.stage), '签章状态：' + (file.pending ? '待签章' : '已签章'), '生成时间：' + (file.time || '-')].join('\n');
+    var blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+  };
+  window.downloadPdfVersion = window.downloadNcPdfVersion;
+})();
+</script>
+
+<script id="NC_FINAL_STAGE_FLOW_PATCH">
+(function () {
+  var style = document.createElement('style');
+  style.id = 'NC_FINAL_PDF_DOCUMENT_STYLE';
+  style.textContent = [
+    '.pdf-viewer{background:#d8dee6!important;padding:18px 24px 32px!important;}',
+    '.signature-file-list.show{width:min(900px,calc(100vw - 64px))!important;margin:0 auto 10px!important;padding:8px 10px!important;border:1px solid #d5dbe5!important;border-radius:4px!important;background:#fff!important;box-shadow:none!important;}',
+    '.signature-file-title{font-size:12px!important;margin-bottom:6px!important;color:#0f172a!important;}',
+    '.signature-file-list > .signature-file-desc{display:none!important;}',
+    '.signature-file-grid{display:flex!important;gap:8px!important;overflow:auto!important;}',
+    '.signature-file-card{min-width:0!important;flex:1 1 0!important;min-height:44px!important;padding:7px 9px!important;border-radius:4px!important;box-shadow:none!important;}',
+    '.signature-file-icon{width:24px!important;height:24px!important;font-size:13px!important;}',
+    '.signature-file-name{font-size:12px!important;line-height:1.3!important;}',
+    '.signature-file-desc{font-size:11px!important;line-height:1.3!important;}',
+    '.signature-file-actions{margin-top:4px!important;}',
+    '.inline-pdf-doc{width:min(900px,calc(100vw - 64px))!important;background:transparent!important;}',
+    '.inline-pdf-page{width:100%!important;min-height:1160px!important;margin:0 auto 18px!important;padding:28px 34px 46px!important;background:#fff!important;border:0!important;box-shadow:none!important;color:#000!important;font-family:Arial,"Microsoft YaHei",sans-serif!important;}',
+    '.pdf-doc-header{display:block!important;margin:0 0 18px!important;padding:0 0 9px!important;border-bottom:1px solid #111827!important;}',
+    '.pdf-org{font-size:20px!important;line-height:1.15!important;font-weight:900!important;color:#002060!important;letter-spacing:0!important;}',
+    '.pdf-en{margin-top:4px!important;font-size:9px!important;line-height:1!important;color:#2f5597!important;letter-spacing:1.6px!important;text-transform:uppercase!important;}',
+    '.pdf-main-title{margin:0 0 16px!important;text-align:center!important;font-size:24px!important;line-height:1.2!important;font-weight:900!important;color:#000!important;letter-spacing:0!important;}',
+    '.pdf-table-section{margin:0 0 12px!important;}',
+    '.pdf-section-title{margin:0 0 7px!important;display:flex!important;align-items:center!important;gap:7px!important;font-size:13px!important;line-height:1.2!important;font-weight:900!important;color:#000!important;}',
+    '.pdf-section-title:before{content:""!important;display:inline-block!important;width:3px!important;height:14px!important;border-radius:0!important;background:#2563eb!important;}',
+    '.plan-pdf-table,.signature-table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;margin:0!important;font-size:11px!important;line-height:1.45!important;color:#000!important;font-family:Arial,"Microsoft YaHei",sans-serif!important;}',
+    '.plan-pdf-table th,.plan-pdf-table td,.signature-table th,.signature-table td{border:1px solid #111827!important;padding:5px 7px!important;vertical-align:top!important;word-break:break-word!important;background:#fff!important;color:#000!important;}',
+    '.plan-pdf-table th,.signature-table th{font-weight:900!important;text-align:left!important;background:#f8fafc!important;}',
+    '.plan-pdf-table:not(.matrix) th{width:160px!important;}',
+    '.signature-seal-title{display:block!important;margin:10px 0 8px!important;font-size:14px!important;line-height:1.2!important;font-weight:900!important;color:#000!important;}',
+    '.signature-seal-area{display:flex!important;align-items:flex-start!important;gap:28px!important;min-height:128px!important;padding:12px 18px!important;border:1px solid #d8dee6!important;border-radius:6px!important;background:#fff!important;box-shadow:none!important;}',
+    '.pdf-personal-seal-wrap{min-width:112px!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:6px!important;}',
+    '.pdf-personal-seal{width:88px!important;height:88px!important;border:3px solid #dc2626!important;border-radius:50%!important;color:#dc2626!important;background:rgba(255,255,255,.95)!important;box-shadow:none!important;transform:rotate(-12deg)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;position:relative!important;}',
+    '.pdf-personal-seal:before{content:""!important;position:absolute!important;inset:6px!important;border:2px solid #dc2626!important;border-radius:50%!important;}',
+    '.pdf-personal-seal .seal-role,.pdf-personal-seal .seal-name,.pdf-personal-seal .seal-mark{position:relative!important;z-index:1!important;color:#dc2626!important;}',
+    '.pdf-personal-seal .seal-role{font-size:10px!important;font-weight:800!important;letter-spacing:0!important;}',
+    '.pdf-personal-seal .seal-name{margin-top:2px!important;font-size:16px!important;font-weight:900!important;letter-spacing:1px!important;}',
+    '.pdf-personal-seal .seal-mark{margin-top:4px!important;font-size:9px!important;font-weight:800!important;}',
+    '.pdf-personal-seal-time{font-size:10px!important;color:#64748b!important;font-family:Arial,"Microsoft YaHei",sans-serif!important;}',
+    '.pdf-footer{display:none!important;}',
+    '@media (max-width:760px){.pdf-viewer{padding:10px!important;}.signature-file-list.show,.inline-pdf-doc{width:100%!important;}.inline-pdf-page{padding:18px 16px 32px!important;}.pdf-org{font-size:18px!important;}.pdf-main-title{font-size:22px!important;}.plan-pdf-table,.signature-table{font-size:10px!important;}.plan-pdf-table:not(.matrix) th{width:92px!important;}}'
+  ].join('\n');
+  document.head.appendChild(style);
+
+  window.isCustomerFillOpen = function (report) {
+    return !!report && !report.finished && reportStage(report) === 'customerFill';
+  };
+
+  window.isConclusionOpen = function (report) {
+    return false;
+  };
+
+  function submitCustomerFillStage(idx) {
+    var report = ncReports[idx];
+    if (!report || !window.isCustomerFillOpen(report)) return;
+    if (!String(report.cause || '').trim()) { alert('请填写原因分析'); return; }
+    if (!String(report.correctionPlan || '').trim()) { alert('请填写纠正、纠正措施或纠正措施计划'); return; }
+    report.stageStatus.customerFill = 'completed';
+    report.stageStatus.auditorConclusion = 'current';
+    report.currentStage = 'auditorConclusion';
+    report.finished = false;
+    ensureStageAutoData(report);
+    if (typeof render === 'function') render();
+    alert(report.no + ' 已提交填写内容');
+  }
+
+  window.submitCustomerFill = submitCustomerFillStage;
+
+  window.handlePrimaryAction = function (idx) {
+    var report = ncReports[idx];
+    if (!report || report.finished) return;
+    var stage = reportStage(report);
+    if (stage === 'customerFill') {
+      submitCustomerFillStage(idx);
+      return;
+    }
+    if (stage === 'auditorConclusion') {
+      return;
+    }
+    submitCurrentStageForReport(idx);
+  };
+
+  window.advanceToNextStage = function (report) {
+    if (!report) return;
+    var stage = reportStage(report);
+    if (stage === 'customerSign') {
+      report.stageStatus.customerSign = 'completed';
+      report.stageStatus.customerFill = 'current';
+      report.stageStatus.auditorConclusion = 'waiting';
+      report.currentStage = 'customerFill';
+      report.finished = false;
+      ensureStageAutoData(report);
+      return;
+    }
+    if (stage === 'customerFill') {
+      report.stageStatus.customerFill = 'completed';
+      report.stageStatus.auditorConclusion = 'current';
+      report.currentStage = 'auditorConclusion';
+      report.finished = false;
+      ensureStageAutoData(report);
+      return;
+    }
+    if (stage === 'auditorConclusion') {
+      report.stageStatus.auditorConclusion = 'completed';
+      report.finished = true;
+      ensureStageAutoData(report);
+      return;
+    }
+  };
+
+  if (typeof render === 'function') render();
 })();
 </script>
 

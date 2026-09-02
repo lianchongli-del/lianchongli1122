@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发票管理</title>
+  <style>
+    :root{--bg:#f3f6fa;--panel:#fff;--border:#e6ebf2;--line:#eef2f6;--text:#111827;--muted:#7b8aa0;--blue:#2563eb;--blue-dark:#1d4ed8}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Microsoft YaHei",Arial,sans-serif;font-size:14px}
+    button,input,select{font:inherit}button{cursor:pointer}.page{padding:16px 16px 22px;min-width:0}.page-title{display:flex;align-items:center;gap:10px;margin:0 0 18px;font-size:22px;line-height:1.25;font-weight:800;color:#0f172a}.page-title:before{content:"";width:22px;height:22px;background:var(--blue);clip-path:polygon(50% 0,61% 24%,87% 13%,76% 39%,100% 50%,76% 61%,87% 87%,61% 76%,50% 100%,39% 76%,13% 87%,24% 61%,0 50%,24% 39%,13% 13%,39% 24%)}.page-subtitle{display:none}
+    .panel{background:var(--panel);border:1px solid #e3eaf3;border-radius:8px;box-shadow:0 2px 6px rgba(15,23,42,.08);overflow:hidden}.filters{display:flex;align-items:flex-end;gap:16px;padding:24px 18px 18px;margin-bottom:16px}.filter-item{display:flex;flex-direction:column;gap:8px}.filter-item label{color:#52627a;font-size:13px;font-weight:800}.filter-item input,.filter-item select{height:39px;width:250px;border:1px solid #cbd7e6;border-radius:6px;padding:0 12px;color:#1f2937;background:#fff;outline:none}.filter-item input::placeholder{color:#a7b4c6}.filter-item input:focus,.filter-item select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.09)}.filter-item input[type=date]{width:205px}.filter-actions{display:flex;gap:9px;margin-left:auto}.btn{height:39px;border:1px solid #cbd7e6;border-radius:6px;padding:0 16px;background:#fff;color:#243247;font-weight:700}.btn-primary{min-width:86px;border-color:var(--blue);background:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(37,99,235,.18)}.btn:hover{filter:brightness(.985)}.btn-primary:hover{background:var(--blue-dark)}.btn i{font-style:normal;margin-right:7px}
+    .list-head{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px;border-bottom:1px solid var(--border)}.list-title{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800;color:#111827}.list-title:before{content:"☷";color:#0f172a;font-size:21px;line-height:1}.list-tools{display:flex;align-items:center;gap:13px;color:#6d7d92;font-size:13px;white-space:nowrap}.list-tools strong{color:var(--blue);font-weight:800}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:960px}th,td{height:57px;padding:0 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{height:44px;background:#f7faff;color:#334155;font-weight:800;font-size:13px}th:first-child,td:first-child{width:54px;padding-left:16px}td{font-size:14px;color:#263246}.amount{font-weight:800;color:#0f172a}.invoice-no{font-weight:800;letter-spacing:.2px;color:#0f172a}.type{color:#344256}.row-actions{display:flex;gap:16px;align-items:center}.link-btn{display:inline-flex;align-items:center;gap:5px;border:0;background:none;color:var(--blue);padding:4px 0;font-size:14px;font-weight:800}.link-btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}.pagination{min-height:62px;display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:0 16px;color:#5f6f84;border-top:1px solid var(--line);flex-wrap:wrap}.page-size{height:34px;border:1px solid #d5dfeb;border-radius:6px;padding:0 30px 0 11px;background:#fff;color:#111827;font-weight:700}.page-btn{min-width:34px;height:34px;padding:0 10px;border:1px solid #d5dfeb;border-radius:6px;background:#fff;color:#334155;font-weight:700}.page-btn.active{border-color:var(--blue);background:var(--blue);color:#fff}.page-btn:disabled{color:#b8c2cf;background:#f7f8fa;cursor:not-allowed}.page-summary{margin-right:4px}.empty{padding:60px;text-align:center;color:var(--muted);display:none}
+    .modal-mask{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.5)}.modal-mask.show{display:flex}.invoice-dialog{width:min(960px,calc(100vw - 48px));height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;background:#eef1f5;border-radius:10px;overflow:hidden;box-shadow:0 24px 70px rgba(15,23,42,.28)}.modal-header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:#fff;border-bottom:1px solid var(--border)}.modal-title{font-size:17px;font-weight:800}.close{border:0;background:none;color:#64748b;font-size:23px;line-height:1}.preview-area{flex:1;overflow:auto;padding:26px}.invoice-paper{width:min(700px,100%);min-height:570px;margin:0 auto;padding:38px 42px;background:#fff;box-shadow:0 3px 14px rgba(15,23,42,.1);color:#222}.invoice-heading{text-align:center;border-bottom:2px solid #283548;padding-bottom:15px;margin-bottom:20px}.invoice-heading h2{margin:0 0 8px;font-size:25px;letter-spacing:4px}.invoice-heading p{margin:0;color:#64748b;font-size:12px}.invoice-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px 28px;margin-bottom:18px;font-size:13px}.invoice-meta span{color:#64748b}.invoice-table{width:100%;min-width:0;border:1px solid #b9c1ca;border-collapse:collapse;table-layout:fixed}.invoice-table col:nth-child(1){width:18%}.invoice-table col:nth-child(2){width:18%}.invoice-table col:nth-child(3){width:13%}.invoice-table col:nth-child(4){width:13%}.invoice-table col:nth-child(5){width:19%}.invoice-table col:nth-child(6){width:19%}.invoice-table th,.invoice-table td{height:42px;padding:8px 10px;border:1px solid #b9c1ca;font-size:12px;white-space:normal;word-break:break-word;vertical-align:middle}.invoice-table th{background:#f5f7fa;text-align:center;font-weight:700}.invoice-table td:nth-child(1),.invoice-table td:nth-child(2){text-align:left}.invoice-table td:nth-child(3),.invoice-table td:nth-child(4){text-align:center}.invoice-table td:nth-child(5),.invoice-table td:nth-child(6){text-align:right}.invoice-table .total-label{text-align:right}.invoice-total{text-align:right;margin-top:18px;font-size:15px}.invoice-total strong{font-size:20px;margin-left:10px}.invoice-footer{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:42px;color:#526071;font-size:12px;line-height:1.8}.modal-footer{height:66px;display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:0 20px;background:#fff;border-top:1px solid var(--border)}
+    @media(max-width:1100px){.page{padding:16px}.filters{flex-wrap:wrap}.filter-actions{align-self:flex-end}.list-head{padding:12px 16px}.list-tools{margin-left:auto}}
+    @media(max-width:760px){.filter-item,.filter-item input,.filter-item select,.filter-item input[type=date]{width:100%}.filter-actions{width:100%;justify-content:flex-end}.list-head{align-items:flex-start;flex-direction:column}.list-tools{width:100%;justify-content:flex-end;flex-wrap:wrap}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1 class="page-title">发票管理</h1>
+    <p class="page-subtitle">查看和管理您的体系认证合同相关发票</p>
+    <section class="panel filters" aria-label="发票查询条件">
+      <div class="filter-item"><label for="invoiceNo">发票号码</label><input id="invoiceNo" placeholder="请输入发票号码"></div>
+      <div class="filter-item"><label for="invoiceDate">开票日期</label><input id="invoiceDate" type="date"></div>
+      <div class="filter-item"><label for="invoiceType">发票类型</label><select id="invoiceType"><option value="">全部类型</option><option>增值税专用发票</option><option>增值税普通发票</option></select></div>
+      <div class="filter-actions"><button class="btn" onclick="resetFilters()"><i>↻</i>重置</button><button class="btn btn-primary" onclick="applyFilters()"><i>⌕</i>查询</button></div>
+    </section>
+    <section class="panel">
+      <div class="list-head"><div class="list-title">发票列表</div><div class="list-tools"><span>当前列表 <strong id="recordCount">0</strong> 条</span></div></div>
+      <div class="table-wrap"><table><thead><tr><th>序号</th><th>发票号码</th><th>开票金额</th><th>开票日期</th><th>发票类型</th><th>操作</th></tr></thead><tbody id="invoiceBody"></tbody></table><div class="empty" id="emptyState">暂无符合条件的发票</div></div>
+      <div class="pagination"><span class="page-summary">共 <strong id="pageCount">0</strong> 条</span><span>每页</span><select class="page-size" id="pageSize" onchange="changePageSize(this.value)"><option>10</option><option>20</option></select><button class="page-btn" id="prevBtn" onclick="changePage(-1)">‹</button><button class="page-btn active" id="pageOne">1</button><span>/ <span id="totalPages">1</span></span><button class="page-btn" id="nextBtn" onclick="changePage(1)">›</button></div>
+    </section>
+  </main>
+
+  <div class="modal-mask" id="invoiceModal" onclick="closeOnMask(event)">
+    <div class="invoice-dialog" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+      <div class="modal-header"><div class="modal-title" id="previewTitle">发票预览</div><button class="close" aria-label="关闭" onclick="closePreview()">&times;</button></div>
+      <div class="preview-area"><article class="invoice-paper" id="invoicePaper"></article></div>
+      <div class="modal-footer"><button class="btn" onclick="closePreview()">关闭</button></div>
+    </div>
+  </div>
+  <script>
+    const invoices=[
+      {no:'243220000001',amount:'¥45,000.00',date:'2024-03-15',type:'增值税专用发票'},
+      {no:'243220000002',amount:'¥38,000.00',date:'2024-03-20',type:'增值税专用发票'},
+      {no:'243220000003',amount:'¥35,000.00',date:'2024-04-08',type:'增值税普通发票'},
+      {no:'243220000004',amount:'¥52,000.00',date:'2024-04-12',type:'增值税专用发票'},
+      {no:'243220000005',amount:'¥15,000.00',date:'2024-05-10',type:'增值税普通发票'},
+      {no:'243220000006',amount:'¥42,000.00',date:'2024-05-18',type:'增值税专用发票'},
+      {no:'243220000007',amount:'¥28,000.00',date:'2024-06-05',type:'增值税普通发票'},
+      {no:'243220000008',amount:'¥32,000.00',date:'2024-06-20',type:'增值税专用发票'},
+      {no:'243220000009',amount:'¥26,000.00',date:'2024-07-08',type:'增值税专用发票'},
+      {no:'243220000010',amount:'¥18,000.00',date:'2024-07-18',type:'增值税普通发票'},
+      {no:'243220000011',amount:'¥48,000.00',date:'2024-08-02',type:'增值税专用发票'},
+      {no:'243220000012',amount:'¥22,000.00',date:'2024-08-16',type:'增值税普通发票'}
+    ];
+    let filtered=invoices.slice(),page=1,pageSize=10;
+    const esc=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const iconEye='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const iconDownload='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>';
+    function render(){const start=(page-1)*pageSize,rows=filtered.slice(start,start+pageSize),totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));document.getElementById('recordCount').textContent=filtered.length;document.getElementById('pageCount').textContent=filtered.length;document.getElementById('totalPages').textContent=totalPages;document.getElementById('pageOne').textContent=page;document.getElementById('invoiceBody').innerHTML=rows.map((row,index)=>'<tr><td>'+(start+index+1)+'</td><td><span class="invoice-no">'+esc(row.no)+'</span></td><td><span class="amount">'+esc(row.amount)+'</span></td><td>'+esc(row.date)+'</td><td><span class="type">'+esc(row.type)+'</span></td><td><div class="row-actions"><button class="link-btn" onclick="openPreview(\''+row.no+'\')">'+iconEye+'预览</button><button class="link-btn" onclick="downloadInvoice(\''+row.no+'\')">'+iconDownload+'下载</button></div></td></tr>').join('');document.getElementById('emptyState').style.display=rows.length?'none':'block';document.getElementById('prevBtn').disabled=page===1;document.getElementById('nextBtn').disabled=page>=totalPages;}
+    function applyFilters(){const no=document.getElementById('invoiceNo').value.trim(),date=document.getElementById('invoiceDate').value,type=document.getElementById('invoiceType').value;filtered=invoices.filter(row=>(!no||row.no.includes(no))&&(!date||row.date===date)&&(!type||row.type===type));page=1;render()}
+    function resetFilters(){document.getElementById('invoiceNo').value='';document.getElementById('invoiceDate').value='';document.getElementById('invoiceType').value='';filtered=invoices.slice();page=1;render()}
+    function changePage(delta){page=Math.min(Math.max(1,Math.ceil(filtered.length/pageSize)),Math.max(1,page+delta));render()}
+    function changePageSize(value){pageSize=Number(value);page=1;render()}
+    function openPreview(no){const row=invoices.find(item=>item.no===no);if(!row)return;document.getElementById('previewTitle').textContent='发票预览 - '+row.no;document.getElementById('invoicePaper').innerHTML='<div class="invoice-heading"><h2>电子发票</h2><p>'+esc(row.type)+'</p></div><div class="invoice-meta"><div><span>发票号码：</span>'+esc(row.no)+'</div><div><span>开票日期：</span>'+esc(row.date)+'</div><div><span>校验码：</span>2386 5471 9201 0365</div><div><span>发票类型：</span>'+esc(row.type)+'</div></div><table class="invoice-table"><colgroup><col><col><col><col><col><col></colgroup><thead><tr><th>项目名称</th><th>规格型号</th><th>单位</th><th>数量</th><th>单价</th><th>金额</th></tr></thead><tbody><tr><td>认证服务费</td><td>体系认证服务</td><td>项</td><td>1</td><td>'+esc(row.amount)+'</td><td>'+esc(row.amount)+'</td></tr><tr><td colspan="5" class="total-label">合计</td><td>'+esc(row.amount)+'</td></tr></tbody></table><div class="invoice-total">价税合计（大写）：<strong>人民币肆万伍仟元整</strong></div><div class="invoice-footer"><div>购买方：盘锦市粮库有限责任公司<br>统一社会信用代码：91110000MA26070100<br>地址：辽宁省盘锦市兴隆台区中心路88号</div><div>销售方：认证服务有限公司<br>纳税人识别号：91110000MA12345678<br>开户行：中国工商银行认证服务支行</div></div>';document.getElementById('invoiceModal').classList.add('show')}
+    function closePreview(){document.getElementById('invoiceModal').classList.remove('show')}
+    function closeOnMask(event){if(event.target.id==='invoiceModal')closePreview()}
+    function downloadInvoice(no){const row=invoices.find(item=>item.no===no);if(!row)return;const content='发票号码：'+row.no+'\n开票金额：'+row.amount+'\n开票日期：'+row.date+'\n发票类型：'+row.type;const blob=new Blob([content],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='发票-'+row.no+'.txt';link.click();URL.revokeObjectURL(url)}
+    document.addEventListener('keydown',event=>{if(event.key==='Escape')closePreview()});render();
+  </script>
+</body>
+</html>

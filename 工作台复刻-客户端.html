@@ -1,0 +1,1904 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>体系认证数字化项目 · 客户端工作台 · 项目进度查询</title>
+  <style>
+    :root {
+      --blue: #1f6cff;
+      --ink: #172b4d;
+      --muted: #7e8da3;
+      --line: #e4ebf4;
+      --green: #14ad72;
+      --red: #ff5c64;
+      --gold: #ffad14;
+      --shadow: 0 3px 12px rgba(34, 67, 111, .07);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-width: 1200px;
+      color: var(--ink);
+      background: #eef3f9;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      font-size: 13px;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .dashboard {
+      min-height: 100vh;
+      padding: 0 14px 30px;
+      background: linear-gradient(180deg, #e5ebf6 0, #f0f3f7 202px, #edf1f6 216px);
+    }
+    .topbar {
+      height: 86px;
+      display: flex;
+      align-items: center;
+      padding: 0 7px;
+      position: relative;
+      overflow: hidden;
+    }
+    .topbar:after {
+      content: "";
+      position: absolute;
+      inset: -36px -34px auto auto;
+      width: 430px;
+      height: 125px;
+      opacity: .46;
+      pointer-events: none;
+      background:
+        linear-gradient(147deg, transparent 40%, rgba(126, 177, 255, .16) 41% 52%, transparent 53%),
+        linear-gradient(29deg, transparent 49%, rgba(126, 177, 255, .12) 50% 67%, transparent 68%);
+      transform: skewX(-20deg);
+    }
+    .welcome { position: relative; z-index: 1; }
+    .welcome h1 { margin: 0 0 8px; color: #12233d; font-size: 20px; }
+    .welcome p { margin: 0; color: #78869b; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 13px; }
+    .stat-card {
+      height: 116px;
+      border-top: 2px solid var(--blue);
+      background: linear-gradient(#fcfdff, #f5f7f9);
+      padding: 19px 25px;
+      position: relative;
+    }
+    .stat-title { color: #48566e; font-size: 12px; }
+    .stat-value { margin: 11px 0 10px; color: #101e31; font-size: 25px; line-height: 1; font-weight: 700; }
+    .stat-foot { color: #8a95a6; font-size: 12px; }
+    .stat-foot .up { color: var(--red); margin-left: 3px; }
+    .stat-foot .down { color: var(--green); margin-left: 3px; }
+    .stat-icon {
+      position: absolute;
+      right: 20px;
+      top: 33px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: #eff5ff;
+    }
+    .stat-icon svg { width: 21px; height: 21px; }
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.57fr) minmax(330px, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .panel {
+      overflow: hidden;
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .work-panel { height: 474px; }
+    .work-head {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 19px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tabs { height: 100%; display: flex; align-items: center; gap: 24px; }
+    .tab {
+      height: 100%;
+      border: 0;
+      background: none;
+      color: #8290a7;
+      position: relative;
+      padding: 0;
+    }
+    .tab.active { color: var(--blue); font-weight: 700; }
+    .tab.active:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: var(--blue);
+    }
+    .count { margin-left: 6px; color: var(--red); font-size: 11px; }
+    .tools { display: flex; align-items: center; gap: 9px; }
+    .module-picker { position: relative; }
+    .module-trigger {
+      width: 182px;
+      height: 26px;
+      border: 1px solid #dbe4f0;
+      border-radius: 4px;
+      background: #fff;
+      color: #60738f;
+      padding: 0 27px 0 9px;
+      text-align: left;
+      font-size: 11px;
+      position: relative;
+    }
+    .module-trigger:after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      border: 4px solid transparent;
+      border-top-color: #8595ad;
+    }
+    .module-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 31px;
+      z-index: 8;
+      width: 238px;
+      max-height: 290px;
+      overflow: auto;
+      border: 1px solid #dbe4f0;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 16px 42px rgba(24, 44, 77, .16);
+      padding: 8px;
+    }
+    .module-picker.open .module-menu { display: block; }
+    .module-menu label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      color: #3b506c;
+      font-size: 12px;
+    }
+    .module-menu label:hover { background: #f5f8fc; }
+    .module-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 4px 2px;
+      border-top: 1px solid var(--line);
+      margin-top: 4px;
+    }
+    .module-actions button, .tools button {
+      height: 26px;
+      border: 0;
+      border-radius: 4px;
+      color: white;
+      background: var(--blue);
+      padding: 0 12px;
+      font-size: 11px;
+    }
+    .module-actions .clear-btn { background: #8796ab; }
+    .tools .more-btn { background: #0fbd83; }
+    .task-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .task-table th {
+      height: 44px;
+      color: #65758f;
+      background: #f7f9fc;
+      font-size: 11px;
+      font-weight: 500;
+      text-align: left;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+    .task-table td {
+      height: 64px;
+      border-bottom: 1px solid #edf1f6;
+      padding: 0 10px;
+      color: #294567;
+      vertical-align: middle;
+      font-size: 11px;
+    }
+    .task-table th:nth-child(1), .task-table td:nth-child(1) { width: 32%; }
+    .task-table th:nth-child(2), .task-table td:nth-child(2) { width: 18%; }
+    .task-table th:nth-child(3), .task-table td:nth-child(3) { width: 15%; }
+    .task-table th:nth-child(4), .task-table td:nth-child(4) { width: 13%; }
+    .task-table th:nth-child(5), .task-table td:nth-child(5) { width: 12%; }
+    .task-table th:nth-child(6), .task-table td:nth-child(6) { width: 10%; }
+    .task-name { color: #1f3653; font-weight: 700; }
+    .tag {
+      display: block;
+      width: fit-content;
+      border-radius: 3px;
+      padding: 2px 5px;
+      margin-top: 5px;
+      color: #2874ff;
+      background: #eef5ff;
+      font-size: 10px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .tag.green { color: #1aa872; background: #e8fbf2; }
+    .tag.gold { color: #b77700; background: #fff4d9; }
+    .tag.gray { color: #7488a2; background: #f0f3f7; }
+    .sub { display: block; color: #8796ab; font-size: 10px; margin-top: 4px; }
+    .handle {
+      color: var(--blue);
+      border: 1px solid #bcd3ff;
+      border-radius: 3px;
+      background: #fff;
+      padding: 4px 10px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .empty-row { display: none; height: 260px; text-align: center; color: #9aa8b9; }
+    .table-pager, .pager {
+      height: 38px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      color: #6f7e92;
+      font-size: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .table-pager button, .pager button {
+      height: 26px;
+      min-width: 28px;
+      border: 1px solid #d4dfed;
+      border-radius: 4px;
+      background: white;
+      color: #31547c;
+    }
+    .table-pager button.active, .pager button.active { background: var(--blue); color: white; border-color: var(--blue); }
+    .table-pager button:disabled, .pager button:disabled { color: #b4bfcc; cursor: not-allowed; }
+    .work-panel.history-mode .task-table th:nth-child(1), .work-panel.history-mode .task-table td:nth-child(1) { width: 34%; }
+    .work-panel.history-mode .task-table th:nth-child(2), .work-panel.history-mode .task-table td:nth-child(2) { width: 20%; }
+    .work-panel.history-mode .task-table th:nth-child(3), .work-panel.history-mode .task-table td:nth-child(3) { width: 16%; }
+    .work-panel.history-mode .task-table th:nth-child(4), .work-panel.history-mode .task-table td:nth-child(4) { width: 14%; }
+    .work-panel.history-mode .task-table th:nth-child(5), .work-panel.history-mode .task-table td:nth-child(5) { width: 16%; }
+    .panel-heading {
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-heading h2 { margin: 0; color: #1b2e4b; font-size: 13px; }
+    .panel-heading h2:before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      margin-right: 8px;
+      border-radius: 2px;
+      background: var(--blue);
+      vertical-align: -3px;
+    }
+    .panel-heading a { color: #56708f; font-size: 11px; text-decoration: none; }
+    .monitor-panel { height: 474px; }
+    .monitor-panel .panel-heading h2:before { background: var(--red); }
+    .monitor-tabs {
+      height: 32px;
+      display: flex;
+      gap: 16px;
+      padding: 0 17px;
+      border-bottom: 1px solid var(--line);
+    }
+    .monitor-tabs button {
+      position: relative;
+      border: 0;
+      background: none;
+      color: #8290a7;
+      font-size: 10px;
+      padding: 0;
+    }
+    .monitor-tabs button.active { color: #1d2738; font-weight: 700; }
+    .monitor-tabs button.active:after {
+      content: "";
+      height: 2px;
+      background: var(--blue);
+      position: absolute;
+      left: -3px;
+      right: -3px;
+      bottom: -1px;
+    }
+    .monitor-list { height: 396px; overflow: auto; padding: 12px 16px 0; }
+    .monitor-item {
+      min-height: 98px;
+      border: 1px solid #ffd77c;
+      border-radius: 7px;
+      padding: 10px 10px 8px;
+      margin-bottom: 10px;
+      background: #fffbef;
+      font-size: 11px;
+      position: relative;
+    }
+    .monitor-item.blue { border-color: #bdd8ff; background: #f1f7ff; }
+    .monitor-item strong { display: block; color: #1b2b41; margin: 7px 0 4px; }
+    .monitor-item .kind { color: #a67200; font-weight: 700; }
+    .monitor-item.blue .kind { color: #2e60bf; }
+    .pill {
+      float: right;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: #fff0c2;
+      color: #b87800;
+      font-weight: 700;
+    }
+    .blue .pill { color: #3270da; background: #e0edff; }
+    .monitor-meta { display: flex; justify-content: space-between; gap: 8px; color: #415676; }
+    .monitor-status {
+      display: inline-block;
+      color: #a77b00;
+      background: #fff2bf;
+      padding: 2px 4px;
+      margin-top: 7px;
+      border-radius: 3px;
+    }
+    .blue .monitor-status { color: #159964; background: #dcf8e9; }
+    .monitor-action { float: right; color: var(--blue); text-decoration: none; margin-top: 8px; }
+    .notice-panel { height: 300px; margin-top: 14px; }
+    .notice-panel .panel-heading h2:before { background: var(--gold); }
+    .notice-list { height: 254px; overflow: auto; padding: 12px 16px; display: grid; gap: 10px; }
+    .notice-item {
+      border: 1px solid #e8eef7;
+      border-radius: 7px;
+      background: #fbfcff;
+      padding: 10px 12px;
+      font-size: 11px;
+    }
+    .notice-date { color: var(--blue); font-weight: 700; margin-right: 8px; }
+    .notice-title { color: #1b2b41; font-weight: 700; }
+    .notice-content { margin: 6px 0; color: #415676; line-height: 1.55; }
+    .notice-time { color: #95a2b5; }
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .chart-panel { height: 300px; }
+    .chart-panel .panel-heading { border-bottom: 0; }
+    .chart-panel.domain .panel-heading h2:before { background: var(--green); }
+    .chart-area { height: 245px; padding: 7px 18px 12px; position: relative; }
+    .bar-chart {
+      height: 192px;
+      margin: 0 10px 0 31px;
+      position: relative;
+      display: flex;
+      align-items: end;
+      justify-content: space-around;
+      background: repeating-linear-gradient(to bottom, #e8edf5 0 1px, transparent 1px 38.4px);
+    }
+    .y-labels {
+      position: absolute;
+      left: -28px;
+      top: -4px;
+      bottom: -4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #98a3b1;
+      font-size: 10px;
+    }
+    .bar {
+      width: 16px;
+      border-radius: 4px 4px 0 0;
+      background: #3e82ef;
+      min-height: 7px;
+      position: relative;
+      transition: filter .15s;
+    }
+    .bar:hover { filter: brightness(1.08); }
+    .bar:after {
+      content: attr(data-label);
+      position: absolute;
+      top: calc(100% + 8px);
+      width: 45px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: #7889a1;
+      font-size: 10px;
+    }
+    .donut-wrap { height: 220px; display: flex; align-items: center; justify-content: center; gap: 28px; }
+    .donut-svg { width: 168px; height: 168px; transform: rotate(-90deg); overflow: visible; }
+    .donut-seg {
+      fill: none;
+      stroke-width: 28;
+      cursor: default;
+      transition: stroke-width .15s, opacity .15s;
+    }
+    .donut-seg:hover { stroke-width: 31; opacity: .92; }
+    .donut-hole { fill: white; }
+    .legend { display: grid; gap: 6px; color: #6f7e92; font-size: 10px; }
+    .legend i { display: inline-block; width: 8px; height: 8px; margin-right: 7px; }
+    .tooltip {
+      position: fixed;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -110%);
+      background: #1e2d45;
+      color: white;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      box-shadow: 0 10px 28px rgba(10, 29, 55, .18);
+      transition: opacity .12s;
+    }
+    .tooltip.show { opacity: 1; }
+    dialog {
+      width: 1120px;
+      max-width: 94vw;
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 20px 80px rgba(24, 44, 77, .25);
+    }
+    dialog::backdrop { background: rgba(23, 43, 77, .35); }
+    .dialog-head {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .dialog-head h2 { margin: 0; font-size: 17px; }
+    .dialog-head button { border: 0; background: none; color: #8090a9; font-size: 24px; }
+    .dialog-body { padding: 18px 22px 20px; line-height: 1.7; }
+    .dialog-actions { border-top: 1px solid var(--line); padding: 14px 22px; text-align: right; }
+    .dialog-actions button {
+      border: 1px solid #cad9ed;
+      background: #fff;
+      border-radius: 4px;
+      padding: 7px 16px;
+      margin-left: 8px;
+      color: #31547c;
+    }
+    .modal-filter-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .modal-table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--line); }
+    .modal-table th, .modal-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      font-size: 12px;
+      vertical-align: top;
+    }
+    .modal-table th { background: #f7f9fc; color: #65758f; font-weight: 500; }
+    .modal-table th:nth-child(1), .modal-table td:nth-child(1) { width: 32%; }
+    .modal-table th:nth-child(2), .modal-table td:nth-child(2) { width: 18%; }
+    .modal-table th:nth-child(3), .modal-table td:nth-child(3) { width: 15%; }
+    .modal-table th:nth-child(4), .modal-table td:nth-child(4) { width: 13%; }
+    .modal-table th:nth-child(5), .modal-table td:nth-child(5) { width: 12%; }
+    .modal-table th:nth-child(6), .modal-table td:nth-child(6) { width: 10%; }
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #1e2d45;
+      color: white;
+      padding: 11px 16px;
+      border-radius: 7px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: .2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* 通用B端设计规范重构 */
+    :root {
+      --blue: #2563eb;
+      --blue-hover: #1d4ed8;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --soft-line: #f1f5f9;
+      --page: #f8fafc;
+      --surface: #fff;
+      --green: #059669;
+      --red: #dc2626;
+      --gold: #d97706;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .04);
+      --shadow-hover: 0 4px 12px rgba(59, 130, 246, .12);
+      --shadow-float: 0 8px 24px rgba(15, 23, 42, .12);
+    }
+    body {
+      min-width: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: Inter, "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+    .dashboard {
+      min-height: 100vh;
+      padding: 0 32px 40px;
+      background: var(--page);
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 68px;
+      margin: 0 -32px 20px;
+      padding: 0 32px;
+      background: rgba(255, 255, 255, .96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .topbar:after { display: none; }
+    .welcome h1 {
+      margin-bottom: 2px;
+      color: #0f172a;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .welcome p { color: var(--muted); font-size: 12px; }
+    .stats {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .stat-card {
+      height: 104px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transition: transform .18s, border-color .18s, box-shadow .18s;
+    }
+    .stat-card:hover {
+      transform: translateY(-1px);
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-hover);
+    }
+    .stat-title { color: var(--muted); font-size: 12px; }
+    .stat-value {
+      margin: 8px 0 3px;
+      color: #0f172a;
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .stat-foot { color: #94a3b8; font-size: 12px; }
+    .stat-foot .up { color: var(--red); }
+    .stat-foot .down { color: var(--green); }
+    .stat-icon {
+      top: 22px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      color: #2563eb;
+      background: #eff6ff;
+    }
+    .content-grid {
+      grid-template-columns: minmax(720px, 1fr) minmax(360px, 420px);
+      gap: 16px;
+      margin-top: 0;
+      align-items: start;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .work-panel { height: 482px; }
+    .work-head {
+      height: 54px;
+      padding: 0 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+    .tabs { gap: 4px; }
+    .tab {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 6px;
+      color: #475569;
+      transition: background .15s, color .15s;
+    }
+    .tab:hover { background: #f1f5f9; color: #1e293b; }
+    .tab.active {
+      background: #eff6ff;
+      color: var(--blue);
+      font-weight: 600;
+    }
+    .tab.active:after { display: none; }
+    .count {
+      min-width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 6px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .module-trigger {
+      height: 32px;
+      width: 176px;
+      border-color: #d1d5db;
+      border-radius: 6px;
+      color: #374151;
+      background: #fff;
+      font-size: 12px;
+    }
+    .module-trigger:hover { border-color: #94a3b8; background: #f9fafb; }
+    .module-trigger:focus {
+      border-color: var(--blue);
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .1);
+    }
+    .module-menu {
+      top: 38px;
+      width: 250px;
+      border-color: var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow-float);
+    }
+    .module-menu label {
+      border-radius: 6px;
+      color: #475569;
+      font-size: 12px;
+    }
+    .module-menu input { accent-color: var(--blue); }
+    .module-actions button,
+    .tools button {
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 6px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background .15s, border-color .15s;
+    }
+    .module-actions button:hover,
+    .tools button:hover { background: var(--blue-hover); }
+    .module-actions .clear-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+    }
+    .module-actions .clear-btn:hover { background: #f9fafb; }
+    .filter-input {
+      height: 32px;
+      width: 220px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      color: #374151;
+      padding: 0 10px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .filter-input::placeholder { color: #94a3b8; }
+    .date-range-filter {
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      padding: 0 10px;
+      color: #64748b;
+      font-size: 12px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .date-range-filter:hover { border-color: #94a3b8; }
+    .date-range-filter:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .1);
+    }
+    .date-range-filter input {
+      width: 114px;
+      border: 0;
+      background: transparent;
+      color: #374151;
+      font-size: 12px;
+      outline: none;
+    }
+    .date-range-filter span {
+      color: #475569;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .date-range-filter em {
+      color: #94a3b8;
+      font-style: normal;
+    }
+    .filter-input:hover,
+    .module-trigger:hover {
+      border-color: #94a3b8;
+      background: #fff;
+    }
+    .filter-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .1);
+    }
+    .date-sep {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+    .tools .module-trigger,
+    .modal-filter-row .module-trigger {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+    }
+    .tools .module-trigger:hover,
+    .modal-filter-row .module-trigger:hover {
+      border-color: #94a3b8;
+      background: #fff;
+      color: #374151;
+    }
+    .tools .search-btn,
+    .modal-filter-row .search-btn {
+      height: 32px;
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      background: var(--blue);
+      color: #fff;
+      padding: 0 14px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .tools .search-btn:hover,
+    .modal-filter-row .search-btn:hover {
+      border-color: var(--blue-hover);
+      background: var(--blue-hover);
+      color: #fff;
+    }
+    .tools .view-all-btn {
+      height: 32px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 2px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .tools .view-all-btn:hover {
+      background: transparent;
+      color: var(--blue);
+    }
+    .task-table th {
+      height: 42px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .task-table td {
+      height: 64px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--soft-line);
+      color: #334155;
+      font-size: 12px;
+    }
+    .task-table tr:hover td { background: #f8fafc; }
+    .progress-panel {
+      grid-column: 1 / -1;
+      margin-top: 0;
+      overflow: hidden;
+    }
+    .progress-head {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+    .progress-head h2 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .progress-tools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .progress-tools .filter-input {
+      width: 150px;
+    }
+    .progress-tools button {
+      height: 32px;
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      background: var(--blue);
+      color: #fff;
+      padding: 0 14px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .progress-tools button:hover {
+      border-color: var(--blue-hover);
+      background: var(--blue-hover);
+    }
+    .progress-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .progress-table th {
+      height: 42px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .progress-table td {
+      height: 58px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--soft-line);
+      color: #334155;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+    .progress-table tr:hover td { background: #f8fafc; }
+    .progress-table th:nth-child(1), .progress-table td:nth-child(1) { width: 17%; }
+    .progress-table th:nth-child(2), .progress-table td:nth-child(2) { width: 8%; }
+    .progress-table th:nth-child(3), .progress-table td:nth-child(3) { width: 14%; }
+    .progress-table th:nth-child(4), .progress-table td:nth-child(4) { width: 10%; }
+    .progress-table th:nth-child(5), .progress-table td:nth-child(5) { width: 16%; }
+    .progress-table th:nth-child(6), .progress-table td:nth-child(6) { width: 10%; }
+    .progress-table th:nth-child(7), .progress-table td:nth-child(7) { width: 10%; }
+    .progress-table th:nth-child(8), .progress-table td:nth-child(8) { width: 8%; }
+    .progress-table th:nth-child(9), .progress-table td:nth-child(9) { width: 7%; text-align: center; }
+    .progress-code {
+      font-family: Consolas, "Courier New", monospace;
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+    .progress-stage {
+      border: 1px solid #bfdbfe;
+      border-radius: 4px;
+      background: #eff6ff;
+      color: #1e40af;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 74px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .progress-stage:hover {
+      border-color: var(--blue);
+      background: #dbeafe;
+    }
+    .track-step .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: auto;
+      height: auto;
+      margin-left: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #426f9f;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .track-detail-table tr.completed td {
+      background: #f0fdf4;
+      color: #166534;
+    }
+    .track-detail-table tr.active td {
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+    .track-detail-table tr.not-applicable td {
+      background: #f8fafc;
+      color: #94a3b8;
+    }
+    .track-detail-table {
+      width: 100%;
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .track-detail-table th,
+    .track-detail-table td {
+      height: 38px;
+      border-bottom: 1px solid var(--soft-line);
+      padding: 8px 12px;
+      color: #334155;
+      font-size: 12px;
+      text-align: left;
+    }
+    .track-detail-table th {
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+    }
+    .track-detail-table tr:last-child td { border-bottom: 0; }
+    #projectTrackDialog {
+      width: 760px;
+      max-width: 92vw;
+    }
+    .track-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+    }
+    .track-summary strong {
+      display: block;
+      margin-top: 4px;
+      color: #0f172a;
+      font-size: 13px;
+    }
+    .track-steps {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      padding: 0;
+      border: 1px solid #fed7aa;
+      border-radius: 2px;
+      background: #fff;
+      overflow-x: auto;
+    }
+    .track-step {
+      min-width: 78px;
+      border: 0;
+      border-right: 1px solid #f1f5f9;
+      background: #fff;
+      color: #334155;
+      padding: 11px 10px;
+      font-size: 12px;
+      white-space: normal;
+      text-align: center;
+    }
+    .track-step:last-child { border-right: 0; }
+    .track-step.done {
+      color: #1d4ed8;
+      background: #f8fbff;
+    }
+    .track-step.active {
+      color: #0b5cff;
+      background: #eff6ff;
+      font-weight: 700;
+    }
+    .task-name {
+      display: block;
+      color: #1e293b;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    .tag {
+      margin-top: 5px;
+      border: 1px solid #93c5fd;
+      border-radius: 4px;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .tag.green { border-color: #a7f3d0; background: #d1fae5; color: #065f46; }
+    .tag.gold { border-color: #fed7aa; background: #fff7e6; color: #9a3412; }
+    .tag.gray { border-color: #e5e7eb; background: #f3f4f6; color: #6b7280; }
+    .handle {
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--blue);
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .handle:hover { background: #eff6ff; }
+    .table-pager,
+    .pager {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 14px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+    .table-pager button,
+    .pager button {
+      height: 28px;
+      min-width: 30px;
+      border-color: #d1d5db;
+      border-radius: 6px;
+      color: #374151;
+      transition: all .15s;
+    }
+    .table-pager button:hover:not(:disabled),
+    .pager button:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .table-pager button.active,
+    .pager button.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .panel-heading {
+      height: 50px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+    .panel-heading h2 {
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .panel-heading h2:before {
+      width: 3px;
+      height: 16px;
+      background: var(--blue);
+    }
+    .panel-heading a {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .panel-heading a:hover { color: var(--blue); }
+    .monitor-panel { height: 482px; }
+    .monitor-list {
+      height: 396px;
+      padding: 12px 16px 0;
+      background: #fff;
+    }
+    .monitor-tabs {
+      height: 36px;
+      gap: 4px;
+      padding: 0 12px;
+      background: #fff;
+    }
+    .monitor-tabs button {
+      height: 28px;
+      align-self: center;
+      padding: 0 9px;
+      border-radius: 6px;
+      color: #64748b;
+      font-size: 12px;
+    }
+    .monitor-tabs button:hover { background: #f1f5f9; color: #1e293b; }
+    .monitor-tabs button.active {
+      background: #eff6ff;
+      color: var(--blue);
+      font-weight: 600;
+    }
+    .monitor-tabs button.active:after { display: none; }
+    .monitor-item {
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      background: #fffbeb;
+      color: #334155;
+      box-shadow: none;
+    }
+    .monitor-item.blue {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+    }
+    .monitor-item.risk {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+    .monitor-item strong { color: #0f172a; font-size: 13px; }
+    .pill {
+      border: 1px solid #fed7aa;
+      border-radius: 4px;
+      background: #fff7e6;
+      color: #9a3412;
+      font-size: 11px;
+    }
+    .blue .pill { border-color: #93c5fd; background: #dbeafe; color: #1e40af; }
+    .risk .pill { border-color: #fecaca; background: #fee2e2; color: #b91c1c; }
+    .monitor-status {
+      border: 1px solid #fed7aa;
+      border-radius: 4px;
+      background: #fff7e6;
+      color: #9a3412;
+      font-size: 11px;
+    }
+    .blue .monitor-status { border-color: #a7f3d0; background: #d1fae5; color: #065f46; }
+    .risk .monitor-status { border-color: #fecaca; background: #fee2e2; color: #b91c1c; }
+    .monitor-item.risk .kind { color: #b91c1c; }
+    #monitorDialog {
+      width: 1100px;
+      max-width: 96vw;
+    }
+    .monitor-modal-table {
+      table-layout: fixed;
+    }
+    .monitor-modal-table th,
+    .monitor-modal-table td {
+      vertical-align: middle;
+    }
+    .monitor-modal-table th:nth-child(1), .monitor-modal-table td:nth-child(1) { width: 13%; }
+    .monitor-modal-table th:nth-child(1), .monitor-modal-table td:nth-child(1) { width: 14%; }
+    .monitor-modal-table th:nth-child(2), .monitor-modal-table td:nth-child(2) { width: 30%; }
+    .monitor-modal-table th:nth-child(3), .monitor-modal-table td:nth-child(3) { width: 10%; }
+    .monitor-modal-table th:nth-child(4), .monitor-modal-table td:nth-child(4) { width: 16%; }
+    .monitor-modal-table th:nth-child(5), .monitor-modal-table td:nth-child(5) { width: 12%; }
+    .monitor-modal-table th:nth-child(6), .monitor-modal-table td:nth-child(6) { width: 18%; }
+    .monitor-filter-row {
+      justify-content: flex-start;
+    }
+    .monitor-filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .monitor-filter-tabs button {
+      height: 30px;
+      border: 1px solid #dbe4f0;
+      border-radius: 4px;
+      background: #fff;
+      color: #60738f;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+    .monitor-filter-tabs button:hover {
+      border-color: #bcd3ff;
+      color: var(--blue);
+      background: #f8fbff;
+    }
+    .monitor-filter-tabs button.active {
+      border-color: #bcd3ff;
+      background: #eef5ff;
+      color: var(--blue);
+      font-weight: 700;
+    }
+    .notice-panel { height: 300px; }
+    .notice-list { height: 250px; background: #fff; }
+    .notice-item {
+      border-color: var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: none;
+    }
+    .notice-item:hover { background: #f8fafc; }
+    .notice-date {
+      display: inline-flex;
+      height: 22px;
+      align-items: center;
+      padding: 0 7px;
+      border: 1px solid #bfdbfe;
+      border-radius: 4px;
+      background: #eff6ff;
+      color: #1e40af;
+      font-size: 11px;
+    }
+    .notice-title { color: #0f172a; font-size: 13px; }
+    .notice-content { color: #475569; }
+    .notice-time { color: #94a3b8; }
+    #noticeDialog {
+      width: 860px;
+      max-width: 92vw;
+    }
+    #noticeDialog .dialog-body {
+      padding: 16px 20px 0;
+    }
+    .notice-dialog-list {
+      height: auto;
+      max-height: none;
+      overflow: visible;
+      padding: 0;
+      gap: 8px;
+      background: #fff;
+    }
+    .notice-dialog-list .notice-item {
+      padding: 8px 12px;
+    }
+    .notice-dialog-list .notice-content {
+      margin: 4px 0;
+      line-height: 1.45;
+    }
+    .charts { gap: 16px; margin-top: 16px; }
+    .chart-panel {
+      height: 300px;
+      border-radius: 8px;
+    }
+    .chart-panel .panel-heading { border-bottom: 1px solid var(--line); }
+    .chart-area { padding: 14px 18px 12px; }
+    .bar-chart {
+      height: 190px;
+      background: repeating-linear-gradient(to bottom, #e2e8f0 0 1px, transparent 1px 38px);
+    }
+    .bar { background: #2563eb; }
+    .legend { color: #64748b; font-size: 12px; }
+    dialog {
+      border-color: var(--line);
+      border-radius: 10px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+    }
+    .dialog-head {
+      height: 56px;
+      border-bottom-color: var(--line);
+      background: #fff;
+    }
+    .dialog-head h2 { color: #0f172a; font-size: 16px; font-weight: 600; }
+    .dialog-body { padding: 20px; }
+    .dialog-actions {
+      background: #f8fafc;
+      border-top-color: var(--line);
+    }
+    .dialog-actions button {
+      height: 32px;
+      border-color: #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      color: #374151;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .modal-table th {
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+    }
+    .modal-table th,
+    .modal-table td {
+      border-color: var(--soft-line);
+      font-size: 12px;
+    }
+    .modal-table tr:hover td { background: #f8fafc; }
+    .tooltip,
+    .toast {
+      border-radius: 6px;
+      background: #1e293b;
+      box-shadow: var(--shadow-float);
+      font-size: 12px;
+    }
+    @media (max-width: 1280px) {
+      .dashboard { padding: 0 20px 32px; }
+      .topbar { margin: 0 -20px 16px; padding: 0 20px; }
+      .content-grid { grid-template-columns: 1fr; }
+      .monitor-panel { height: 360px; }
+      .monitor-list { height: 274px; }
+      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 780px) {
+      .stats,
+      .charts { grid-template-columns: 1fr; }
+      .work-head { height: auto; min-height: 54px; align-items: stretch; flex-direction: column; padding: 12px 16px; }
+      .tools { justify-content: space-between; }
+      .module-trigger { width: 100%; }
+      .task-table { min-width: 960px; }
+      .progress-table { min-width: 960px; }
+      .work-panel { overflow-x: auto; }
+      .progress-panel { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <header class="topbar">
+      <div class="welcome">
+        <h1>崔颖，欢迎回来！</h1>
+        <p>中检集团/直属单位/东北区域总部/辽宁子公司/中检简诺（大连）数据科技有限公司</p>
+      </div>
+    </header>
+    <section class="content-grid">
+      <div class="left-col">
+        <section class="panel work-panel">
+          <div class="work-head">
+            <div class="tabs" role="tablist">
+              <button class="tab active" type="button" data-tab="pending">待办事项 <span class="count" id="visibleCount">0</span></button>
+              <button class="tab" type="button" data-tab="history">已办历史</button>
+            </div>
+            <div class="tools">
+              <div class="module-picker" id="modulePicker">
+                <button class="module-trigger" id="moduleTrigger" type="button">业务模块</button>
+                <div class="module-menu" id="moduleMenu"></div>
+              </div>
+              <button id="searchBtn" class="search-btn" type="button">搜索</button>
+              <button id="moreBtn" class="view-all-btn" type="button">查看全部</button>
+            </div>
+          </div>
+          <table class="task-table">
+            <thead id="taskHead"></thead>
+            <tbody id="taskBody"><tr class="empty-row" id="emptyRow"><td colspan="6">没有找到匹配的待办事项</td></tr></tbody>
+          </table>
+          <div class="table-pager" id="mainPager"></div>
+        </section>
+      </div>
+      <aside class="right-col">
+        <section class="panel monitor-panel">
+          <div class="panel-heading"><h2>证后管理监控</h2><a href="#" id="monitorMoreBtn">查看全部</a></div>
+          <div class="monitor-tabs" id="monitorTabs"></div>
+          <div class="monitor-list" id="monitorList"></div>
+        </section>
+      </aside>
+      <section class="panel progress-panel">
+        <div class="progress-head">
+          <h2>项目进度查询</h2>
+          <div class="progress-tools">
+            <select class="filter-input" id="progressAuditTypeFilter" aria-label="审核类型">
+              <option value="">全部审核类型</option>
+            </select>
+            <select class="filter-input" id="progressFieldFilter" aria-label="认证领域">
+              <option value="">全部认证领域</option>
+            </select>
+            <select class="filter-input" id="progressStageFilter" aria-label="当前项目进度">
+              <option value="">全部项目进度</option>
+            </select>
+            <button id="progressSearchBtn" type="button">查询</button>
+          </div>
+        </div>
+        <table class="progress-table">
+          <thead>
+            <tr>
+              <th>客户名称</th>
+              <th>认证领域</th>
+              <th>项目编号</th>
+              <th>审核类型</th>
+              <th>当前项目进度</th>
+              <th>创建日期</th>
+              <th>任务持续时间</th>
+              <th>经办人</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="progressBody"></tbody>
+        </table>
+        <div class="table-pager" id="progressPager"></div>
+      </section>
+      <div class="left-col">
+
+        <div class="charts">
+          <section class="panel chart-panel"><div class="panel-heading"><h2>新增认证业务</h2></div><div class="chart-area"><div class="bar-chart" id="trendChart"><div class="y-labels"><span>150</span><span>120</span><span>90</span><span>60</span><span>30</span><span>0</span></div></div></div></section>
+          <section class="panel chart-panel domain"><div class="panel-heading"><h2>认证领域分布</h2></div><div class="chart-area"><div class="donut-wrap"><svg class="donut-svg" id="domainChart" viewBox="0 0 180 180" aria-label="认证领域分布图"></svg><div class="legend" id="domainLegend"></div></div></div></section>
+        </div>
+      </div>
+      <aside class="right-col">
+
+        <section class="panel notice-panel">
+          <div class="panel-heading"><h2>通知内容</h2><a href="#" id="noticeMoreBtn">查看全部</a></div>
+          <div class="notice-list" id="noticeList"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <div class="tooltip" id="tooltip" role="status"></div>
+  <div class="toast" id="toast" role="status"></div>
+  <dialog id="moreDialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle">全部待办</h2><button type="button" aria-label="关闭">×</button></div><div class="dialog-body"></div></dialog>
+  <dialog id="monitorDialog" aria-labelledby="monitorDialogTitle"><div class="dialog-head"><h2 id="monitorDialogTitle">全部监控提醒</h2><button type="button" aria-label="关闭">×</button></div><div class="dialog-body monitor-dialog-body"></div></dialog>
+  <dialog id="projectTrackDialog" aria-labelledby="projectTrackDialogTitle"><div class="dialog-head"><h2 id="projectTrackDialogTitle">认证项目跟踪</h2><button type="button" aria-label="关闭">×</button></div><div class="dialog-body project-track-body"></div></dialog>
+  <dialog id="noticeDialog" aria-labelledby="noticeDialogTitle"><div class="dialog-head"><h2 id="noticeDialogTitle">全部通知内容</h2><button type="button" aria-label="关闭">×</button></div><div class="dialog-body notice-dialog-body"></div></dialog>
+  <script>
+    const rawItems = [
+      ['申请', '初次认证申请', '客户', '认证申请待签章'],
+      ['申请', '认证转换申请', '客户', '认证申请待签章'],
+      ['申请', '监督审核通知', '客户', '认证申请待提交'],
+      ['申请', '再认证审核通知', '客户', '认证申请待提交'],
+      ['审核', '审核计划', '客户', '审核计划待签章'],
+      ['审核', '不符合项报告', '客户', '不符合项报告待签章']
+    ];
+    const submitters = ['客户服务部', '项目管理部', '审核组'];
+    const createDates = ['2026-01-14', '2026-01-13', '2026-01-12', '2026-01-11'];
+    const durations = ['2天', '1天', '1天', '当天'];
+    const todoItems = rawItems.map(([level1, module, role, desc], index) => ({
+      id: `TODO-${String(index + 1).padStart(3, '0')}`,
+      level1,
+      module,
+      role,
+      desc,
+      submitter: submitters[index % submitters.length],
+      createDate: createDates[index % createDates.length],
+      duration: durations[index % durations.length],
+      processTime: '-',
+      done: false
+    }));
+    const historyItems = [
+      { id: 'DONE-001', module: '初次认证申请', desc: '认证申请签章已完成', submitter: '客户服务部', createDate: '2026-01-06', duration: '2天', processTime: '2026-01-08 16:20', done: true },
+      { id: 'DONE-002', module: '审核计划', desc: '审核计划签章已完成', submitter: '项目管理部', createDate: '2026-01-05', duration: '1天', processTime: '2026-01-06 11:05', done: true }
+    ];
+    const auditTypes = ['初次认证', '监督', '再认证', '证书变更', '认证转换'];
+    const certificationFields = ['QMS', 'EMS', 'OHSMS', 'FSMS', 'HACCP', 'ISMS', 'ITSMS'];
+    const projectStages = ['认证申请', '业务评审', '方案策划', '一阶段审核任务', '二阶段审核任务', '材料上报', '材料审查', '技术评定', '区域决定', '中心决定', '证书签发'];
+    const projectHandlers = ['张三', '李四', '王五', '赵明', '刘洋', '孙悦', '周强', '钱敏', '吴越', '郑楠', '陈晨', '韩冰', '马磊'];
+    const projectProgressItems = [
+      { customer: '大连机车车辆有限公司', field: 'QMS', projectNo: '7777/Q0/2026/0386', auditType: '监督', stage: '二阶段审核任务', createDate: '2026-01-04', duration: '7天', handler: '张三' }
+    ];
+    const notices = [
+      ['2026-01-14', '新增证书', '您有新的管理体系证书已签发，证书编号为：00126Q304355R101。', '2026-01-14 09:00'],
+      ['2026-01-13', '暂停证书', '贵司管理体系证书已被暂停，暂停时间为 6 个月，证书编号为：00126E304355R101。', '2026-01-13 17:30'],
+      ['2026-01-12', '撤销证书', '贵司证书已被撤销，证书编号为：00126Q304355R101。', '2026-01-12 10:15'],
+      ['2026-01-11', '注销证书', '贵司证书已被注销，证书编号为：00126Q304355R101。', '2026-01-11 14:20'],
+      ['2026-01-10', '恢复证书', '贵司证书已恢复，证书编号为：00126Q304355R101。', '2026-01-10 16:00'],
+      ['2026-01-09', '证书到期', '贵司证书已过期，证书编号为：00126Q304355R101。', '2026-01-09 11:30'],
+      ['2026-01-08', '新增监督合格通知书', '您有新的监督合格通知书已签发，通知书编号为：210026Q3Q03143。', '2026-01-08 09:45'],
+      ['2026-01-07', '新增发票', '您有新的发票已开具，发票编号为：243220000001。', '2026-01-07 15:20']
+    ];
+    const monitorCategories = ['监督提醒', '再认证提醒'];
+    const monitorItems = [
+      { category: '监督提醒', days: 45, company: '大连机车车辆有限公司', field: 'QMS', dueDate: '2026-02-24', status: '待通知审核', action: '', tone: 'warn', detail: '监督审核距证书节点不足 60 天，需尽快通知客户确认审核安排。' },
+      { category: '监督提醒', days: 30, company: '英特尔半导体(大连)', field: 'EMS', dueDate: '2026-02-09', status: '待通知审核', action: '', tone: 'warn', detail: '监督审核计划尚未通知，建议优先确认审核窗口。' },
+      { category: '监督提醒', days: 12, company: '红沿河核电站', field: 'OHSMS', dueDate: '2026-01-22', status: '待通知审核', action: '', tone: 'warn', detail: '监督提醒临近到期，需完成通知并锁定审核组资源。' },
+      { category: '监督提醒', days: 58, company: '东北制药集团', field: 'QMS', dueDate: '2026-03-09', status: '待通知审核', action: '', tone: 'warn', detail: '监督周期进入 60 天提醒范围，需发起通知审核。' },
+      { category: '再认证提醒', days: 52, company: '恒力石化(大连)有限公司', field: 'OHSMS', dueDate: '2026-03-03', status: '待通知审核', action: '', tone: 'info', detail: '再认证证书到期前 60 天内，需通知客户启动再认证审核。' },
+      { category: '再认证提醒', days: 40, company: '大连港股份有限公司', field: 'EMS', dueDate: '2026-02-19', status: '待通知审核', action: '', tone: 'info', detail: '再认证提醒待处理，请确认合同、资料与审核安排。' },
+      { category: '再认证提醒', days: 25, company: '大连船舶重工集团', field: 'QMS', dueDate: '2026-02-04', status: '待通知审核', action: '', tone: 'info', detail: '再认证剩余时间较短，需尽快通知审核并跟进客户确认。' }
+    ];
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
+    const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uniqueModules = () => [...new Set(todoItems.map(item => item.module))];
+    const modulePalette = ['','green','gold','gray'];
+    const moduleClassMap = {};
+    uniqueModules().forEach((module, index) => { moduleClassMap[module] = modulePalette[index % modulePalette.length]; });
+    const state = {
+      tab: 'pending',
+      selectedModules: uniqueModules(),
+      customerName: '',
+      page: 1,
+      pageSize: 5,
+      modalPage: 1,
+      modalPageSize: 8,
+      noticePage: 1,
+      noticePageSize: 5,
+      noticeTitle: '',
+      monitorCategory: '',
+      monitorPage: 1,
+      monitorPageSize: 6,
+      progressAuditType: '',
+      progressField: '',
+      progressStage: '',
+      progressPage: 1,
+      progressPageSize: 5
+    };
+    const tooltip = $('#tooltip');
+    const toast = $('#toast');
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+    }
+    function taskLabel(item) {
+      return `<span class="task-name">${esc(item.desc)}</span><span class="tag ${moduleClassMap[item.module] || ''}">${esc(item.module)}</span>`;
+    }
+    function filteredRows(source) {
+      return source.filter(item => {
+        const moduleMatched = source === historyItems || state.selectedModules.includes(item.module);
+        return moduleMatched;
+      });
+    }
+    function visibleRows() {
+      return filteredRows(state.tab === 'history' ? historyItems : todoItems);
+    }
+    function dialogRows() {
+      return filteredRows(todoItems);
+    }
+    function headersHTML() {
+      const common = '<tr><th>待办事项描述</th><th>提交人/部门</th><th>创建日期</th><th>任务持续时间</th><th>处理时间</th>';
+      return state.tab === 'history' ? `${common}</tr>` : `${common}<th>操作</th></tr>`;
+    }
+    function rowHTML(item) {
+      const common = `<tr><td>${taskLabel(item)}</td><td>${esc(item.submitter)}</td><td>${esc(item.createDate)}</td><td>${esc(item.duration)}</td><td>${esc(item.processTime)}</td>`;
+      return state.tab === 'history' ? `${common}</tr>` : `${common}<td><button class="handle" type="button" data-id="${esc(item.id)}">处理</button></td></tr>`;
+    }
+    function renderPager(target, page, pageCount, prefix, total) {
+      target.innerHTML = `<span>共 ${total} 条，第 ${page} / ${pageCount} 页</span><button type="button" data-${prefix}="prev" ${page === 1 ? 'disabled' : ''}>上一页</button>${Array.from({ length: pageCount }, (_, i) => `<button type="button" data-${prefix}="${i + 1}" class="${page === i + 1 ? 'active' : ''}">${i + 1}</button>`).join('')}<button type="button" data-${prefix}="next" ${page === pageCount ? 'disabled' : ''}>下一页</button>`;
+    }
+    function renderMainTasks() {
+      const rows = visibleRows();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      state.page = Math.min(state.page, pageCount);
+      const pageRows = rows.slice((state.page - 1) * state.pageSize, state.page * state.pageSize);
+      const empty = $('#emptyRow');
+      $('.work-panel').classList.toggle('history-mode', state.tab === 'history');
+      $('#taskHead').innerHTML = headersHTML();
+      $('#taskBody').innerHTML = pageRows.map(item => rowHTML(item)).join('');
+      $('#taskBody').append(empty);
+      empty.firstElementChild.colSpan = state.tab === 'history' ? 5 : 6;
+      empty.style.display = rows.length ? 'none' : 'table-row';
+      $('#visibleCount').textContent = todoItems.length;
+      renderPager($('#mainPager'), state.page, pageCount, 'page', rows.length);
+    }
+    function filteredProjectRows() {
+      return projectProgressItems.filter(item => {
+        const auditTypeMatched = !state.progressAuditType || item.auditType === state.progressAuditType;
+        const fieldMatched = !state.progressField || item.field === state.progressField;
+        const stageMatched = !state.progressStage || item.stage === state.progressStage;
+        return auditTypeMatched && fieldMatched && stageMatched;
+      });
+    }
+    function renderProgressFilters() {
+      $('#progressAuditTypeFilter').innerHTML = '<option value="">全部审核类型</option>' + auditTypes.map(type => `<option value="${esc(type)}">${esc(type)}</option>`).join('');
+      $('#progressFieldFilter').innerHTML = '<option value="">全部认证领域</option>' + certificationFields.map(field => `<option value="${esc(field)}">${esc(field)}</option>`).join('');
+      $('#progressStageFilter').innerHTML = '<option value="">全部项目进度</option>' + projectStages.map(stage => `<option value="${esc(stage)}">${esc(stage)}</option>`).join('');
+    }
+    function progressRowHTML(item) {
+      return `<tr><td><span class="task-name">${esc(item.customer)}</span></td><td>${esc(item.field)}</td><td><span class="progress-code">${esc(item.projectNo)}</span></td><td>${esc(item.auditType)}</td><td><button class="progress-stage" type="button" data-project-no="${esc(item.projectNo)}">${esc(item.stage)}</button></td><td>${esc(item.createDate)}</td><td>${esc(item.duration)}</td><td>${esc(item.handler)}</td><td><button class="handle" type="button" data-project-no="${esc(item.projectNo)}">查看详情</button></td></tr>`;
+    }
+    function renderProjectProgress() {
+      const rows = filteredProjectRows();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.progressPageSize));
+      state.progressPage = Math.min(state.progressPage, pageCount);
+      const pageRows = rows.slice((state.progressPage - 1) * state.progressPageSize, state.progressPage * state.progressPageSize);
+      $('#progressBody').innerHTML = pageRows.map(progressRowHTML).join('') || '<tr><td colspan="9">没有匹配的项目进度</td></tr>';
+      renderPager($('#progressPager'), state.progressPage, pageCount, 'progresspage', rows.length);
+    }
+    function applicableProjectStages(item) {
+      if (item.auditType === '监督' || item.auditType === '证书变更') {
+        return projectStages.filter(stage => !['认证申请', '一阶段审核任务'].includes(stage));
+      }
+      if (item.auditType === '认证转换') {
+        return projectStages.filter(stage => !['一阶段审核任务', '二阶段审核任务'].includes(stage));
+      }
+      return projectStages;
+    }
+    function stageCompletionRows(item) {
+      const applicableStages = applicableProjectStages(item);
+      const activeIndex = applicableStages.indexOf(item.stage);
+      const start = new Date(item.createDate + 'T09:00:00');
+      return projectStages.map((stage, index) => {
+        if (!applicableStages.includes(stage)) return { stage, time: '-', handler: '-', state: 'not-applicable' };
+        const applicableIndex = applicableStages.indexOf(stage);
+        const handler = projectHandlers[(index + projectProgressItems.indexOf(item)) % projectHandlers.length];
+        if (applicableIndex > activeIndex) return { stage, time: '-', handler: '-', state: 'pending' };
+        const d = new Date(start);
+        d.setDate(start.getDate() + applicableIndex);
+        const pad = n => String(n).padStart(2, '0');
+        const time = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(9 + (applicableIndex % 7))}:30`;
+        return { stage, time: applicableIndex === activeIndex ? '-' : time, handler, state: applicableIndex === activeIndex ? 'active' : 'completed' };
+      });
+    }
+    function showProjectTrack(projectNo) {
+      const item = projectProgressItems.find(row => row.projectNo === projectNo);
+      if (!item) return;
+      const detailRows = stageCompletionRows(item).map(row => `<tr class="${row.state}"><td>${esc(row.stage)}</td><td>${esc(row.handler)}</td><td>${esc(row.time)}</td></tr>`).join('');
+      $('.project-track-body').innerHTML = `<div class="track-summary"><div>项目编号<strong>${esc(item.projectNo)}</strong></div><div>客户名称<strong>${esc(item.customer)}</strong></div><div>认证领域<strong>${esc(item.field)}</strong></div><div>认证类型<strong>${esc(item.auditType)}</strong></div></div><table class="track-detail-table"><thead><tr><th>项目节点</th><th>经办人</th><th>完成时间</th></tr></thead><tbody>${detailRows}</tbody></table>`;
+      $('#projectTrackDialog').showModal();
+    }
+    function runProgressSearch() {
+      state.progressAuditType = $('#progressAuditTypeFilter').value;
+      state.progressField = $('#progressFieldFilter').value;
+      state.progressStage = $('#progressStageFilter').value;
+      state.progressPage = 1;
+      renderProjectProgress();
+    }
+    function renderModuleMenu() {
+      $('#moduleMenu').innerHTML = uniqueModules().map(module => `<label><input type="checkbox" value="${esc(module)}" ${state.selectedModules.includes(module) ? 'checked' : ''}>${esc(module)}</label>`).join('') + '<div class="module-actions"><button class="clear-btn" type="button" id="clearModules">清空</button><button type="button" id="applyModules">确定</button></div>';
+      updateModuleTrigger();
+    }
+    function updateModuleTrigger() {
+      $('#moduleTrigger').textContent = state.selectedModules.length === uniqueModules().length ? '业务模块（全部）' : `业务模块（${state.selectedModules.length}）`;
+    }
+    function syncFilters(source = 'main') {
+      state.customerName = '';
+    }
+    function renderMoreDialog() {
+      const rows = dialogRows();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.modalPageSize));
+      state.modalPage = Math.min(state.modalPage, pageCount);
+      const pageRows = rows.slice((state.modalPage - 1) * state.modalPageSize, state.modalPage * state.modalPageSize);
+      const modalHeaders = '<tr><th>待办事项描述</th><th>提交人/部门</th><th>创建日期</th><th>任务持续时间</th><th>处理时间</th><th>操作</th></tr>';
+      $('.dialog-body').innerHTML = `<div class="modal-filter-row"><div class="module-picker" id="modalModulePicker"><button class="module-trigger" type="button" id="modalModuleTrigger">业务模块</button><div class="module-menu" id="modalModuleMenu"></div></div><button class="search-btn" id="modalSearchBtn" type="button">搜索</button></div><table class="modal-table"><thead>${modalHeaders}</thead><tbody>${pageRows.map(item => rowHTML(item)).join('') || '<tr><td colspan="6">没有匹配的数据</td></tr>'}</tbody></table><div class="pager" id="modalPager"></div>`;
+      renderPager($('#modalPager'), state.modalPage, pageCount, 'modalpage', rows.length);
+      $('#modalModuleMenu').innerHTML = uniqueModules().map(module => `<label><input type="checkbox" value="${esc(module)}" ${state.selectedModules.includes(module) ? 'checked' : ''}>${esc(module)}</label>`).join('') + '<div class="module-actions"><button class="clear-btn" type="button" id="modalClearModules">清空</button><button type="button" id="modalApplyModules">确定</button></div>';
+      $('#modalModuleTrigger').textContent = state.selectedModules.length === uniqueModules().length ? '业务模块（全部）' : `业务模块（${state.selectedModules.length}）`;
+      $('#modalModuleTrigger').onclick = event => {
+        event.stopPropagation();
+        $('#modalModulePicker').classList.toggle('open');
+      };
+      $('#modalApplyModules').onclick = () => {
+        state.selectedModules = $$('#modalModuleMenu input:checked').map(input => input.value);
+        state.page = 1;
+        state.modalPage = 1;
+        renderModuleMenu();
+        renderMainTasks();
+        renderMoreDialog();
+      };
+      $('#modalClearModules').onclick = () => {
+        state.selectedModules = [];
+        state.page = 1;
+        state.modalPage = 1;
+        renderModuleMenu();
+        renderMainTasks();
+        renderMoreDialog();
+      };
+      $('#modalSearchBtn').onclick = () => {
+        syncFilters('modal');
+        state.page = 1;
+        state.modalPage = 1;
+        renderMainTasks();
+        renderMoreDialog();
+      };
+      $('#modalPager').onclick = handlePagerClick;
+    }
+    function bindTooltip(el, text) {
+      el.addEventListener('mousemove', event => {
+        tooltip.textContent = text;
+        tooltip.style.left = `${event.clientX}px`;
+        tooltip.style.top = `${event.clientY - 12}px`;
+        tooltip.classList.add('show');
+      });
+      el.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+    }
+    function renderTrendChart() {
+      [['一月',120], ['二月',132], ['三月',102], ['四月',134], ['五月',91], ['六月',86]].forEach(([label, value]) => {
+        const bar = document.createElement('i');
+        bar.className = 'bar';
+        bar.dataset.label = label;
+        bar.style.height = `${value / 150 * 100}%`;
+        bindTooltip(bar, `${label}：${value} 单`);
+        $('#trendChart').append(bar);
+      });
+    }
+    function renderDomainChart() {
+      const data = [['QMS',520,'#3f82ee'], ['EMS',90,'#14ad72'], ['OHSMS',190,'#ffac11'], ['FSMS',100,'#8954e7'], ['HACCP',50,'#ee4c94'], ['其他',50,'#68758b']];
+      const total = data.reduce((sum, row) => sum + row[1], 0);
+      const radius = 62;
+      const circumference = 2 * Math.PI * radius;
+      let offset = 0;
+      $('#domainChart').innerHTML = '<circle class="donut-hole" cx="90" cy="90" r="50"></circle>';
+      data.forEach(([name, value, color]) => {
+        const seg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const length = value / total * circumference;
+        seg.setAttribute('class', 'donut-seg');
+        seg.setAttribute('cx', '90');
+        seg.setAttribute('cy', '90');
+        seg.setAttribute('r', String(radius));
+        seg.setAttribute('stroke', color);
+        seg.setAttribute('stroke-dasharray', `${length} ${circumference - length}`);
+        seg.setAttribute('stroke-dashoffset', String(-offset));
+        bindTooltip(seg, `${name}：${value} 张`);
+        $('#domainChart').append(seg);
+        offset += length;
+      });
+      $('#domainLegend').innerHTML = data.map(([name, value, color]) => `<span><i style="background:${color}"></i>${name} ${value}</span>`).join('');
+    }
+    function filteredNotices() {
+      return notices.filter(([, title]) => !state.noticeTitle || title.includes(state.noticeTitle));
+    }
+    function noticeHTML([date, title, content, time]) {
+      return `<article class="notice-item"><div><span class="notice-date">${esc(date)}</span><span class="notice-title">${esc(title)}</span></div><div class="notice-content">${esc(content)}</div><div class="notice-time">发布时间：${esc(time)}</div></article>`;
+    }
+    function renderNotices() {
+      $('#noticeList').innerHTML = notices.slice(0, 5).map(noticeHTML).join('');
+    }
+    function renderNoticeDialog() {
+      const rows = filteredNotices();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.noticePageSize));
+      state.noticePage = Math.min(state.noticePage, pageCount);
+      const pageRows = rows.slice((state.noticePage - 1) * state.noticePageSize, state.noticePage * state.noticePageSize);
+      $('.notice-dialog-body').innerHTML = `<div class="notice-list notice-dialog-list">${pageRows.map(noticeHTML).join('') || '<article class="notice-item">暂无通知内容</article>'}</div><div class="pager" id="noticePager"></div>`;
+      renderPager($('#noticePager'), state.noticePage, pageCount, 'noticepage', rows.length);
+      $('#noticePager').onclick = handlePagerClick;
+    }
+    function filteredMonitorItems() {
+      return monitorItems.filter(item => !state.monitorCategory || item.category === state.monitorCategory);
+    }
+    function monitorCardHTML(item) {
+      const toneClass = item.tone === 'info' ? 'blue' : item.tone === 'risk' ? 'risk' : '';
+      return `<article class="monitor-item ${toneClass}"><span class="kind">${esc(item.category)}</span><span class="pill">剩${esc(item.days)}天</span><strong>${esc(item.company)}</strong><div class="monitor-meta"><span>${esc(item.field)}</span><span>审核截止日：${esc(item.dueDate)}</span></div><span class="monitor-status">${esc(item.status)}</span></article>`;
+    }
+    function renderMonitorTabs() {
+      const allCount = monitorItems.length;
+      const buttons = [`<button class="${state.monitorCategory === '' ? 'active' : ''}" type="button" data-monitor-category="">全部 (${allCount})</button>`].concat(monitorCategories.map(category => {
+        const count = monitorItems.filter(item => item.category === category).length;
+        return `<button class="${state.monitorCategory === category ? 'active' : ''}" type="button" data-monitor-category="${esc(category)}">${esc(category)} (${count})</button>`;
+      }));
+      $('#monitorTabs').innerHTML = buttons.join('');
+      $$('#monitorTabs button').forEach(button => {
+        button.onclick = () => {
+          state.monitorCategory = button.dataset.monitorCategory;
+          state.monitorPage = 1;
+          renderMonitorTabs();
+          renderMonitorList();
+          if ($('#monitorDialog').open) renderMonitorDialog();
+        };
+      });
+    }
+    function renderMonitorList() {
+      $('#monitorList').innerHTML = filteredMonitorItems().slice(0, 5).map(monitorCardHTML).join('');
+    }
+    function renderMonitorDialog() {
+      const rows = filteredMonitorItems();
+      const pageCount = Math.max(1, Math.ceil(rows.length / state.monitorPageSize));
+      state.monitorPage = Math.min(state.monitorPage, pageCount);
+      const pageRows = rows.slice((state.monitorPage - 1) * state.monitorPageSize, state.monitorPage * state.monitorPageSize);
+      const filterButtons = [''].concat(monitorCategories).map(category => {
+        const label = category || '全部';
+        const count = category ? monitorItems.filter(item => item.category === category).length : monitorItems.length;
+        return `<button class="${state.monitorCategory === category ? 'active' : ''}" type="button" data-dialog-monitor-category="${esc(category)}">${esc(label)} (${count})</button>`;
+      }).join('');
+      const bodyRows = pageRows.map(item => `<tr><td>${esc(item.category)}</td><td>${esc(item.company)}</td><td>${esc(item.field)}</td><td>${esc(item.dueDate)}</td><td>剩${esc(item.days)}天</td><td><span class="monitor-status">${esc(item.status)}</span></td></tr>`).join('');
+      $('.monitor-dialog-body').innerHTML = `<div class="modal-filter-row monitor-filter-row"><div class="monitor-filter-tabs">${filterButtons}</div></div><table class="modal-table monitor-modal-table"><thead><tr><th>类别</th><th>企业名称</th><th>领域</th><th>审核截止日</th><th>剩余天数</th><th>状态</th></tr></thead><tbody>${bodyRows || '<tr><td colspan="6">没有匹配的数据</td></tr>'}</tbody></table><div class="pager" id="monitorPager"></div>`;
+      renderPager($('#monitorPager'), state.monitorPage, pageCount, 'monitorpage', rows.length);
+      $$('.monitor-filter-tabs button').forEach(button => {
+        button.onclick = () => {
+          state.monitorCategory = button.dataset.dialogMonitorCategory;
+          state.monitorPage = 1;
+          renderMonitorTabs();
+          renderMonitorList();
+          renderMonitorDialog();
+        };
+      });
+      $('#monitorPager').onclick = handlePagerClick;
+    }
+    function handlePagerClick(event) {
+      const button = event.target.closest('button');
+      if (!button || button.disabled) return;
+      const pageCount = Math.max(1, Math.ceil(visibleRows().length / state.pageSize));
+      const modalPageCount = Math.max(1, Math.ceil(visibleRows().length / state.modalPageSize));
+      if (button.dataset.page) {
+        const page = button.dataset.page;
+        state.page = page === 'prev' ? Math.max(1, state.page - 1) : page === 'next' ? Math.min(pageCount, state.page + 1) : Number(page);
+        renderMainTasks();
+      }
+      if (button.dataset.modalpage) {
+        const page = button.dataset.modalpage;
+        state.modalPage = page === 'prev' ? Math.max(1, state.modalPage - 1) : page === 'next' ? Math.min(modalPageCount, state.modalPage + 1) : Number(page);
+        renderMoreDialog();
+      }
+      if (button.dataset.progresspage) {
+        const progressPageCount = Math.max(1, Math.ceil(filteredProjectRows().length / state.progressPageSize));
+        const page = button.dataset.progresspage;
+        state.progressPage = page === 'prev' ? Math.max(1, state.progressPage - 1) : page === 'next' ? Math.min(progressPageCount, state.progressPage + 1) : Number(page);
+        renderProjectProgress();
+      }
+      if (button.dataset.noticepage) {
+        const noticePageCount = Math.max(1, Math.ceil(filteredNotices().length / state.noticePageSize));
+        const page = button.dataset.noticepage;
+        state.noticePage = page === 'prev' ? Math.max(1, state.noticePage - 1) : page === 'next' ? Math.min(noticePageCount, state.noticePage + 1) : Number(page);
+        renderNoticeDialog();
+      }
+      if (button.dataset.monitorpage) {
+        const monitorPageCount = Math.max(1, Math.ceil(filteredMonitorItems().length / state.monitorPageSize));
+        const page = button.dataset.monitorpage;
+        state.monitorPage = page === 'prev' ? Math.max(1, state.monitorPage - 1) : page === 'next' ? Math.min(monitorPageCount, state.monitorPage + 1) : Number(page);
+        renderMonitorDialog();
+      }
+    }
+    $('#moduleTrigger').onclick = () => $('#modulePicker').classList.toggle('open');
+    $('#moduleMenu').onclick = event => {
+      if (event.target.id === 'applyModules') {
+        state.selectedModules = $$('#moduleMenu input:checked').map(input => input.value);
+        state.page = 1;
+        renderMainTasks();
+        updateModuleTrigger();
+        $('#modulePicker').classList.remove('open');
+      }
+      if (event.target.id === 'clearModules') {
+        state.selectedModules = [];
+        state.page = 1;
+        renderModuleMenu();
+        renderMainTasks();
+        $('#modulePicker').classList.remove('open');
+      }
+    };
+    $('.dialog-body').onclick = event => {
+      const button = event.target.closest('.handle');
+      if (button) showToast(state.tab === 'history' ? '已查看已办记录' : '已进入处理流程');
+    };
+    $('#mainPager').onclick = handlePagerClick;
+    $('#progressPager').onclick = handlePagerClick;
+    $('#progressSearchBtn').onclick = runProgressSearch;
+    $('#progressAuditTypeFilter').onchange = runProgressSearch;
+    $('#progressFieldFilter').onchange = runProgressSearch;
+    $('#progressStageFilter').onchange = runProgressSearch;
+    $('#progressBody').onclick = event => {
+      const button = event.target.closest('[data-project-no]');
+      if (button) showProjectTrack(button.dataset.projectNo);
+    };
+    $('#projectTrackDialog .dialog-head button').onclick = () => $('#projectTrackDialog').close();
+    function runMainSearch() {
+      syncFilters('main');
+      state.page = 1;
+      state.modalPage = 1;
+      renderMainTasks();
+      if ($('#moreDialog').open) renderMoreDialog();
+    }
+    $('#searchBtn').onclick = runMainSearch;
+    $('#moreBtn').onclick = () => {
+      state.modalPage = 1;
+      syncFilters('main');
+      $('#moreDialog').showModal();
+      renderMoreDialog();
+    };
+    $('#moreDialog .dialog-head button').onclick = () => $('#moreDialog').close();
+    $('#noticeMoreBtn').onclick = event => {
+      event.preventDefault();
+      state.noticePage = 1;
+      renderNoticeDialog();
+      $('#noticeDialog').showModal();
+    };
+    $('#noticeDialog .dialog-head button').onclick = () => $('#noticeDialog').close();
+    $('#monitorMoreBtn').onclick = event => {
+      event.preventDefault();
+      state.monitorPage = 1;
+      renderMonitorTabs();
+      renderMonitorDialog();
+      $('#monitorDialog').showModal();
+    };
+    $('#monitorDialog .dialog-head button').onclick = () => $('#monitorDialog').close();
+    $('#taskBody').onclick = event => {
+      const button = event.target.closest('.handle');
+      if (!button) return;
+      showToast(state.tab === 'history' ? '已查看已办记录' : '已进入处理流程');
+    };
+    $$('.tab').forEach(button => {
+      button.onclick = () => {
+        state.tab = button.dataset.tab;
+        state.page = 1;
+        $$('.tab').forEach(tab => tab.classList.toggle('active', tab === button));
+        renderMainTasks();
+      };
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#modulePicker')) $('#modulePicker').classList.remove('open');
+      if (!event.target.closest('#modalModulePicker')) $('#modalModulePicker')?.classList.remove('open');
+    });
+    renderModuleMenu();
+    renderMainTasks();
+    renderProgressFilters();
+    renderProjectProgress();
+    renderTrendChart();
+    renderDomainChart();
+    renderMonitorTabs();
+    renderMonitorList();
+    renderNotices();
+  </script>
+</body>
+</html>

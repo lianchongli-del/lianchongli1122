@@ -1,0 +1,3839 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户端企业信息 - 丰源新能源集团有限公司</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        html, body { height: 100vh; overflow: hidden; margin: 0; padding: 0; }
+
+        .main-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-nav {
+            height: 64px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 100;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .left-sidebar {
+            width: 450px;
+            min-width: 380px;
+            height: 100%;
+            overflow-y: auto;
+            background: #f8fafc;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px;
+        }
+
+        .left-sidebar::-webkit-scrollbar { width: 6px; }
+        .left-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .left-sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .right-content {
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+            background: #f1f5f9;
+            padding: 0 20px;
+        }
+
+        .right-content::-webkit-scrollbar { width: 8px; }
+        .right-content::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+
+        .customer-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            position: relative;
+        }
+
+        .edit-trigger {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+
+        .edit-trigger:hover { background: rgba(255,255,255,0.3); }
+
+        .section-header-edit {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-edit-btn {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            color: #64748b;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .section-edit-btn:hover {
+            background: #f1f5f9;
+            color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .tag-system { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tag-preset { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .tag-preset:hover { background: #bfdbfe; }
+        .tag-custom { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .tag-custom:hover { background: #fde68a; }
+        .tag-enterprise { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .anchor-nav-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0;
+            z-index: 50;
+            margin: 0px -20px 20px -20px;
+            width: calc(100% + 40px);
+        }
+
+        .anchor-nav {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .anchor-nav::-webkit-scrollbar { display: none; }
+
+        .anchor-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+            background: #f1f5f9;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            cursor: pointer;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .anchor-btn:hover { background: #e2e8f0; color: #475569; }
+        .anchor-btn.active { background: #3b82f6; color: white; }
+
+        .business-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            scroll-margin-top: 80px;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table td {
+            padding: 16px;
+            font-size: 14px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .data-table tr:hover td { background: #f8fafc; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-normal { background: #dcfce7; color: #166534; }
+        .status-suspended { background: #fef3c7; color: #92400e; }
+
+        .contact-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .main-tab-nav-container {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            margin: -20px -20px 20px -20px;
+            padding: 0 20px;
+            width: calc(100% + 40px);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .main-tab-nav {
+            display: flex;
+            gap: 0;
+        }
+
+        .main-tab-btn {
+            padding: 16px 28px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .main-tab-btn:hover { color: #3b82f6; }
+        .main-tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .cert-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .cert-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #bfdbfe;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #64748b; font-size: 13px; }
+        .info-value { color: #1e293b; font-size: 13px; font-weight: 500; text-align: right; max-width: 60%; }
+
+        .site-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .site-card:hover { border-color: #3b82f6; box-shadow: 0 2px 8px rgba(59,130,246,0.1); }
+
+        .site-contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .site-contact-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 132px;
+            transition: all 0.2s;
+        }
+
+        .site-contact-card:hover {
+            background: #fff;
+            border-color: #bfdbfe;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+        }
+
+        .site-contact-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .timeline-container {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 24px;
+        }
+
+        .timeline-item:last-child { padding-bottom: 0; }
+
+        .timeline-dot {
+            position: absolute;
+            left: -20px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+
+        .timeline-dot.plan { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+        .timeline-dot.opportunity { background: #8b5cf6; box-shadow: 0 0 0 2px #8b5cf6; }
+        .timeline-dot.completed { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
+
+        .timeline-content {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .timeline-meta {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .timeline-body {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .relation-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .relation-tag.plan { background: #fef3c7; color: #92400e; }
+        .relation-tag.opportunity { background: #ede9fe; color: #6d28d9; }
+        .relation-tag.independent { background: #f1f5f9; color: #64748b; }
+
+        .plan-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .plan-card:hover {
+            border-color: #f59e0b;
+            box-shadow: 0 2px 8px rgba(245,158,11,0.1);
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .plan-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .plan-status.pending { background: #fef3c7; color: #92400e; }
+        .plan-status.completed { background: #dcfce7; color: #166534; }
+        .plan-status.overdue { background: #fee2e2; color: #991b1b; }
+
+        .activity-text {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.6;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .sub-tab-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .sub-tab-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .sub-tab-btn:hover { background: #f1f5f9; color: #475569; }
+        .sub-tab-btn.active { background: #eff6ff; color: #3b82f6; }
+
+
+
+        .scope-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .scope-mini-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+        }
+
+        .scope-mini-card.active { border-color: #bfdbfe; background: #eff6ff; }
+        .scope-mini-card.pool { border-color: #bbf7d0; background: #f0fdf4; }
+        .scope-mini-card.other { background: #f8fafc; color: #64748b; }
+
+        .scope-code {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: 0;
+        }
+
+        .scope-name {
+            margin-top: 2px;
+            font-size: 11px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .scope-state {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .scope-state.following { background: #dbeafe; color: #1e40af; }
+        .scope-state.pool { background: #dcfce7; color: #166534; }
+        .scope-state.cross { background: #fef3c7; color: #92400e; }
+        .scope-state.none { background: #f1f5f9; color: #64748b; }
+
+        .scope-hero {
+            background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .scope-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .scope-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            background: white;
+            min-height: 148px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .scope-card.following { border-color: #bfdbfe; box-shadow: inset 3px 0 0 #3b82f6; }
+        .scope-card.pool { border-color: #bbf7d0; box-shadow: inset 3px 0 0 #22c55e; }
+        .scope-card.cross { border-color: #fde68a; box-shadow: inset 3px 0 0 #f59e0b; }
+        .scope-card.none { background: #f8fafc; }
+
+        .scope-meta {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .scope-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .scope-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .scope-chip.active { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+
+        @media (max-width: 1280px) {
+            .scope-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        .hidden { display: none !important; }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-label.required::after {
+            content: '*';
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .site-modal-container {
+            max-width: 1120px;
+            border-radius: 8px;
+            max-height: 92vh;
+        }
+
+        .site-modal-container .modal-header,
+        .site-modal-container .modal-footer {
+            background: #fff;
+            border-color: transparent;
+        }
+
+        .site-modal-container .modal-body {
+            padding-top: 0;
+        }
+
+        .site-form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .site-field-wide {
+            grid-column: span 2;
+        }
+
+        .site-field-full {
+            grid-column: 1 / -1;
+        }
+
+        .site-form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        .site-form-grid .form-textarea {
+            min-height: 76px;
+        }
+
+        .site-customer-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px;
+            margin-bottom: 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .site-customer-toggle button {
+            min-width: 92px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .site-customer-toggle button.active {
+            background: #2563eb;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(37, 99, 235, 0.22);
+        }
+
+        .site-region-field.hidden,
+        .site-credit-code-field.hidden,
+        .site-country-field.hidden {
+            display: none;
+        }
+
+        .site-country-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .site-country-control .form-select {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .country-code-badge {
+            flex: 0 0 54px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        .country-code-badge.empty {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+        }
+
+        .site-name-autocomplete {
+            position: relative;
+        }
+
+        .site-suggestion-list {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 4px);
+            z-index: 1010;
+            display: none;
+            max-height: 220px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+        }
+
+        .site-suggestion-list.active {
+            display: block;
+        }
+
+        .site-suggestion-item {
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            background: #fff;
+            text-align: left;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .site-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .site-suggestion-item:hover {
+            background: #eff6ff;
+        }
+
+        .site-suggestion-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .site-suggestion-meta {
+            margin-top: 3px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .cascader {
+            position: relative;
+        }
+
+        .cascader-trigger {
+            width: 100%;
+            min-height: 40px;
+            padding: 10px 36px 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            color: #1f2937;
+            font-size: 14px;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cascader-trigger::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .cascader-trigger.placeholder {
+            color: #9ca3af;
+        }
+
+        .cascader-panel {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 4px);
+            z-index: 1010;
+            display: none;
+            min-width: 520px;
+            max-width: 760px;
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+            overflow: hidden;
+        }
+
+        .cascader-panel.active {
+            display: flex;
+        }
+
+        .cascader-column {
+            width: 180px;
+            max-height: 252px;
+            overflow-y: auto;
+            border-right: 1px solid #eef2f7;
+            padding: 6px;
+        }
+
+        .cascader-column:last-child {
+            border-right: none;
+        }
+
+        .cascader-option {
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 10px;
+            background: transparent;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.35;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .cascader-option:hover,
+        .cascader-option.active {
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        .input-with-count {
+            position: relative;
+        }
+
+        .input-with-count .form-input,
+        .input-with-count .form-textarea {
+            padding-right: 58px;
+        }
+
+        .char-count {
+            position: absolute;
+            right: 12px;
+            bottom: 10px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .site-contact-note {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1280px) {
+            .site-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .site-field-wide { grid-column: span 2; }
+        }
+
+        .tag-select-container {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f9fafb;
+        }
+
+        .tag-category {
+            margin-bottom: 16px;
+        }
+
+        .tag-category:last-child { margin-bottom: 0; }
+
+        .tag-category-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tag-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag-option {
+            padding: 6px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag-option:hover { border-color: #3b82f6; color: #3b82f6; }
+        .tag-option.selected {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        /* 只读标签样式 */
+        .tag-readonly {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .custom-tag-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #e5e7eb;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover { background: #2563eb; }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover { background: #f9fafb; }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover { background: #dc2626; }
+
+        .btn-sync {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-sync:hover { background: #059669; }
+
+        .btn-sync.syncing {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .selected-tags-preview {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            min-height: 48px;
+        }
+
+        .preview-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+
+        .icon-btn.delete:hover {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .modal-lg { max-width: 800px; }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .site-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .site-type-central {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .site-type-normal {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .confirm-dialog {
+            max-width: 400px;
+        }
+
+        .confirm-body {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .confirm-icon {
+            width: 48px;
+            height: 48px;
+            background: #fef2f2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 20px;
+        }
+
+        .confirm-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .confirm-text {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        .sync-status.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .sync-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+            /* 添加场所：按境内/境外与固定场所/服务点/公司显示表单 */
+        #siteModal .site-modal-container { width: min(1120px, calc(100vw - 48px)); max-width: none; max-height: 90vh; }
+        #siteModal .modal-header { padding: 22px 30px; }
+        #siteModal .modal-body { padding: 2px 30px 20px; }
+        #siteModal .modal-footer { padding: 18px 30px; }
+        #siteModal .site-mode-toggle { display: flex; width: max-content; margin: 0 0 14px; }
+        #siteModal .site-mode-toggle button { min-height: 38px; padding: 0 18px; border: 1px solid #d1d5db; background: #fff; color: #4b5563; font-size: 14px; font-weight: 650; margin-left: -1px; }
+        #siteModal .site-mode-toggle button:first-child { margin-left: 0; border-radius: 6px 0 0 6px; }
+        #siteModal .site-mode-toggle button:last-child { border-radius: 0 6px 6px 0; }
+        #siteModal .site-mode-toggle button.active { background: #2563eb; border-color: #2563eb; color: white; position: relative; z-index: 1; }
+        #siteModal .site-mode-toggle button:disabled { cursor: default; opacity: 1; }
+        #siteModal .site-form-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px 20px; }
+        #siteModal .site-form-grid .form-group { grid-column: span 6; min-width: 0; }
+        #siteModal .site-form-grid .site-field-hidden { display: none; }
+        #siteModal .site-form-grid .site-field-employees, #siteModal .site-form-grid .site-field-region, #siteModal .site-form-grid .site-field-industry, #siteModal .site-form-grid .site-field-note { grid-column: 1 / -1; }
+        #siteModal[data-category="company"] .site-form-grid .site-field-employees,
+        #siteModal[data-category="company"][data-location="domestic"] .site-form-grid .site-field-region,
+        #siteModal[data-category="company"][data-location="domestic"] .site-form-grid .site-field-industry,
+        #siteModal[data-category="company"] .site-form-grid .site-field-credit { grid-column: span 6; }
+        #siteModal[data-category="company"] .site-field-legal,
+        #siteModal[data-category="company"] .site-field-phone,
+        #siteModal[data-category="company"] .site-field-capital { grid-column: span 4; }
+        #siteModal[data-location="overseas"][data-category="fixed"] .site-field-country,
+        #siteModal[data-location="overseas"][data-category="fixed"] .site-field-name,
+        #siteModal[data-location="overseas"][data-category="fixed"] .site-field-name-en,
+        #siteModal[data-location="overseas"][data-category="service"] .site-field-country,
+        #siteModal[data-location="overseas"][data-category="service"] .site-field-name,
+        #siteModal[data-location="overseas"][data-category="service"] .site-field-name-en { grid-column: span 4; }
+        #siteModal[data-location="overseas"][data-category="company"] .site-field-country,
+        #siteModal[data-location="overseas"][data-category="company"] .site-field-name,
+        #siteModal[data-location="overseas"][data-category="company"] .site-field-name-en,
+        #siteModal[data-location="overseas"][data-category="company"] .site-field-tax-type { grid-column: span 3; }
+        #siteModal .site-field-hint { margin: 6px 0 0; color: #6b7280; font-size: 12px; }
+        #siteModal .site-capital-control { display: flex; gap: 8px; }
+        #siteModal .site-capital-control input { min-width: 0; flex: 1; }
+        #siteModal .site-capital-control select { flex: 0 0 120px; min-width: 0; }
+        #siteModal .site-country-control .country-code-badge { flex-basis: 66px; background: #f1f5f9; border-color: #d1d5db; color: #64748b; font-weight: 500; }
+        #siteModal .site-form-grid .form-textarea { min-height: 58px; }
+        #siteModal .site-contact-note { display: inline-block; background: #eff6ff; border-color: #dbeafe; }
+        @media(max-width:1000px) {
+            #siteModal .site-form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+            #siteModal .site-form-grid .form-group { grid-column: span 1!important; }
+            #siteModal .site-form-grid .site-field-employees, #siteModal .site-form-grid .site-field-region, #siteModal .site-form-grid .site-field-industry, #siteModal .site-form-grid .site-field-note { grid-column: 1 / -1!important; }
+        }
+        @media(max-width:650px) {
+            #siteModal .site-modal-container { width: calc(100vw - 16px); }
+            #siteModal .modal-header, #siteModal .modal-footer { padding-left: 16px; padding-right: 16px; }
+            #siteModal .modal-body { padding-left: 16px; padding-right: 16px; }
+            #siteModal .site-form-grid { grid-template-columns: minmax(0,1fr); }
+            #siteModal .site-form-grid .form-group { grid-column: 1 / -1!important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <nav class="top-nav flex items-center px-6">
+            <div class="flex items-center space-x-4">
+                <button type="button" onclick="history.back()" class="text-gray-600 hover:text-gray-800 transition-colors" title="返回" aria-label="返回">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">企业详情</h1>
+            </div>
+        </nav>
+        <!-- 顶部导航 -->
+
+
+        <!-- 主体内容 -->
+        <div class="content-wrapper">
+            <!-- 左侧：客户基础信息（独立滚动） -->
+            <div class="left-sidebar">
+                <!-- 客户基本信息 -->
+                <div class="section-card">
+                    <button class="edit-trigger" onclick="openBasicEditModal()" title="编辑基本信息">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <div class="customer-header px-5 py-4 text-white relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-lg font-bold" id="customer-name">丰源新能源集团有限公司</h2>
+                            <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded" id="customer-type">国内客户</span>
+                        </div>
+                        <p class="text-blue-100 text-xs mb-1" id="customer-name-en">Fengyuan New Energy Group Co., Ltd.</p>
+                        <p class="text-blue-100 text-xs">客户编号：<span id="customer-code">C20240315001</span></p>
+                        <div id="sync-status-container" class="mt-2 hidden">
+                            <span class="sync-status success" id="sync-status-text">
+                                <i class="fas fa-check-circle mr-1"></i>刚刚同步
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="space-y-2">
+                            <div class="info-row">
+                                <span class="info-label">客户类型</span>
+                                <span class="info-value">中央企业</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">具体中央企业</span>
+                                <span class="info-value">中国石油天然气集团有限公司</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">统一社会信用代码</span>
+                                <span class="info-value font-mono text-xs">91110000100010433W</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">行业分类</span>
+                                <span class="info-value">电力、热力、燃气及水生产和供应业 / 电力生产 / 太阳能发电 / 太阳能发电</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">公司总人数</span>
+                                <span class="info-value">1,650人</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">注册资金</span>
+                                <span class="info-value">486,900,000元 / 人民币</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">成立日期</span>
+                                <span class="info-value">1990-02-09</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">客户来源</span>
+                                <span class="info-value">自主开发</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">首次合作</span>
+                                <span class="info-value">2020-03-15</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">法定代表人</span>
+                                <span class="info-value">戴厚良</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">经营期限</span>
+                                <span class="info-value">1990-02-09 至 长期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- 注册地址 -->
+                <div class="section-card">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 section-header-edit">
+                        <h3 class="font-semibold text-gray-800 flex items-center text-sm">
+                            <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>注册地址
+                        </h3>
+                        <button class="section-edit-btn" onclick="openAddressEditModal('registered')">
+                            <i class="fas fa-pen text-xs mr-1"></i>编辑
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-3"><span class="text-xs text-gray-500 block mb-1">注册地址省市区</span><span class="text-sm font-medium text-gray-800" id="address-region">北京市 北京市 东城区</span></div>
+                        <div class="mb-3"><span class="text-xs text-gray-500 block mb-1">注册地址</span><span class="text-sm font-medium text-gray-800" id="address-detail">东直门北大街9号中国石油大厦</span></div>
+                        <div><span class="text-xs text-gray-500 block mb-1">注册地址（英）</span><span class="text-sm font-medium text-gray-800" id="address-detail-en">No.9 Dongzhimen North Street, PetroChina Tower, Dongcheng District, Beijing, China</span></div>
+                    </div>
+                </div>
+
+                <!-- 运营地址 -->
+                <div class="section-card">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 section-header-edit">
+                        <h3 class="font-semibold text-gray-800 flex items-center text-sm">
+                            <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>运营地址
+                        </h3>
+                        <button class="section-edit-btn" onclick="openAddressEditModal('operating')">
+                            <i class="fas fa-pen text-xs mr-1"></i>编辑
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-3"><span class="text-xs text-gray-500 block mb-1">运营地址省市区</span><span class="text-sm font-medium text-gray-800" id="operating-region">北京市 北京市 海淀区</span></div>
+                        <div class="mb-3"><span class="text-xs text-gray-500 block mb-1">运营地址</span><span class="text-sm font-medium text-gray-800" id="operating-address">中关村软件园二期8号楼</span></div>
+                        <div><span class="text-xs text-gray-500 block mb-1">运营地址（英）</span><span class="text-sm font-medium text-gray-800" id="operating-address-en">Building 8, Zhongguancun Software Park Phase II, Haidian District, Beijing, China</span></div>
+                    </div>
+                </div>
+
+                <!-- 开票信息 -->
+                <div class="section-card">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 section-header-edit">
+                        <h3 class="font-semibold text-gray-800 flex items-center text-sm">
+                            <i class="fas fa-file-invoice-dollar text-blue-600 mr-2"></i>开票信息
+                        </h3>
+                        <button class="section-edit-btn" onclick="openInvoiceEditModal()">
+                            <i class="fas fa-pen text-xs mr-1"></i>编辑
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-2" id="invoice-container">
+                        <div class="info-row">
+                            <span class="info-label">发票名称</span>
+                            <span class="info-value" id="invoice-name">丰源新能源集团有限公司</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">发票名称（英文）</span>
+                            <span class="info-value text-xs" id="invoice-name-en">Fengyuan New Energy Group Co., Ltd.</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">税号</span>
+                            <span class="info-value font-mono text-xs" id="invoice-tax">91110000100010433W</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">开户银行</span>
+                            <span class="info-value" id="invoice-bank">中国工商银行北京分行</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">银行账户</span>
+                            <span class="info-value font-mono text-xs" id="invoice-account">0200 0001 0900 1234 567</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">开票地址</span>
+                            <span class="info-value text-xs" id="invoice-address">北京市东城区东直门北大街9号</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">开票地址（英文）</span>
+                            <span class="info-value text-xs" id="invoice-address-en">No.9 Dongzhimen North Street, Dongcheng District, Beijing, China</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">开票电话</span>
+                            <span class="info-value" id="invoice-phone">010-12345678</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 备注信息 -->
+                <div class="section-card">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 section-header-edit">
+                        <h3 class="font-semibold text-gray-800 flex items-center text-sm">
+                            <i class="fas fa-sticky-note text-blue-600 mr-2"></i>备注信息
+                        </h3>
+                        <button class="section-edit-btn" onclick="openRemarkEditModal()">
+                            <i class="fas fa-pen text-xs mr-1"></i>编辑
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-sm text-gray-600 leading-relaxed" id="remark-text">
+                            该客户为集团级战略客户，需优先安排审核资源。客户对信息安全要求较高，所有审核人员需提前报备并签署保密协议。建议安排资深审核员进行服务。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：主Tab内容（独立滚动） -->
+            <div class="right-content">
+                <div class="bg-white rounded-xl p-6" style="margin-top:20px;">
+                    <span id="site-count" class="hidden"></span>
+                        <div id="resource-sites" class="fade-in">
+                            <div class="mb-4 flex items-center justify-between">
+                                <h4 class="font-semibold text-gray-800">场所及联系人</h4>
+                                <button class="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 role-action" onclick="openSiteModal()">
+                                    <i class="fas fa-plus mr-1"></i>添加场所
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4" id="sites-list">
+                                <!-- 场所卡片由JS动态生成 -->
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 地址编辑弹窗 -->
+    <div id="addressEditModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-map-marker-alt text-blue-600"></i><span id="address-modal-title">编辑注册地址</span></div>
+                <button class="modal-close" onclick="closeModal('addressEditModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label required">省市区</label>
+                    <input type="hidden" id="addr-region">
+                    <div class="cascader" id="addr-region-cascader">
+                        <button type="button" class="cascader-trigger placeholder" onclick="toggleCascader('addr-region')">请选择省市区</button>
+                        <div class="cascader-panel" id="addr-region-panel"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">邮政编码</label>
+                    <input type="text" class="form-input" id="addr-zip" placeholder="100000" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" id="addr-detail-label">注册地址</label>
+                    <textarea class="form-textarea" id="addr-detail"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="addr-detail-en-label">注册地址（英）</label>
+                    <textarea class="form-textarea" id="addr-detail-en"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addressEditModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveAddress()"><i class="fas fa-save mr-1"></i>保存地址</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- 开票信息编辑弹窗 -->
+    <div id="invoiceEditModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-file-invoice-dollar text-blue-600"></i>
+                    编辑开票信息
+                </div>
+                <button class="modal-close" onclick="closeModal('invoiceEditModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label required">发票抬头（名称）</label>
+                    <input type="text" class="form-input" id="inv-name" value="丰源新能源集团有限公司">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">发票抬头（英文）</label>
+                    <input type="text" class="form-input" id="inv-name-en" value="Fengyuan New Energy Group Co., Ltd.">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required">纳税人识别号（税号）</label>
+                    <input type="text" class="form-input" id="inv-tax" value="91110000100010433W" maxlength="20">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">开户银行</label>
+                        <input type="text" class="form-input" id="inv-bank" value="中国工商银行北京分行">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">银行账号</label>
+                        <input type="text" class="form-input" id="inv-account" value="0200 0001 0900 1234 567">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">注册地址</label>
+                        <input type="text" class="form-input" id="inv-address" value="北京市东城区东直门北大街9号">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">注册地址（英文）</label>
+                        <input type="text" class="form-input" id="inv-address-en" value="No.9 Dongzhimen North Street, Dongcheng District, Beijing, China">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">注册电话</label>
+                        <input type="text" class="form-input" id="inv-phone" value="010-12345678">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('invoiceEditModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveInvoice()">
+                    <i class="fas fa-save mr-1"></i>保存开票信息
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 备注编辑弹窗 -->
+    <div id="remarkEditModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-sticky-note text-blue-600"></i>
+                    编辑备注信息
+                </div>
+                <button class="modal-close" onclick="closeModal('remarkEditModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">客户备注</label>
+                    <textarea class="form-textarea" id="remark-edit-text" rows="6" placeholder="请输入客户相关备注信息...">该客户为集团级战略客户，需优先安排审核资源。客户对信息安全要求较高，所有审核人员需提前报备并签署保密协议。建议安排资深审核员进行服务。</textarea>
+                    <p class="text-xs text-gray-500 mt-2">提示：备注信息对客户可见，请勿填写敏感信息。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('remarkEditModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveRemark()">
+                    <i class="fas fa-save mr-1"></i>保存备注
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 基本信息编辑弹窗 -->
+    <div id="basicEditModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-building text-blue-600"></i>
+                    <span>编辑基本信息</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('basicEditModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">客户名称</label>
+                        <input type="text" class="form-input" id="basic-name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">英文名称</label>
+                        <input type="text" class="form-input" id="basic-name-en">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">客户类型</label>
+                        <select class="form-select" id="basic-type">
+                            <option value="中央企业">中央企业</option>
+                            <option value="地方国企">地方国企</option>
+                            <option value="民营企业">民营企业</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">具体中央企业</label>
+                        <input type="text" class="form-input" id="basic-central-enterprise">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required">行业分类（四级）</label>
+                    <input type="text" class="form-input" id="basic-industry" placeholder="门类 / 大类 / 中类 / 小类">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">注册资金（元）</label>
+                        <input type="text" class="form-input" id="basic-capital">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">币种</label>
+                        <select class="form-select" id="basic-currency">
+                            <option value="人民币">人民币</option>
+                            <option value="美元">美元</option>
+                            <option value="欧元">欧元</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">公司总人数</label>
+                        <input type="text" class="form-input" id="basic-employee-total">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">法定代表人</label>
+                        <input type="text" class="form-input" id="basic-legal-person">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('basicEditModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveBasicInfo()">
+                    <i class="fas fa-save mr-1"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 联系人编辑/新增弹窗 -->
+    <div id="contactModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-user text-blue-600"></i>
+                    <span id="contact-modal-title">新增业务联系人</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('contactModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="contact-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">姓名</label>
+                        <input type="text" class="form-input" id="contact-name" placeholder="请输入联系人姓名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">职位</label>
+                        <input type="text" class="form-input" id="contact-position" placeholder="如：技术总监">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">部门</label>
+                        <input type="text" class="form-input" id="contact-dept" placeholder="如：技术部">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">负责认证领域</label>
+                        <select class="form-select" id="contact-scope">
+                            <option value="EMS">EMS 环境管理体系</option>
+                            <option value="OHSMS">OHSMS 职业健康安全管理体系</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">手机号码</label>
+                        <input type="tel" class="form-input" id="contact-mobile" placeholder="138-0000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">电子邮箱</label>
+                        <input type="email" class="form-input" id="contact-email" placeholder="example@company.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">职责</label>
+                    <input type="text" class="form-input" id="contact-duty" placeholder="如：环境体系对接、职业健康安全资料协调">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('contactModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveContact()">
+                    <i class="fas fa-save mr-1"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 场所编辑/新增弹窗 -->
+    <div id="siteModal" class="modal-overlay" data-location="domestic" data-category="fixed">
+        <div class="modal-container site-modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-building text-blue-600"></i>
+                    <span id="site-modal-title">添加场所</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('siteModal')" aria-label="关闭">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="site-id">
+                <input type="hidden" id="site-customer-type" value="domestic">
+                <input type="hidden" id="site-type" value="fixed">
+                <div class="site-mode-toggle" role="group" aria-label="场所所在地">
+                    <button type="button" id="site-domestic-btn" class="active" onclick="setSiteCustomerType('domestic')">境内场所</button>
+                    <button type="button" id="site-overseas-btn" onclick="setSiteCustomerType('overseas')">境外场所</button>
+                </div>
+                <div class="site-mode-toggle site-type-toggle" role="group" aria-label="场所类别">
+                    <button type="button" id="site-fixed-btn" class="active" onclick="setSiteType('fixed')">固定场所</button>
+                    <button type="button" id="site-service-btn" onclick="setSiteType('service')">服务点</button>
+                    <button type="button" id="site-company-btn" onclick="setSiteType('company')">公司</button>
+                </div>
+                <div class="site-form-grid">
+                    <div class="form-group site-field-country site-field-hidden" id="site-country-field">
+                        <label class="form-label required" for="site-country">国家/地区及代码</label>
+                        <div class="site-country-control">
+                            <select class="form-select" id="site-country" onchange="normalizeCountryDisplay()">
+                                <option value="">选择国家/地区</option>
+                                <option value="702">新加坡</option><option value="276">德国</option>
+                                <option value="840">美国</option><option value="826">英国</option>
+                                <option value="392">日本</option><option value="410">韩国</option>
+                                <option value="036">澳大利亚</option>
+                            </select>
+                            <span class="country-code-badge empty" id="site-country-code">代码</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-name">
+                        <label class="form-label required" id="site-name-label" for="site-name">场所名称（中文）</label>
+                        <div class="site-name-autocomplete">
+                            <div class="input-with-count">
+                                <input type="text" class="form-input" id="site-name" placeholder="输入场所名称/企业名称联想" maxlength="90" autocomplete="off" onfocus="handleSiteNameInput(this)" oninput="handleSiteNameInput(this)">
+                                <span class="char-count">0 / 90</span>
+                            </div>
+                            <div class="site-suggestion-list" id="site-name-suggestions"></div>
+                        </div>
+                        <p class="site-field-hint">输入至少2个字符开始搜索，选择后将自动回填企业信息</p>
+                    </div>
+                    <div class="form-group site-field-name-en">
+                        <label class="form-label" id="site-name-en-label" for="site-name-en">场所名称（英文）</label>
+                        <div class="input-with-count">
+                            <input type="text" class="form-input" id="site-name-en" placeholder="如：Beijing Headquarters" maxlength="90" oninput="updateCharCount(this)">
+                            <span class="char-count">0 / 90</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-tax-type site-field-hidden">
+                        <label class="form-label" for="site-tax-type">税号类型</label>
+                        <select class="form-select" id="site-tax-type">
+                            <option value="">请选择</option><option value="tax">税号</option>
+                            <option value="registration">登记号</option><option value="vat">增值税号</option>
+                        </select>
+                    </div>
+                    <div class="form-group site-field-credit site-field-hidden">
+                        <label class="form-label" id="site-credit-code-label" for="site-credit-code">统一社会信用代码</label>
+                        <div class="input-with-count">
+                            <input type="text" class="form-input" id="site-credit-code" placeholder="如：91120242MA0QFK058N" maxlength="20" oninput="updateCharCount(this)">
+                            <span class="char-count">0 / 20</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-employees">
+                        <label class="form-label required" for="site-employees">场所人数</label>
+                        <input type="number" class="form-input" id="site-employees" placeholder="如：450" min="1">
+                    </div>
+                    <div class="form-group site-field-legal site-field-hidden">
+                        <label class="form-label required" for="site-legal-person">法定代表人</label>
+                        <input type="text" class="form-input" id="site-legal-person" placeholder="请输入法定代表人">
+                    </div>
+                    <div class="form-group site-field-phone site-field-hidden">
+                        <label class="form-label required" for="site-phone">联系电话</label>
+                        <input type="tel" class="form-input" id="site-phone" placeholder="请输入联系电话">
+                    </div>
+                    <div class="form-group site-field-capital site-field-hidden">
+                        <label class="form-label required" for="site-registered-capital">注册资本（万元）</label>
+                        <div class="site-capital-control">
+                            <input type="number" class="form-input" id="site-registered-capital" placeholder="如：5000" min="0" step="0.01">
+                            <select class="form-select" id="site-capital-currency" aria-label="注册资本币种">
+                                <option value="CNY">人民币元</option><option value="USD">美元</option>
+                                <option value="EUR">欧元</option><option value="HKD">港币</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-region" id="site-region-field">
+                        <label class="form-label required" for="site-region-cascader">省市区</label>
+                        <input type="hidden" id="site-region">
+                        <div class="cascader" id="site-region-cascader">
+                            <button type="button" class="cascader-trigger placeholder" onclick="toggleCascader('site-region')">请选择省市区</button>
+                            <div class="cascader-panel" id="site-region-panel"></div>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-industry site-field-hidden">
+                        <label class="form-label" id="site-industry-label">所属国民经济行业</label>
+                        <input type="hidden" id="site-industry">
+                        <div class="cascader" id="site-industry-cascader">
+                            <button type="button" class="cascader-trigger placeholder" onclick="toggleCascader('site-industry')">请选择所属国民经济行业</button>
+                            <div class="cascader-panel" id="site-industry-panel"></div>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-registered">
+                        <label class="form-label" id="site-registered-address-label" for="site-registered-address">注册地址</label>
+                        <div class="input-with-count">
+                            <textarea class="form-textarea" id="site-registered-address" placeholder="请输入注册地址" maxlength="300" oninput="updateCharCount(this)"></textarea>
+                            <span class="char-count">0 / 300</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-registered-en">
+                        <label class="form-label" id="site-registered-address-en-label" for="site-registered-address-en">注册地址（英）</label>
+                        <div class="input-with-count">
+                            <textarea class="form-textarea" id="site-registered-address-en" placeholder="请输入注册地址英文" maxlength="300" oninput="updateCharCount(this)"></textarea>
+                            <span class="char-count">0 / 300</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-operating">
+                        <label class="form-label" id="site-address-detail-label" for="site-address-detail">运营地址</label>
+                        <div class="input-with-count">
+                            <textarea class="form-textarea" id="site-address-detail" placeholder="请输入街道、门牌号、楼栋等运营地址" maxlength="300" oninput="updateCharCount(this)"></textarea>
+                            <span class="char-count">0 / 300</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-operating-en">
+                        <label class="form-label" id="site-address-detail-en-label" for="site-address-detail-en">运营地址（英）</label>
+                        <div class="input-with-count">
+                            <textarea class="form-textarea" id="site-address-detail-en" placeholder="请输入运营地址英文" maxlength="300" oninput="updateCharCount(this)"></textarea>
+                            <span class="char-count">0 / 300</span>
+                        </div>
+                    </div>
+                    <div class="form-group site-field-note">
+                        <label class="form-label">场所联系人</label>
+                        <div class="site-contact-note">保存场所后，可在场所卡片下添加联系人，并维护电话、邮箱和现场职责。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('siteModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveSite()"><i class="fas fa-save mr-1"></i>保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 场所联系人弹窗 -->
+    <div id="siteContactModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-user-plus text-blue-600"></i>
+                    <span id="site-contact-modal-title">添加场所联系人</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('siteContactModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="site-contact-site-id">
+                <input type="hidden" id="site-contact-index">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">联系人姓名</label>
+                        <input type="text" class="form-input" id="site-contact-name" placeholder="如：李芳">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">职责/职位</label>
+                        <input type="text" class="form-input" id="site-contact-duty" placeholder="如：质量经理">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">手机号码</label>
+                        <input type="tel" class="form-input" id="site-contact-mobile" placeholder="138-0000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">电子邮箱</label>
+                        <input type="email" class="form-input" id="site-contact-email" placeholder="example@company.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('siteContactModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveSiteContact()">
+                    <i class="fas fa-save mr-1"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 客户经理流转历史弹窗 -->
+    <div id="ownerHistoryModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-user-clock text-blue-600"></i>
+                    <span id="owner-history-title">客户经理流转历史</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('ownerHistoryModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-500 border-b border-gray-200">
+                                <th class="pb-2 font-medium">领域</th>
+                                <th class="pb-2 font-medium">客户经理</th>
+                                <th class="pb-2 font-medium">业务单位</th>
+                                <th class="pb-2 font-medium">开始时间</th>
+                                <th class="pb-2 font-medium">结束时间</th>
+                                <th class="pb-2 font-medium">流转说明</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700" id="owner-history-table"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('ownerHistoryModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-container confirm-dialog">
+            <div class="confirm-body">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="confirm-title" id="confirm-title">确认删除？</div>
+                <div class="confirm-text" id="confirm-text">删除后数据将无法恢复，请谨慎操作。</div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn-secondary" onclick="closeModal('confirmModal')">取消</button>
+                <button class="btn btn-danger" id="confirm-btn" onclick="executeDelete()">
+                    <i class="fas fa-trash mr-1"></i>确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let deleteTarget = { type: null, id: null };
+        let currentRole = 'sales';
+        let currentScope = 'ALL';
+        const salesAllowedScopes = ['EMS', 'OHSMS'];
+        
+        // 模拟数据存储
+        let contactsData = [
+            {
+                id: 1,
+                name: '张伟',
+                position: '环境体系负责人',
+                duty: '环境体系对接',
+                dept: '技术部',
+                mobile: '138-0013-8000',
+                email: 'zhang.wei@fengyuan.com',
+                scope: 'EMS',
+                avatar: '张',
+                color: 'blue'
+            },
+            {
+                id: 2,
+                name: '李芳',
+                position: '安全经理',
+                duty: '职业健康安全对接',
+                dept: '安全管理部',
+                mobile: '139-0013-9000',
+                email: 'li.fang@fengyuan.com',
+                scope: 'OHSMS',
+                avatar: '李',
+                color: 'purple'
+            },
+            {
+                id: 3,
+                name: '周敏',
+                position: '试制中心主任',
+                duty: '储能试制中心环境数据协调',
+                dept: '保定储能试制中心',
+                mobile: '134-0013-4000',
+                email: 'zhou.min@fengyuan.com',
+                scope: 'EMS',
+                avatar: '周',
+                color: 'orange'
+            },
+            {
+                id: 4,
+                name: '赵倩',
+                position: '生产基地负责人',
+                duty: '安全访谈与现场协调',
+                dept: '天津生产基地',
+                mobile: '136-0013-6000',
+                email: 'zhao.qian@fengyuan.com',
+                scope: 'OHSMS',
+                avatar: '赵',
+                color: 'green'
+            }
+        ];
+
+        // 场所数据
+        let sitesData = [
+            {
+                id: 1,
+                name: '总部办公楼',
+                nameEn: 'Beijing Headquarters',
+                employees: 450,
+                type: 'fixed',
+                isHeadquarters: true,
+                customerType: 'domestic',
+                country: '156',
+                isCentral: true,
+                creditCode: '91110000100010433W',
+                legalPerson: '王建国',
+                phone: '010-12345678',
+                registeredCapital: '50000',
+                capitalCurrency: 'CNY',
+                industry: 'D/44/441/4416',
+                province: '北京市',
+                city: '北京市',
+                district: '东城区',
+                registeredAddress: '北京市东城区东直门北大街9号',
+                registeredAddressEn: 'No.9 Dongzhimen North Street, Dongcheng District, Beijing, China',
+                addressDetail: '东直门北大街9号中国石油大厦',
+                addressDetailEn: 'No.9 Dongzhimen North Street, PetroChina Tower, Dongcheng District, Beijing, China',
+                address: '北京市东城区东直门北大街9号中国石油大厦',
+                contacts: [
+                    { name: '张伟', duty: '环境体系对接人', mobile: '138-0013-8000', email: 'zhang.wei@fengyuan.com', scopes: ['EMS'] }
+                ]
+            },
+            {
+                id: 2,
+                name: '天津生产基地',
+                nameEn: 'Tianjin Production Base',
+                employees: 1200,
+                type: 'fixed',
+                isHeadquarters: false,
+                customerType: 'domestic',
+                country: '156',
+                isCentral: false,
+                creditCode: '91120242MA0QFK058N',
+                legalPerson: '刘明',
+                phone: '022-66218888',
+                registeredCapital: '12000',
+                capitalCurrency: 'CNY',
+                industry: 'C/38/382/3825',
+                province: '天津市',
+                city: '天津市',
+                district: '滨海新区',
+                registeredAddress: '天津市滨海新区第九大街18号',
+                registeredAddressEn: 'No.18 Ninth Avenue, Binhai New Area, Tianjin, China',
+                addressDetail: '第九大街18号',
+                addressDetailEn: 'No.18 Ninth Avenue, Binhai New Area, Tianjin, China',
+                address: '天津市滨海新区第九大街18号',
+                contacts: [
+                    { name: '李芳', duty: '职业健康安全联系人', mobile: '139-0013-9000', email: 'li.fang@fengyuan.com', scopes: ['OHSMS'] },
+                    { name: '赵倩', duty: 'OHSMS现场协调', mobile: '136-0013-6000', email: 'zhao.qian@fengyuan.com', scopes: ['OHSMS'] }
+                ]
+            },
+            {
+                id: 3,
+                name: '保定储能试制中心',
+                nameEn: 'Baoding Energy Storage Pilot Center',
+                employees: 180,
+                type: 'service',
+                isHeadquarters: false,
+                customerType: 'domestic',
+                country: '156',
+                isCentral: false,
+                creditCode: '91130605MA0G8X21X9',
+                legalPerson: '陈立',
+                phone: '0312-3128888',
+                registeredCapital: '3000',
+                capitalCurrency: 'CNY',
+                industry: 'C/38/382/3825',
+                province: '河北省',
+                city: '保定市',
+                district: '高新区',
+                registeredAddress: '河北省保定市高新区向阳北大街2899号',
+                registeredAddressEn: 'No.2899 Xiangyang North Street, Gaoxin District, Baoding, Hebei, China',
+                addressDetail: '向阳北大街2899号',
+                addressDetailEn: 'No.2899 Xiangyang North Street, Gaoxin District, Baoding, Hebei, China',
+                address: '河北省保定市高新区向阳北大街2899号',
+                contacts: [
+                    { name: '周敏', duty: 'EMS现场联系人', mobile: '134-0013-4000', email: 'zhou.min@fengyuan.com', scopes: ['EMS'] },
+                    { name: '周敏', duty: 'OHSMS现场联系人', mobile: '134-0013-4000', email: 'zhou.min@fengyuan.com', scopes: ['OHSMS'] }
+                ]
+            }
+        ];
+
+        const scopeNames = {
+            QMS: '质量管理体系',
+            EMS: '环境管理体系',
+            OHSMS: '职业健康安全管理体系',
+            FSMS: '食品安全管理体系',
+            HACCP: '危害分析与关键控制点',
+            ISMS: '信息安全管理体系',
+            ITSMS: '信息技术服务管理体系',
+            EnMS: '能源管理体系'
+        };
+
+        const regionOptions = {
+            '北京市': {
+                '北京市': ['东城区', '西城区', '朝阳区', '海淀区', '丰台区', '通州区']
+            },
+            '天津市': {
+                '天津市': ['和平区', '河西区', '南开区', '滨海新区', '武清区']
+            },
+            '河北省': {
+                '石家庄市': ['长安区', '桥西区', '裕华区'],
+                '保定市': ['竞秀区', '莲池区', '满城区', '高新区'],
+                '唐山市': ['路北区', '路南区', '丰南区']
+            },
+            '山西省': {
+                '太原市': ['小店区', '迎泽区', '杏花岭区'],
+                '大同市': ['平城区', '云冈区', '新荣区']
+            }
+        };
+
+        const nationalIndustryOptions = {
+            'C 制造业': {
+                '36 汽车制造业': {
+                    '367 汽车零部件及配件制造': ['3670 汽车零部件及配件制造']
+                },
+                '38 电气机械和器材制造业': {
+                    '382 输配电及控制设备制造': ['3825 光伏设备及元器件制造']
+                }
+            },
+            'D 电力、热力、燃气及水生产和供应业': {
+                '44 电力、热力生产和供应业': {
+                    '441 电力生产': ['4416 太阳能发电']
+                }
+            },
+            'I 信息传输、软件和信息技术服务业': {
+                '65 软件和信息技术服务业': {
+                    '651 软件开发': ['6513 应用软件开发']
+                }
+            },
+            'L 租赁和商务服务业': {
+                '72 商务服务业': {
+                    '721 组织管理服务': ['7212 投资与资产管理']
+                }
+            }
+        };
+
+        const scopeFlowData = {
+            QMS: {
+                owners: [
+                    { owner: '刘明', unit: '北京认证中心', start: '2023-01-15', end: '-', duration: '当前' },
+                    { owner: '陈静', unit: '天津办事处', start: '2021-06-01', end: '2023-01-14', duration: '592天' }
+                ],
+                records: [
+                    { type: 'process', title: '监督审核资料确认', relation: '客户跟进', time: '2024-03-18 09:20', user: '刘明', method: '电话沟通', unit: '北京认证中心', body: '确认QMS监督审核资料清单，客户已补充生产过程控制记录和供应商评价材料。' },
+                    { type: 'opportunity', title: '质量体系续证风险排查', relation: '关联商机 PRJ-2024-0008', time: '2024-03-10 11:30', user: '刘明', method: '线上会议', unit: '北京认证中心', body: '围绕证书到期节奏和监督审核问题项进行回访，客户反馈新版工艺文件已完成内部发布。' }
+                ]
+            },
+            EMS: {
+                owners: [
+                    { owner: '刘明', unit: '北京认证中心', start: '2024-02-28', end: '-', duration: '当前' },
+                    { owner: '待认领池', unit: '-', start: '2024-02-20', end: '2024-02-28', duration: '8天' }
+                ],
+                records: [
+                    { type: 'opportunity', title: '储能生产线扩项需求确认', relation: '关联商机 PRJ-2024-0015', time: '2024-03-15 14:30', user: '刘明', method: '现场拜访', unit: '北京认证中心', body: '拜访客户技术总监张伟，确认储能试制中心纳入EMS扩项内容，预计4月完成报价与合同确认。' },
+                    { type: 'process', title: '领域认领并分配客户经理', relation: '系统流转', time: '2024-02-28 09:20', user: '刘明', method: '认领', unit: '北京认证中心', body: 'EMS领域认领至北京认证中心，客户经理设为刘明。' }
+                ]
+            },
+            OHSMS: {
+                owners: [
+                    { owner: '陈静', unit: '北京认证中心', start: '2023-09-15', end: '-', duration: '当前' }
+                ],
+                records: [
+                    { type: 'process', title: '天津基地安全访谈完成', relation: '客户跟进', time: '2024-03-06 10:10', user: '陈静', method: '现场访谈', unit: '北京认证中心', body: '完成天津生产基地危险源清单、应急演练记录核对，客户承诺补充承包商安全培训台账。' }
+                ]
+            },
+            FSMS: {
+                owners: [
+                    { owner: '赵倩', unit: '天津办事处', start: '2024-03-12', end: '-', duration: '当前' }
+                ],
+                records: [
+                    { type: 'opportunity', title: '食品安全领域首次沟通', relation: '关联商机 PRJ-2024-0022', time: '2024-03-12 16:00', user: '赵倩', method: '电话沟通', unit: '天津办事处', body: '客户天津基地计划新增员工餐配送中心，已确认需要评估FSMS认证可行性。' }
+                ]
+            },
+            HACCP: {
+                owners: [
+                    { owner: '周海', unit: '华南认证中心', start: '2024-03-18', end: '-', duration: '跨区域跟进中' },
+                    { owner: '赵倩', unit: '天津办事处', start: '2024-03-12', end: '2024-03-18', duration: '6天' }
+                ],
+                records: [
+                    { type: 'process', title: '跨区域跟进申请通过', relation: '客户跟进', time: '2024-03-18 10:00', user: '周海', method: '跨区跟进', unit: '华南认证中心', body: 'HACCP领域跨区域跟进申请已审批通过，当前由周海继续跟进。' },
+                    { type: 'opportunity', title: 'HACCP同步纳入食品安全商机', relation: '关联商机 PRJ-2024-0023', time: '2024-03-12 16:20', user: '赵倩', method: '电话沟通', unit: '天津办事处', body: '与FSMS需求同步评估，客户希望了解关键控制点文件准备周期。' }
+                ]
+            },
+            ISMS: {
+                owners: [
+                    { owner: '张磊', unit: '上海认证中心', start: '2024-03-11', end: '-', duration: '审批中' },
+                    { owner: '刘明', unit: '北京认证中心', start: '2024-03-01', end: '2024-03-11', duration: '10天' }
+                ],
+                records: [
+                    { type: 'opportunity', title: '提交跨区域跟进申请', relation: '审批中 CR-2024-0311', time: '2024-03-11 18:05', user: '张磊', method: '跨区申请', unit: '上海认证中心', body: '张磊申请跟进ISMS领域，当前停留在华东区域经理审批节点。' }
+                ]
+            },
+            ITSMS: {
+                owners: [
+                    { owner: '待认领池', unit: '-', start: '2024-02-28', end: '-', duration: '当前' }
+                ],
+                records: [
+                    { type: 'process', title: '领域待认领', relation: '系统流转', time: '2024-02-28 09:00', user: '系统', method: '自动流转', unit: '-', body: '新增客户时未选择ITSMS客户经理，该领域等待后续认领。' }
+                ]
+            },
+            EnMS: {
+                owners: [
+                    { owner: '待认领池', unit: '-', start: '2024-02-28', end: '-', duration: '当前' }
+                ],
+                records: [
+                    { type: 'process', title: '领域待认领', relation: '系统流转', time: '2024-02-28 09:00', user: '系统', method: '自动流转', unit: '-', body: '新增客户时未选择EnMS客户经理，该领域等待后续认领。' }
+                ]
+            }
+        };
+
+        const certificationDomainData = {
+            ALL: { name: '全部跟进领域', status: '全量查看', region: '多区域', company: '多公司', owner: '2个已分配', serviceStaff: '2名客服人员', last: '2024-03-18', follow: 4, opp: 2, scheme: 2, cert: 2 },
+            QMS: { name: '质量管理体系', status: '已分配跟进', region: '华北区域', company: '北京认证中心', owner: '刘明', serviceStaff: '刘明', last: '2024-03-18', follow: 2, opp: 0, scheme: 1, cert: 1 },
+            EMS: { name: '环境管理体系', status: '已分配跟进', region: '华北区域', company: '北京认证中心', owner: '刘明', serviceStaff: '刘明', last: '2024-03-15', follow: 2, opp: 1, scheme: 0, cert: 1 },
+            OHSMS: { name: '职业健康安全管理体系', status: '已分配跟进', region: '华北区域', company: '北京认证中心', owner: '陈静', serviceStaff: '陈静', last: '2024-03-06', follow: 1, opp: 1, scheme: 0, cert: 1 },
+            FSMS: { name: '食品安全管理体系', status: '已分配跟进', region: '华北区域', company: '天津办事处', owner: '赵倩', serviceStaff: '赵倩', last: '2024-03-12', follow: 1, opp: 0, scheme: 0, cert: 0 },
+            HACCP: { name: '危害分析与关键控制点', status: '已分配跟进', region: '华北区域', company: '天津办事处', owner: '赵倩', serviceStaff: '赵倩', last: '2024-03-12', follow: 1, opp: 0, scheme: 0, cert: 0 },
+            ISMS: { name: '信息安全管理体系', status: '跨区跟进', region: '华东区域', company: '上海认证中心', owner: '张磊', serviceStaff: '-', last: '2024-03-11', follow: 1, opp: 0, scheme: 0, cert: 0 },
+            ITSMS: { name: '信息技术服务管理体系', status: '待认领', region: '-', company: '-', owner: '-', serviceStaff: '-', last: '2024-02-28', follow: 1, opp: 0, scheme: 0, cert: 0 },
+            EnMS: { name: '能源管理体系', status: '待认领', region: '-', company: '-', owner: '-', serviceStaff: '-', last: '2024-02-28', follow: 1, opp: 0, scheme: 0, cert: 0 }
+        };
+
+        // 标签池数据
+        const systemTagPool = [
+            { value: 'central-enterprise', label: '中央企业', icon: 'fa-landmark', fixed: true },
+            { value: 'group-customer', label: '集团客户', icon: 'fa-sitemap', fixed: true },
+            { value: 'a-plus', label: 'A+级客户', icon: 'fa-star', fixed: false },
+            { value: 'high-credit', label: '信用良好', icon: 'fa-shield-alt', fixed: false }
+        ];
+        const tagPool = [
+            { value: 'strategic', label: '战略客户', icon: 'fa-crown' },
+            { value: 'annual-key', label: '年度重点', icon: 'fa-bullseye' },
+            { value: 'long-term', label: '长期合作', icon: 'fa-handshake' },
+            { value: 'high-risk', label: '高风险客户', icon: 'fa-exclamation-triangle' },
+            { value: 'key-account', label: '重点客户', icon: 'fa-gem' },
+            { value: 'new-develop', label: '新开发客户', icon: 'fa-rocket' },
+            { value: 'renewal-risk', label: '续证风险', icon: 'fa-clock' },
+            { value: 'price-sensitive', label: '价格敏感', icon: 'fa-dollar-sign' },
+            { value: 'high-requirement', label: '要求高', icon: 'fa-medal' },
+            { value: 'vip-service', label: 'VIP服务', icon: 'fa-crown' }
+        ];
+
+        // 当前客户已关联的标签
+        let associatedSystemTags = ['central-enterprise', 'group-customer', 'a-plus'];
+        let associatedTags = ['strategic', 'annual-key', 'long-term'];
+
+        function getInfoValue(labelText) {
+            const row = Array.from(document.querySelectorAll('.info-row')).find(item => item.querySelector('.info-label')?.textContent.trim() === labelText);
+            return row?.querySelector('.info-value')?.textContent.trim() || '';
+        }
+
+        function setInfoValue(labelText, value) {
+            const row = Array.from(document.querySelectorAll('.info-row')).find(item => item.querySelector('.info-label')?.textContent.trim() === labelText);
+            const valueEl = row?.querySelector('.info-value');
+            if (valueEl) valueEl.textContent = value || '-';
+        }
+
+        function openBasicEditModal() {
+            document.getElementById('basic-name').value = document.getElementById('customer-name').textContent.trim();
+            document.getElementById('basic-name-en').value = document.getElementById('customer-name-en').textContent.trim();
+            document.getElementById('basic-type').value = getInfoValue('客户类型') || '中央企业';
+            document.getElementById('basic-central-enterprise').value = getInfoValue('具体中央企业');
+            document.getElementById('basic-industry').value = getInfoValue('行业分类');
+            const capitalParts = getInfoValue('注册资金').split('/');
+            document.getElementById('basic-capital').value = (capitalParts[0] || '').replace('元', '').trim();
+            document.getElementById('basic-currency').value = (capitalParts[1] || '人民币').trim();
+            document.getElementById('basic-employee-total').value = getInfoValue('公司总人数').replace('人', '');
+            document.getElementById('basic-legal-person').value = getInfoValue('法定代表人');
+            openModal('basicEditModal');
+        }
+
+        function saveBasicInfo() {
+            const name = document.getElementById('basic-name').value.trim();
+            if (!name) {
+                alert('请填写客户名称');
+                return;
+            }
+            document.getElementById('customer-name').textContent = name;
+            document.getElementById('customer-name-en').textContent = document.getElementById('basic-name-en').value.trim();
+            setInfoValue('客户类型', document.getElementById('basic-type').value);
+            setInfoValue('具体中央企业', document.getElementById('basic-central-enterprise').value.trim());
+            setInfoValue('行业分类', document.getElementById('basic-industry').value.trim());
+            const capital = document.getElementById('basic-capital').value.trim().replace(/元$/, '');
+            const currency = document.getElementById('basic-currency').value;
+            setInfoValue('注册资金', `${capital || '-'}元 / ${currency}`);
+            const employeeTotal = document.getElementById('basic-employee-total').value.trim();
+            setInfoValue('公司总人数', employeeTotal ? `${employeeTotal}人` : '-');
+            setInfoValue('法定代表人', document.getElementById('basic-legal-person').value.trim());
+            closeModal('basicEditModal');
+            showToast('基本信息已更新');
+        }
+
+        // 初始化标签池UI
+        function renderTagPool() {
+            const systemContainer = document.getElementById('system-tag-options');
+            const container = document.getElementById('tag-pool-container');
+            systemContainer.innerHTML = '';
+            container.innerHTML = '';
+
+            systemTagPool.forEach(tag => {
+                const isSelected = associatedSystemTags.includes(tag.value);
+                const option = document.createElement('span');
+                option.className = `tag-option ${isSelected ? 'selected' : ''} ${tag.fixed ? 'opacity-80' : ''}`;
+                option.innerHTML = `<i class="fas ${tag.icon}"></i>${tag.label}${tag.fixed ? '<span class="ml-1 text-[10px]">固定</span>' : ''}`;
+                if (!tag.fixed) {
+                    option.onclick = function() {
+                        toggleSystemTagAssociation(tag.value);
+                    };
+                }
+                systemContainer.appendChild(option);
+            });
+
+            tagPool.forEach(tag => {
+                const isSelected = associatedTags.includes(tag.value);
+                const option = document.createElement('span');
+                option.className = `tag-option ${isSelected ? 'selected' : ''}`;
+                option.setAttribute('data-value', tag.value);
+                option.innerHTML = `<i class="fas ${tag.icon}"></i>${tag.label}`;
+                option.onclick = function() {
+                    toggleTagAssociation(tag.value);
+                };
+                container.appendChild(option);
+            });
+        }
+
+        function toggleSystemTagAssociation(tagValue) {
+            const tag = systemTagPool.find(t => t.value === tagValue);
+            if (!tag || tag.fixed) return;
+            const index = associatedSystemTags.indexOf(tagValue);
+            if (index > -1) {
+                associatedSystemTags.splice(index, 1);
+            } else {
+                associatedSystemTags.push(tagValue);
+            }
+            renderTagPool();
+            updateTagPreview();
+        }
+
+        // 切换标签关联状态
+        function toggleTagAssociation(tagValue) {
+            const index = associatedTags.indexOf(tagValue);
+            if (index > -1) {
+                associatedTags.splice(index, 1);
+            } else {
+                associatedTags.push(tagValue);
+            }
+            renderTagPool();
+            updateTagPreview();
+        }
+
+        function updateTagPreview() {
+            const container = document.getElementById('preview-tags');
+            container.innerHTML = '';
+
+            [...associatedSystemTags, ...associatedTags].forEach(tagValue => {
+                const tagInfo = systemTagPool.find(t => t.value === tagValue) || tagPool.find(t => t.value === tagValue);
+                if (tagInfo) {
+                    const tag = document.createElement('span');
+                    tag.className = systemTagPool.some(t => t.value === tagValue) ? 'tag tag-preset' : 'tag tag-custom';
+                    tag.innerHTML = `<i class="fas ${tagInfo.icon}"></i>${tagInfo.label}`;
+                    container.appendChild(tag);
+                }
+            });
+        }
+
+        // 保留此函数以兼容旧代码，但功能已从"新增"改为"从池子选择"
+        function addCustomTag() {
+            console.log('标签只能从标签池中选择关联');
+        }
+
+        // 弹窗控制
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 标签配置
+        function openTagEditModal() {
+            renderTagPool();
+            updateTagPreview();
+            openModal('tagEditModal');
+        }
+
+        function saveTags() {
+            const customerTagsContainer = document.getElementById('customer-tags');
+            customerTagsContainer.innerHTML = '';
+
+            [...associatedSystemTags, ...associatedTags].forEach(tagValue => {
+                const tagInfo = systemTagPool.find(t => t.value === tagValue) || tagPool.find(t => t.value === tagValue);
+                if (tagInfo) {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = systemTagPool.some(t => t.value === tagValue) ? 'tag tag-preset' : 'tag tag-custom';
+                    tagSpan.innerHTML = `<i class="fas ${tagInfo.icon} mr-1"></i>${tagInfo.label}`;
+                    customerTagsContainer.appendChild(tagSpan);
+                }
+            });
+
+            closeModal('tagEditModal');
+            showToast('客户标签已更新');
+        }
+
+        // 客户数据同步功能
+        async function syncCustomerData() {
+            const btn = document.getElementById('sync-btn');
+            const statusContainer = document.getElementById('sync-status-container');
+            const statusText = document.getElementById('sync-status-text');
+            
+            // 防止重复点击
+            if (btn.classList.contains('syncing')) return;
+            
+            btn.classList.add('syncing');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-spinner loading-spinner mr-1"></i>同步中...`;
+            
+            try {
+                // 模拟API调用
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 模拟从接口获取的最新数据
+                const latestData = {
+                    name: '丰源新能源集团有限公司',
+                    creditCode: '91110000100010433W',
+                    legalPerson: '戴厚良',
+                    capital: '500,000,000元', // 变更示例
+                    employeeTotal: '1,700人', // 变更示例
+                    industry: '电力、热力、燃气及水生产和供应业 / 电力生产 / 太阳能发电 / 太阳能发电',
+                    establishDate: '1990-02-09',
+                    address: {
+                        province: '北京市',
+                        city: '北京市',
+                        district: '东城区',
+                        detail: '东直门北大街9号中国石油大厦A座',
+                        detailEn: 'Building A, PetroChina Tower, No.9 Dongzhimen North Street, Dongcheng District, Beijing, China'
+                    }
+                };
+                
+                // 更新页面数据
+                document.getElementById('customer-name').textContent = latestData.name;
+                
+                // 更新基础信息字段
+                const rows = document.querySelectorAll('.info-row');
+                rows.forEach(row => {
+                    const label = row.querySelector('.info-label').textContent;
+                    const valueSpan = row.querySelector('.info-value');
+                    
+                    if (label.includes('注册资金')) valueSpan.textContent = latestData.capital + ' / 人民币';
+                    if (label.includes('公司总人数')) valueSpan.textContent = latestData.employeeTotal;
+                    if (label.includes('行业分类')) valueSpan.textContent = latestData.industry;
+                    if (label.includes('注册地址') && !label.includes('英')) valueSpan.textContent = latestData.address.detail;
+                    if (label.includes('注册地址') && label.includes('英')) valueSpan.textContent = latestData.address.detailEn;
+                });
+                
+                // 显示同步成功状态
+                statusContainer.classList.remove('hidden');
+                statusText.className = 'sync-status success';
+                statusText.innerHTML = '<i class="fas fa-check-circle mr-1"></i>刚刚同步';
+                
+                showToast('客户数据同步成功');
+                
+                // 3秒后隐藏状态标识
+                setTimeout(() => {
+                    statusContainer.classList.add('hidden');
+                }, 5000);
+                
+            } catch (error) {
+                statusContainer.classList.remove('hidden');
+                statusText.className = 'sync-status error';
+                statusText.innerHTML = '<i class="fas fa-times-circle mr-1"></i>同步失败';
+                showToast('同步失败，请稍后重试');
+            } finally {
+                btn.classList.remove('syncing');
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        // 地址编辑
+        const addressValues = {
+            registered: { province: '北京市', city: '北京市', district: '东城区', detail: '东直门北大街9号中国石油大厦', detailEn: 'No.9 Dongzhimen North Street, PetroChina Tower, Dongcheng District, Beijing, China', zip: '' },
+            operating: { province: '北京市', city: '北京市', district: '海淀区', detail: '中关村软件园二期8号楼', detailEn: 'Building 8, Zhongguancun Software Park Phase II, Haidian District, Beijing, China', zip: '' }
+        };
+        let editingAddressKind = 'registered';
+
+        function openAddressEditModal(kind = 'registered') {
+            editingAddressKind = kind;
+            const address = addressValues[kind];
+            const label = kind === 'registered' ? '注册地址' : '运营地址';
+            document.getElementById('address-modal-title').textContent = '编辑' + label;
+            document.getElementById('addr-detail-label').textContent = label;
+            document.getElementById('addr-detail-en-label').textContent = label + '（英）';
+            document.getElementById('addr-detail').value = address.detail;
+            document.getElementById('addr-detail-en').value = address.detailEn;
+            document.getElementById('addr-zip').value = address.zip;
+            setCascaderValue('addr-region', getSiteRegionValue(address.province, address.city, address.district));
+            openModal('addressEditModal');
+        }
+
+        function saveAddress() {
+            const region = parseSiteRegionValue(document.getElementById('addr-region').value);
+            const detail = document.getElementById('addr-detail').value.trim();
+            if (!region.province || !region.city || !region.district) {
+                showToast('请选择完整省市区');
+                return;
+            }
+            if (!detail) {
+                showToast('请填写详细地址');
+                return;
+            }
+            const address = addressValues[editingAddressKind];
+            Object.assign(address, region, {
+                detail: detail,
+                detailEn: document.getElementById('addr-detail-en').value.trim(),
+                zip: document.getElementById('addr-zip').value.trim()
+            });
+            const ids = editingAddressKind === 'registered'
+                ? ['address-region', 'address-detail', 'address-detail-en']
+                : ['operating-region', 'operating-address', 'operating-address-en'];
+            document.getElementById(ids[0]).textContent = [address.province, address.city, address.district].join(' ');
+            document.getElementById(ids[1]).textContent = address.detail;
+            document.getElementById(ids[2]).textContent = address.detailEn;
+            closeModal('addressEditModal');
+            showToast('地址信息保存成功');
+        }
+
+                // 开票信息编辑
+        function openInvoiceEditModal() {
+            openModal('invoiceEditModal');
+        }
+
+        function saveInvoice() {
+            document.getElementById('invoice-name').textContent = document.getElementById('inv-name').value;
+            document.getElementById('invoice-tax').textContent = document.getElementById('inv-tax').value;
+            document.getElementById('invoice-bank').textContent = document.getElementById('inv-bank').value;
+            document.getElementById('invoice-account').textContent = document.getElementById('inv-account').value;
+            document.getElementById('invoice-address').textContent = document.getElementById('inv-address').value;
+            document.getElementById('invoice-phone').textContent = document.getElementById('inv-phone').value;
+            
+            closeModal('invoiceEditModal');
+            showToast('开票信息保存成功');
+        }
+
+        // 备注编辑
+        function openRemarkEditModal() {
+            openModal('remarkEditModal');
+        }
+
+        function saveRemark() {
+            document.getElementById('remark-text').textContent = document.getElementById('remark-edit-text').value;
+            closeModal('remarkEditModal');
+            showToast('备注保存成功');
+        }
+
+        // 业务联系人管理
+        function openContactModal(contactId = null) {
+            const modal = document.getElementById('contactModal');
+            const title = document.getElementById('contact-modal-title');
+            
+            if (contactId) {
+                const contact = contactsData.find(c => c.id === contactId);
+                if (contact) {
+                    title.textContent = '编辑业务联系人';
+                    document.getElementById('contact-id').value = contact.id;
+                    document.getElementById('contact-name').value = contact.name;
+                    document.getElementById('contact-position').value = contact.position || '';
+                    document.getElementById('contact-dept').value = contact.dept || '';
+                    document.getElementById('contact-scope').value = contact.scope || salesAllowedScopes[0];
+                    document.getElementById('contact-mobile').value = contact.mobile;
+                    document.getElementById('contact-email').value = contact.email;
+                    document.getElementById('contact-duty').value = contact.duty || '';
+                }
+            } else {
+                title.textContent = '新增业务联系人';
+                document.getElementById('contact-id').value = '';
+                document.getElementById('contact-name').value = '';
+                document.getElementById('contact-position').value = '';
+                document.getElementById('contact-duty').value = '';
+                document.getElementById('contact-dept').value = '';
+                document.getElementById('contact-scope').value = currentScope !== 'ALL' && salesAllowedScopes.includes(currentScope) ? currentScope : salesAllowedScopes[0];
+                document.getElementById('contact-mobile').value = '';
+                document.getElementById('contact-email').value = '';
+            }
+            
+            openModal('contactModal');
+        }
+
+        function editContact(id) {
+            openContactModal(id);
+        }
+
+        function saveContact() {
+            const id = document.getElementById('contact-id').value;
+            const name = document.getElementById('contact-name').value;
+            const scope = document.getElementById('contact-scope').value;
+            
+            if (!name || !scope) {
+                alert('请填写必填项');
+                return;
+            }
+            
+            const newContact = {
+                id: id ? parseInt(id) : Date.now(),
+                name: name,
+                position: document.getElementById('contact-position').value,
+                duty: document.getElementById('contact-duty').value,
+                dept: document.getElementById('contact-dept').value,
+                mobile: document.getElementById('contact-mobile').value,
+                email: document.getElementById('contact-email').value,
+                scope,
+                avatar: name.charAt(0),
+                color: id ? (contactsData.find(c => c.id === parseInt(id))?.color || 'blue') : ['blue', 'purple', 'orange', 'green', 'red'][Math.floor(Math.random() * 5)]
+            };
+            
+            if (id) {
+                const index = contactsData.findIndex(c => c.id === parseInt(id));
+                if (index !== -1) contactsData[index] = newContact;
+            } else {
+                contactsData.push(newContact);
+            }
+            
+            renderContacts();
+            closeModal('contactModal');
+            showToast(id ? '业务联系人修改成功' : '业务联系人新增成功');
+        }
+
+        function renderContacts() {
+            const container = document.getElementById('contacts-list');
+            container.innerHTML = '';
+            
+            const visibleContacts = contactsData.filter(contact => salesAllowedScopes.includes(contact.scope));
+            visibleContacts.forEach(contact => {
+                const html = `
+                    <div class="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow" data-contact-id="${contact.id}">
+                        <div class="flex items-start">
+                            <div class="contact-avatar bg-${contact.color}-600 text-white mr-4">${contact.avatar}</div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-3">
+                                        <h5 class="font-bold text-lg text-gray-800">${contact.name}</h5>
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">${contact.scope}</span>
+                                        <span class="px-2 py-1 bg-${contact.color}-100 text-${contact.color}-700 rounded text-xs">${contact.position || '业务联系人'}</span>
+                                    </div>
+                                    <div class="resource-actions">
+                                        <button class="icon-btn role-action" onclick="editContact(${contact.id})" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="icon-btn delete role-action" onclick="confirmDeleteContact(${contact.id})" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-500 mb-3">${contact.dept || ''} ${contact.duty ? '· ' + contact.duty : ''}</p>
+                                <div class="grid grid-cols-3 gap-4 mb-3">
+                                    <div class="flex items-center text-sm">
+                                        <i class="fas fa-phone text-${contact.color}-500 mr-2 w-4"></i>
+                                        <span class="font-medium">${contact.mobile || '-'}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm">
+                                        <i class="fas fa-envelope text-${contact.color}-500 mr-2 w-4"></i>
+                                        <span>${contact.email || '-'}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm">
+                                        <i class="fas fa-map-marker-alt text-${contact.color}-500 mr-2 w-4"></i>
+                                        <span>${scopeNames[contact.scope] || contact.scope}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+            
+            document.getElementById('contact-count').textContent = visibleContacts.length;
+        }
+
+        function confirmDeleteContact(id) {
+            deleteTarget = { type: 'contact', id: id };
+            document.getElementById('confirm-title').textContent = '确认删除业务联系人？';
+            document.getElementById('confirm-text').textContent = '删除后该业务联系人信息将被移除，此操作不可恢复。';
+            openModal('confirmModal');
+        }
+
+        // 场所管理（精简版）
+        function getSiteRegionValue(province, city, district) {
+            return [province || '', city || '', district || ''].join('|');
+        }
+
+        function parseSiteRegionValue(value) {
+            const [province = '', city = '', district = ''] = (value || '').split('|');
+            return { province, city, district };
+        }
+
+        const cascaderState = {
+            'site-region': { path: [] },
+            'addr-region': { path: [] },
+            'site-industry': { path: [] }
+        };
+
+        function getCascaderData(type) {
+            return ['site-region', 'addr-region'].includes(type) ? regionOptions : nationalIndustryOptions;
+        }
+
+        function getCascaderPlaceholder(type) {
+            return ['site-region', 'addr-region'].includes(type) ? '请选择省市区' : '请选择所属国民经济行业';
+        }
+
+        function getCascaderLeafValue(type, path) {
+            if (['site-region', 'addr-region'].includes(type)) return getSiteRegionValue(path[0], path[1], path[2]);
+            const leaf = path[path.length - 1] || '';
+            const code = leaf.split(' ')[0] || '';
+            return code ? `${path[0]?.charAt(0) || ''}/${path[1]?.split(' ')[0] || ''}/${path[2]?.split(' ')[0] || ''}/${code}` : '';
+        }
+
+        function getCascaderLeafPath(type, value) {
+            if (!value) return [];
+            if (['site-region', 'addr-region'].includes(type)) {
+                const region = parseSiteRegionValue(value);
+                return [region.province, region.city, region.district].filter(Boolean);
+            }
+
+            const parts = value.split('/');
+            const targetCode = parts[parts.length - 1];
+            let foundPath = [];
+            Object.entries(nationalIndustryOptions).some(([first, seconds]) => {
+                return Object.entries(seconds).some(([second, thirds]) => {
+                    return Object.entries(thirds).some(([third, fourths]) => {
+                        const leaf = fourths.find(item => item.startsWith(`${targetCode} `));
+                        if (leaf) {
+                            foundPath = [first, second, third, leaf];
+                            return true;
+                        }
+                        return false;
+                    });
+                });
+            });
+            return foundPath;
+        }
+
+        function getNodeAtPath(data, path) {
+            return path.reduce((node, key) => {
+                if (Array.isArray(node)) return node;
+                return node?.[key];
+            }, data);
+        }
+
+        function renderCascader(type) {
+            const panel = document.getElementById(`${type}-panel`);
+            const trigger = document.querySelector(`#${type}-cascader .cascader-trigger`);
+            if (!panel || !trigger) return;
+
+            const data = getCascaderData(type);
+            const path = cascaderState[type].path;
+            const columns = [];
+            let node = data;
+
+            for (let level = 0; level < 4 && node; level++) {
+                const options = Array.isArray(node) ? node : Object.keys(node);
+                columns.push({ level, options });
+                const selected = path[level];
+                node = selected && !Array.isArray(node) ? node[selected] : (Array.isArray(node) ? null : node[options[0]]);
+                if (Array.isArray(node) && path[level + 1]) node = null;
+            }
+
+            panel.innerHTML = columns.map(column => `
+                <div class="cascader-column">
+                    ${column.options.map(option => `
+                        <button type="button" class="cascader-option ${path[column.level] === option ? 'active' : ''}" onclick="chooseCascaderOption('${type}', ${column.level}, '${option.replace(/'/g, "\\'")}')">${option}</button>
+                    `).join('')}
+                </div>
+            `).join('');
+
+            const value = document.getElementById(type)?.value;
+            const selectedPath = getCascaderLeafPath(type, value);
+            trigger.textContent = selectedPath.length ? selectedPath.join(' / ') : getCascaderPlaceholder(type);
+            trigger.classList.toggle('placeholder', !selectedPath.length);
+        }
+
+        function chooseCascaderOption(type, level, option) {
+            const nextPath = cascaderState[type].path.slice(0, level);
+            nextPath[level] = option;
+            cascaderState[type].path = nextPath;
+
+            const data = getCascaderData(type);
+            const node = getNodeAtPath(data, nextPath);
+            if (Array.isArray(node) && level === (type === 'site-industry' ? 3 : 2)) {
+                document.getElementById(type).value = getCascaderLeafValue(type, nextPath);
+                document.getElementById(`${type}-panel`)?.classList.remove('active');
+            } else {
+                document.getElementById(type).value = '';
+            }
+
+            renderCascader(type);
+        }
+
+        function toggleCascader(type) {
+            document.querySelectorAll('.cascader-panel').forEach(panel => {
+                if (panel.id !== `${type}-panel`) panel.classList.remove('active');
+            });
+            const panel = document.getElementById(`${type}-panel`);
+            panel?.classList.toggle('active');
+            renderCascader(type);
+        }
+
+        function setCascaderValue(type, value) {
+            const field = document.getElementById(type);
+            if (!field) return;
+            field.value = value || '';
+            cascaderState[type].path = getCascaderLeafPath(type, field.value);
+            renderCascader(type);
+        }
+
+        function updateSiteRegionOptions(preset = {}) {
+            setCascaderValue('site-region', getSiteRegionValue(preset.province, preset.city, preset.district));
+        }
+
+        function formatRegionAddress(province, city, district, detail) {
+            const cityText = province === city ? '' : city;
+            return `${province || ''}${cityText || ''}${district || ''}${detail || ''}`;
+        }
+
+        function buildSiteAddress(site) {
+            const address = formatRegionAddress(site.province, site.city, site.district, site.addressDetail);
+            return address || site.address || site.addressDetailEn || '-';
+        }
+
+        function updateCharCount(field) {
+            const wrapper = field.closest('.input-with-count');
+            const counter = wrapper?.querySelector('.char-count');
+            if (!counter) return;
+            counter.textContent = `${field.value.length} / ${field.maxLength}`;
+        }
+
+        function setSiteFieldValue(id, value) {
+            const field = document.getElementById(id);
+            if (!field) return;
+            field.value = value || '';
+            if (field.maxLength > 0) updateCharCount(field);
+        }
+
+        function refreshSiteCharCounts() {
+            document.querySelectorAll('#siteModal .input-with-count input, #siteModal .input-with-count textarea').forEach(updateCharCount);
+        }
+
+        const aiSiteSuggestions = [
+            {
+                customerType: 'domestic',
+                country: '156',
+                name: '丰源新能源集团有限公司天津生产基地',
+                nameEn: 'Fengyuan New Energy Group Tianjin Production Base',
+                creditCode: '91120242MA0QFK058N',
+                employees: 450,
+                type: 'fixed',
+                legalPerson: '刘明',
+                phone: '022-66218888',
+                registeredCapital: '12000',
+                capitalCurrency: 'CNY',
+                industry: 'C/38/382/3825',
+                province: '天津市',
+                city: '天津市',
+                district: '滨海新区',
+                registeredAddress: '天津市滨海新区第九大街18号',
+                registeredAddressEn: 'No.18 Ninth Avenue, Binhai New Area, Tianjin, China',
+                addressDetail: '第九大街18号',
+                addressDetailEn: 'No.18 Ninth Avenue, Binhai New Area, Tianjin, China'
+            },
+            {
+                customerType: 'domestic',
+                country: '156',
+                name: '丰源新能源集团有限公司保定储能试制中心',
+                nameEn: 'Fengyuan New Energy Group Baoding Energy Storage Pilot Center',
+                creditCode: '91130605MA0G8X21X9',
+                employees: 180,
+                type: 'service',
+                legalPerson: '陈立',
+                phone: '0312-3128888',
+                registeredCapital: '3000',
+                capitalCurrency: 'CNY',
+                industry: 'C/38/382/3825',
+                province: '河北省',
+                city: '保定市',
+                district: '高新区',
+                registeredAddress: '河北省保定市高新区向阳北大街2899号',
+                registeredAddressEn: 'No.2899 Xiangyang North Street, Gaoxin District, Baoding, Hebei, China',
+                addressDetail: '向阳北大街2899号',
+                addressDetailEn: 'No.2899 Xiangyang North Street, Gaoxin District, Baoding, Hebei, China'
+            },
+            {
+                customerType: 'domestic',
+                country: '156',
+                name: '丰源新能源集团有限公司总部办公楼',
+                nameEn: 'Fengyuan New Energy Group Beijing Headquarters',
+                creditCode: '91110000100010433W',
+                employees: 450,
+                type: 'fixed',
+                legalPerson: '王建国',
+                phone: '010-12345678',
+                registeredCapital: '50000',
+                capitalCurrency: 'CNY',
+                industry: 'D/44/441/4416',
+                province: '北京市',
+                city: '北京市',
+                district: '东城区',
+                registeredAddress: '北京市东城区东直门北大街9号',
+                registeredAddressEn: 'No.9 Dongzhimen North Street, Dongcheng District, Beijing, China',
+                addressDetail: '东直门北大街9号中国石油大厦',
+                addressDetailEn: 'No.9 Dongzhimen North Street, PetroChina Tower, Dongcheng District, Beijing, China'
+            },
+            {
+                customerType: 'overseas',
+                country: '702',
+                name: '',
+                nameEn: 'Fengyuan Energy Singapore Pte. Ltd.',
+                creditCode: '202412345N',
+                employees: 86,
+                type: 'fixed',
+                legalPerson: 'Liu Ming',
+                phone: '+65 6123 8899',
+                registeredCapital: '800',
+                capitalCurrency: 'USD',
+                industry: 'I/65/651/6513',
+                province: '',
+                city: '',
+                district: '',
+                registeredAddress: '',
+                registeredAddressEn: '10 Anson Road, #20-01 International Plaza, Singapore 079903',
+                addressDetail: '',
+                addressDetailEn: '10 Anson Road, #20-01 International Plaza, Singapore 079903'
+            },
+            {
+                customerType: 'overseas',
+                country: '276',
+                name: '',
+                nameEn: 'Fengyuan Energy GmbH Munich Branch',
+                creditCode: 'HRB 298765',
+                employees: 42,
+                type: 'service',
+                legalPerson: 'Chen Li',
+                phone: '+49 89 1234 5678',
+                registeredCapital: '500',
+                capitalCurrency: 'EUR',
+                industry: 'L/72/721/7212',
+                province: '',
+                city: '',
+                district: '',
+                registeredAddress: '',
+                registeredAddressEn: 'Leopoldstrasse 23, 80802 Munich, Germany',
+                addressDetail: '',
+                addressDetailEn: 'Leopoldstrasse 23, 80802 Munich, Germany'
+            }
+        ];
+
+        function setRequiredLabel(id, required) {
+            document.getElementById(id)?.classList.toggle('required', required);
+        }
+
+        function syncSiteForm() {
+            const modal = document.getElementById('siteModal');
+            const location = document.getElementById('site-customer-type').value;
+            const category = document.getElementById('site-type').value;
+            const overseas = location === 'overseas';
+            const company = category === 'company';
+            const editing = Boolean(document.getElementById('site-id').value);
+            modal.dataset.location = location;
+            modal.dataset.category = category;
+
+            ['domestic', 'overseas'].forEach(value => {
+                const button = document.getElementById('site-' + value + '-btn');
+                button.classList.toggle('active', value === location);
+                button.disabled = editing;
+                button.setAttribute('aria-pressed', String(value === location));
+            });
+            ['fixed', 'service', 'company'].forEach(value => {
+                const button = document.getElementById('site-' + value + '-btn');
+                button.classList.toggle('active', value === category);
+                button.disabled = editing;
+                button.setAttribute('aria-pressed', String(value === category));
+            });
+            document.getElementById('site-country-field').classList.toggle('site-field-hidden', !overseas);
+            document.getElementById('site-region-field').classList.toggle('site-field-hidden', overseas);
+            document.querySelector('.site-field-credit').classList.toggle('site-field-hidden', !company);
+            document.querySelector('.site-field-tax-type').classList.toggle('site-field-hidden', !(company && overseas));
+            document.querySelector('.site-field-industry').classList.toggle('site-field-hidden', !company);
+            ['legal','phone','capital'].forEach(name =>
+                document.querySelector('.site-field-' + name).classList.toggle('site-field-hidden', !company)
+            );
+
+            document.getElementById('site-credit-code-label').textContent = overseas ? '税号/登记号' : '统一社会信用代码';
+            document.getElementById('site-credit-code').placeholder = overseas ? '请输入税号或登记号' : '如：91120242MA0QFK058N';
+            setRequiredLabel('site-name-label', !overseas);
+            setRequiredLabel('site-name-en-label', overseas);
+            setRequiredLabel('site-industry-label', company && !overseas);
+            setRequiredLabel('site-registered-address-label', company && !overseas);
+            setRequiredLabel('site-registered-address-en-label', company && overseas);
+            setRequiredLabel('site-address-detail-label', company && !overseas);
+            setRequiredLabel('site-address-detail-en-label', company && overseas);
+            document.getElementById('site-name-suggestions').classList.remove('active');
+        }
+
+        function setSiteCustomerType(type, force = false) {
+            if (!force && document.getElementById('site-id').value) return;
+            document.getElementById('site-customer-type').value = type;
+            syncSiteForm();
+        }
+
+        function setSiteType(type, force = false) {
+            if (!force && document.getElementById('site-id').value) return;
+            document.getElementById('site-type').value = type;
+            syncSiteForm();
+        }
+
+        function normalizeCountryDisplay() {
+            const select = document.getElementById('site-country');
+            const codeBadge = document.getElementById('site-country-code');
+            if (!select) return;
+            if (!codeBadge) return;
+            codeBadge.textContent = select.value || '---';
+            codeBadge.classList.toggle('empty', !select.value);
+        }
+
+        function handleSiteNameInput(field) {
+            updateCharCount(field);
+            const keyword = field.value.trim().toLowerCase();
+            const list = document.getElementById('site-name-suggestions');
+            if (!list) return;
+            const customerType = document.getElementById('site-customer-type')?.value || 'domestic';
+            const selectedType = document.getElementById('site-type').value;
+            const source = aiSiteSuggestions.filter(site => (site.customerType || 'domestic') === customerType && site.type === selectedType);
+
+            const matches = (keyword.length >= 2
+                ? source.filter(site => `${site.name} ${site.nameEn} ${site.creditCode}`.toLowerCase().includes(keyword))
+                : []).slice(0, 5);
+
+            list.innerHTML = matches.map((site, index) => `
+                <button type="button" class="site-suggestion-item" onclick="selectAiSiteSuggestion(${index})">
+                    <div class="site-suggestion-name">${site.name || site.nameEn}</div>
+                    <div class="site-suggestion-meta">${customerType === 'overseas' ? '税号/登记号' : '统一社会信用代码'}：${site.creditCode} · ${site.registeredAddress || site.registeredAddressEn}</div>
+                </button>
+            `).join('');
+            list.classList.toggle('active', matches.length > 0);
+            list.dataset.matches = JSON.stringify(matches.map(site => site.creditCode));
+        }
+
+        function selectAiSiteSuggestion(index) {
+            const list = document.getElementById('site-name-suggestions');
+            const codes = JSON.parse(list?.dataset.matches || '[]');
+            const site = aiSiteSuggestions.find(item => item.creditCode === codes[index]);
+            if (!site) return;
+
+            setSiteCustomerType(site.customerType || 'domestic');
+            setSiteFieldValue('site-name', site.name);
+            setSiteFieldValue('site-name-en', site.nameEn);
+            setSiteFieldValue('site-credit-code', site.creditCode);
+            setSiteFieldValue('site-employees', site.employees);
+            setSiteFieldValue('site-type', site.type);
+            setSiteFieldValue('site-country', site.country);
+            normalizeCountryDisplay();
+            setSiteFieldValue('site-legal-person', site.legalPerson);
+            setSiteFieldValue('site-phone', site.phone);
+            setSiteFieldValue('site-registered-capital', site.registeredCapital);
+            setSiteFieldValue('site-capital-currency', site.capitalCurrency);
+            setCascaderValue('site-industry', site.industry);
+            if ((site.customerType || 'domestic') === 'domestic') {
+                updateSiteRegionOptions({
+                    province: site.province,
+                    city: site.city,
+                    district: site.district
+                });
+            } else {
+                setCascaderValue('site-region', '');
+            }
+            setSiteFieldValue('site-registered-address', site.registeredAddress);
+            setSiteFieldValue('site-registered-address-en', site.registeredAddressEn);
+            setSiteFieldValue('site-address-detail', site.addressDetail);
+            setSiteFieldValue('site-address-detail-en', site.addressDetailEn);
+            list.classList.remove('active');
+            showToast('已根据企业名称带入场所相关信息，可继续手动调整');
+        }
+
+        function openSiteModal(siteId = null) {
+            const site = siteId ? sitesData.find(item => item.id === siteId) : null;
+            if (siteId && !site) return;
+            if (site?.isHeadquarters) {
+                showToast('总部场所由客户基础信息带入，不能编辑');
+                return;
+            }
+            const editing = Boolean(site);
+            document.getElementById('site-modal-title').textContent = editing ? '编辑场所' : '添加场所';
+            document.getElementById('site-id').value = editing ? site.id : '';
+            setSiteCustomerType(site?.customerType || 'domestic', true);
+            setSiteType(site?.type || 'fixed', true);
+            document.getElementById('site-name-suggestions').classList.remove('active');
+
+            const fields = {
+                'site-name':site?.name || '',
+                'site-name-en':site?.nameEn || '',
+                'site-credit-code':site?.creditCode || '',
+                'site-tax-type':site?.taxType || '',
+                'site-employees':site?.employees || '',
+                'site-country':site?.country || '',
+                'site-legal-person':site?.legalPerson || '',
+                'site-phone':site?.phone || '',
+                'site-registered-capital':site?.registeredCapital || '',
+                'site-capital-currency':site?.capitalCurrency || 'CNY',
+                'site-registered-address':site?.registeredAddress || '',
+                'site-registered-address-en':site?.registeredAddressEn || '',
+                'site-address-detail':site?.addressDetail || '',
+                'site-address-detail-en':site?.addressDetailEn || ''
+            };
+            Object.entries(fields).forEach(([id,value]) => setSiteFieldValue(id,value));
+            normalizeCountryDisplay();
+            setCascaderValue('site-industry', site?.industry || '');
+            if ((site?.customerType || 'domestic') === 'domestic') {
+                updateSiteRegionOptions(site ? {
+                    province:site.province || '', city:site.city || '', district:site.district || ''
+                } : {});
+            } else {
+                setCascaderValue('site-region', '');
+            }
+            refreshSiteCharCounts();
+            renderCascader('site-region');
+            renderCascader('site-industry');
+            openModal('siteModal');
+        }
+
+        function editSite(id) {
+            openSiteModal(id);
+        }
+
+        function saveSite() {
+            const id = document.getElementById('site-id').value;
+            const previous = id ? sitesData.find(site => site.id === parseInt(id)) : null;
+            const customerType = previous?.customerType || document.getElementById('site-customer-type').value;
+            const type = previous?.type || document.getElementById('site-type').value;
+            const overseas = customerType === 'overseas';
+            const company = type === 'company';
+            const value = id => document.getElementById(id).value.trim();
+            const name = value('site-name');
+            const nameEn = value('site-name-en');
+            const employees = Number(value('site-employees'));
+            const country = value('site-country');
+            const region = parseSiteRegionValue(value('site-region'));
+            const registeredAddress = value('site-registered-address');
+            const registeredAddressEn = value('site-registered-address-en');
+            const addressDetail = value('site-address-detail');
+            const addressDetailEn = value('site-address-detail-en');
+            const legalPerson = value('site-legal-person');
+            const phone = value('site-phone');
+            const registeredCapital = value('site-registered-capital');
+            const industry = value('site-industry');
+
+            if (!overseas && !name) { alert('请填写场所名称（中文）'); return; }
+            if (overseas && !nameEn) { alert('请填写场所名称（英文）'); return; }
+            if (!Number.isInteger(employees) || employees < 1) { alert('请填写场所人数'); return; }
+            if (overseas && !country) { alert('请选择国家/地区'); return; }
+            if (!overseas && (!region.province || !region.city || !region.district)) {
+                alert('请选择完整省市区'); return;
+            }
+            if (company) {
+                if (!legalPerson) { alert('请填写法定代表人'); return; }
+                if (!phone) { alert('请填写联系电话'); return; }
+                if (!registeredCapital) { alert('请填写注册资本'); return; }
+                if (!overseas && !industry) { alert('请选择所属国民经济行业'); return; }
+                if (!overseas && (!registeredAddress || !addressDetail)) {
+                    alert('请填写注册地址和运营地址'); return;
+                }
+                if (overseas && (!registeredAddressEn || !addressDetailEn)) {
+                    alert('请填写注册地址（英）和运营地址（英）'); return;
+                }
+            }
+
+            const newSite = {
+                id: previous?.id || Date.now(),
+                customerType,
+                type,
+                country: overseas ? country : '156',
+                name,
+                nameEn,
+                creditCode: company ? value('site-credit-code') : '',
+                taxType: company && overseas ? value('site-tax-type') : '',
+                employees,
+                isHeadquarters: false,
+                isCentral: previous?.isCentral || false,
+                legalPerson: company ? legalPerson : '',
+                phone: company ? phone : '',
+                registeredCapital: company ? registeredCapital : '',
+                capitalCurrency: company ? value('site-capital-currency') : 'CNY',
+                industry: company ? industry : '',
+                province: overseas ? '' : region.province,
+                city: overseas ? '' : region.city,
+                district: overseas ? '' : region.district,
+                registeredAddress,
+                registeredAddressEn,
+                addressDetail,
+                addressDetailEn,
+                address: formatRegionAddress(
+                    overseas ? '' : region.province,
+                    overseas ? '' : region.city,
+                    overseas ? '' : region.district,
+                    overseas ? addressDetailEn : addressDetail
+                ),
+                contacts: previous?.contacts || []
+            };
+            if (previous) sitesData[sitesData.indexOf(previous)] = newSite;
+            else sitesData.push(newSite);
+            renderSites();
+            closeModal('siteModal');
+            showToast(previous ? '场所信息修改成功' : '场所添加成功');
+        }
+
+        function renderSites() {
+            const container = document.getElementById('sites-list');
+            container.innerHTML = '';
+            
+            [...sitesData].sort((a, b) => (b.isHeadquarters ? 1 : 0) - (a.isHeadquarters ? 1 : 0)).forEach(site => {
+                const siteContacts = (site.contacts || [])
+                    .map((contact, index) => ({ contact, index }));
+                const typeLabel = site.isHeadquarters ? '总部场所' : (site.type === 'company' ? '公司' : (site.type === 'service' ? '服务点' : '固定场所'));
+                const displayName = site.name || site.nameEn || '-';
+                const html = `
+                    <div class="site-card ${site.isCentral ? 'bg-gradient-to-r from-white to-blue-50/20 border-blue-200' : ''}" data-site-id="${site.id}">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-${site.isCentral ? 'blue' : 'gray'}-100 text-${site.isCentral ? 'blue' : 'gray'}-600 flex items-center justify-center">
+                                    <i class="fas fa-${site.isCentral ? 'building' : 'industry'} text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h5 class="font-bold text-lg text-gray-800">${displayName}</h5>
+                                        <span class="site-type-badge ${site.isHeadquarters || site.isCentral ? 'site-type-central' : 'site-type-normal'}">${typeLabel}</span>
+                                        ${site.isHeadquarters ? `<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">基础信息带入</span>` : ''}
+                                    </div>
+                                    <p class="text-sm text-gray-500">${site.nameEn || ''}</p>
+                                </div>
+                            </div>
+                            <div class="resource-actions">
+                                ${site.isHeadquarters ? `
+                                    <span class="text-xs text-gray-400 px-2">不可编辑</span>
+                                ` : `
+                                    <button class="icon-btn role-action" onclick="editSite(${site.id})" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="icon-btn delete role-action" onclick="confirmDeleteSite(${site.id})" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-500 mb-1">场所人数</p>
+                                <p class="font-bold text-gray-800">${site.employees}人</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-500 mb-1">联系人数量</p>
+                                <p class="font-bold text-gray-800">${siteContacts.length}人</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-500 mb-1">场所类型</p>
+                                <p class="font-bold text-gray-800">${typeLabel}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 bg-gray-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-500 mb-1">运营地址</p>
+                            <p class="font-medium text-gray-800">${buildSiteAddress(site)}</p>
+                        </div>
+                        <div class="mt-4 border-t border-gray-100 pt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-xs text-gray-500">场所联系人</p>
+                                <button class="text-xs text-blue-600 hover:text-blue-800 font-medium" onclick="openSiteContactModal(${site.id})"><i class="fas fa-plus mr-1"></i>添加场所联系人</button>
+                            </div>
+                            <div class="site-contact-grid">
+                                ${siteContacts.map(({ contact, index }) => `
+                                    <div class="site-contact-card">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex items-start gap-3 min-w-0">
+                                                <div class="site-contact-avatar">${(contact.name || '?').slice(0, 1)}</div>
+                                                <div class="min-w-0">
+                                                    <div class="font-semibold text-gray-800 truncate">${contact.name}</div>
+                                                    <div class="text-xs text-gray-500 mt-0.5 truncate">${contact.duty || '-'}</div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-1 flex-shrink-0">
+                                                <button class="icon-btn" onclick="openSiteContactModal(${site.id}, ${index})" title="编辑联系人"><i class="fas fa-edit"></i></button>
+                                                <button class="icon-btn delete" onclick="deleteSiteContact(${site.id}, ${index})" title="删除联系人"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 space-y-1 text-xs text-gray-500">
+                                            <div class="flex items-center"><i class="fas fa-phone text-blue-500 mr-2 w-3"></i><span class="font-medium text-gray-700">${contact.mobile || '-'}</span></div>
+                                            <div class="flex items-center min-w-0"><i class="fas fa-envelope text-blue-500 mr-2 w-3"></i><span class="truncate">${contact.email || '-'}</span></div>
+                                        </div>
+                                    </div>
+                                `).join('') || '<div class="text-sm text-gray-400 bg-gray-50 rounded-lg p-3">暂无联系人</div>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+            
+            document.getElementById('site-count').textContent = sitesData.length;
+            applyRoleActionState();
+        }
+
+        function confirmDeleteSite(id) {
+            const site = sitesData.find(s => s.id === id);
+            if (site?.isHeadquarters) {
+                showToast('总部场所由客户基础信息带入，不能删除');
+                return;
+            }
+            deleteTarget = { type: 'site', id: id };
+            document.getElementById('confirm-title').textContent = '确认删除场所？';
+            document.getElementById('confirm-text').textContent = '删除后该场所的所有信息将被移除，此操作不可恢复。';
+            openModal('confirmModal');
+        }
+
+        function openSiteContactModal(siteId, contactIndex = null) {
+            const site = sitesData.find(s => s.id === siteId);
+            const contact = contactIndex !== null ? site?.contacts?.[contactIndex] : null;
+            document.getElementById('site-contact-site-id').value = siteId;
+            document.getElementById('site-contact-index').value = contactIndex !== null ? contactIndex : '';
+            document.getElementById('site-contact-modal-title').textContent = contact ? '编辑场所联系人' : '添加场所联系人';
+            document.getElementById('site-contact-name').value = contact?.name || '';
+            document.getElementById('site-contact-duty').value = contact?.duty || '';
+            document.getElementById('site-contact-mobile').value = contact?.mobile || '';
+            document.getElementById('site-contact-email').value = contact?.email || '';
+            openModal('siteContactModal');
+        }
+
+        function saveSiteContact() {
+            const siteId = parseInt(document.getElementById('site-contact-site-id').value);
+            const contactIndexValue = document.getElementById('site-contact-index').value;
+            const site = sitesData.find(s => s.id === siteId);
+            const name = document.getElementById('site-contact-name').value.trim();
+            const duty = document.getElementById('site-contact-duty').value.trim();
+            const mobile = document.getElementById('site-contact-mobile').value.trim();
+            const email = document.getElementById('site-contact-email').value.trim();
+            if (!site || !name || !mobile) {
+                alert('请填写联系人姓名和手机号码');
+                return;
+            }
+            site.contacts = site.contacts || [];
+            const nextContact = { name, duty, mobile, email };
+            if (contactIndexValue !== '') {
+                site.contacts[parseInt(contactIndexValue)] = nextContact;
+            } else {
+                site.contacts.push(nextContact);
+            }
+            renderSites();
+            closeModal('siteContactModal');
+            showToast(contactIndexValue !== '' ? '场所联系人已更新' : '场所联系人已添加');
+        }
+
+        function deleteSiteContact(siteId, contactIndex) {
+            const site = sitesData.find(s => s.id === siteId);
+            if (!site?.contacts?.[contactIndex]) return;
+            site.contacts.splice(contactIndex, 1);
+            renderSites();
+            showToast('场所联系人已删除');
+        }
+
+        function canViewBusiness(scopeCode) {
+            return currentRole === 'cqc' || salesAllowedScopes.includes(scopeCode);
+        }
+
+        function switchRole(role) {
+            currentRole = role;
+            const cqcBtn = document.getElementById('role-cqc-btn');
+            const salesBtn = document.getElementById('role-sales-btn');
+            if (cqcBtn) cqcBtn.className = role === 'cqc' ? 'px-3 py-1.5 rounded bg-white text-blue-700 font-medium shadow-sm' : 'px-3 py-1.5 rounded text-gray-600 font-medium';
+            if (salesBtn) salesBtn.className = role === 'sales' ? 'px-3 py-1.5 rounded bg-white text-blue-700 font-medium shadow-sm' : 'px-3 py-1.5 rounded text-gray-600 font-medium';
+
+            document.querySelectorAll('#cert-domain-tabs .sub-tab-btn').forEach(btn => {
+                const scope = btn.dataset.domain;
+                const limited = role === 'sales' && scope !== 'ALL' && !salesAllowedScopes.includes(scope);
+                btn.classList.toggle('opacity-60', limited);
+                btn.title = limited ? '仅可查看当前客户经理和区域，业务信息不可见' : '';
+            });
+
+            renderSites();
+            applyRoleActionState();
+            selectCertificationDomain(role === 'sales' ? 'ALL' : currentScope);
+            showToast(role === 'cqc' ? '已切换为CQC中心角色：可查看全量并操作客户' : '已切换为区域业务员角色：仅查看跟进领域业务信息');
+        }
+
+        function applyRoleActionState() {
+            document.querySelectorAll('.role-action, .section-edit-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+            });
+        }
+
+        function openOwnerHistoryModal() {
+            const scopes = currentScope === 'ALL' ? salesAllowedScopes : [currentScope];
+            document.getElementById('owner-history-title').textContent = currentScope === 'ALL' ? '当前跟进领域客户经理流转历史' : `${currentScope} 客户经理流转历史`;
+            document.getElementById('owner-history-table').innerHTML = scopes.map(code => {
+                return (scopeFlowData[code]?.owners || []).map(item => `
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">${code}</span></td>
+                        <td class="py-2">${item.owner}</td>
+                        <td class="py-2">${item.unit}</td>
+                        <td class="py-2">${item.start}</td>
+                        <td class="py-2">${item.end}</td>
+                        <td class="py-2">${item.duration}</td>
+                    </tr>
+                `).join('');
+            }).join('');
+            openModal('ownerHistoryModal');
+        }
+
+        function executeDelete() {
+            if (deleteTarget.type === 'contact') {
+                contactsData = contactsData.filter(c => c.id !== deleteTarget.id);
+                renderContacts();
+                showToast('业务联系人已删除');
+            } else if (deleteTarget.type === 'site') {
+                sitesData = sitesData.filter(s => s.id !== deleteTarget.id);
+                renderSites();
+                showToast('场所已删除');
+            }
+            closeModal('confirmModal');
+            deleteTarget = { type: null, id: null };
+        }
+
+        // 辅助功能
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2';
+            toast.innerHTML = `<i class="fas fa-check-circle text-green-400"></i>${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        function showScopeFlow(scopeCode) {
+            currentScope = scopeCode;
+            document.getElementById('cross-region-approval').classList.toggle('hidden', scopeCode !== 'ISMS' || !canViewBusiness(scopeCode));
+            document.getElementById('cross-region-following').classList.toggle('hidden', scopeCode !== 'HACCP' || !canViewBusiness(scopeCode));
+            if (scopeCode === 'ALL') {
+                const domain = certificationDomainData.ALL;
+                document.getElementById('domain-panel-label').textContent = '领域汇总';
+                document.getElementById('domain-code').textContent = '全部跟进领域';
+                document.getElementById('domain-name').textContent = '';
+                document.getElementById('domain-status').textContent = '汇总视图';
+                document.getElementById('domain-region-label').textContent = '认证领域';
+                document.getElementById('domain-company-label').textContent = '已分配';
+                document.getElementById('domain-owner-label').textContent = '业务联系人';
+                document.getElementById('domain-service-staff-label').textContent = '客户经理';
+                document.getElementById('domain-last-label').textContent = '最近跟进';
+                document.getElementById('domain-region').textContent = '2个';
+                document.getElementById('domain-company').textContent = '2个';
+                document.getElementById('domain-owner').textContent = contactsData.filter(c => salesAllowedScopes.includes(c.scope)).length + '人';
+                document.getElementById('domain-service-staff').textContent = '刘明、陈静';
+                document.getElementById('domain-last').textContent = domain.last;
+                document.getElementById('domain-follow-count').textContent = '3';
+                document.getElementById('domain-opp-count').textContent = '2';
+                document.getElementById('domain-scheme-count').textContent = '1';
+                document.getElementById('domain-cert-count').textContent = '2';
+                document.getElementById('selected-scope-note').textContent = '当前查看：全部跟进领域';
+                const visibleCodes = salesAllowedScopes;
+                document.getElementById('scope-flow-timeline').innerHTML = visibleCodes.flatMap(code => {
+                    return scopeFlowData[code].records.slice(0, 1).map(record => ({ ...record, code }));
+                }).map(record => `
+                    <div class="timeline-item">
+                        <div class="timeline-dot ${record.type}"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div>
+                                    <span class="timeline-title">${record.code} · ${record.title}</span>
+                                    <span class="relation-tag ${record.type}">
+                                        <i class="fas fa-link text-xs"></i>${record.relation}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-gray-500">${record.time}</span>
+                            </div>
+                            <div class="timeline-meta">
+                                <span class="mr-3"><i class="fas fa-user mr-1"></i>${record.user}</span>
+                                <span class="mr-3"><i class="fas fa-exchange-alt mr-1"></i>${record.method}</span>
+                                <span><i class="fas fa-building mr-1"></i>${record.unit}</span>
+                            </div>
+                            <div class="timeline-body">${record.body}</div>
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            const data = scopeFlowData[scopeCode];
+            if (!data) return;
+
+            const domain = certificationDomainData[scopeCode];
+            if (domain) {
+                document.getElementById('domain-panel-label').textContent = '当前认证领域';
+                document.getElementById('domain-region-label').textContent = '归属区域';
+                document.getElementById('domain-company-label').textContent = '所属公司';
+                document.getElementById('domain-owner-label').textContent = '客户经理';
+                document.getElementById('domain-service-staff-label').textContent = '客服人员';
+                document.getElementById('domain-last-label').textContent = '最近跟进';
+                document.getElementById('domain-code').textContent = scopeCode;
+                document.getElementById('domain-name').textContent = domain.name;
+                document.getElementById('domain-status').textContent = domain.status;
+                document.getElementById('domain-region').textContent = domain.region;
+                document.getElementById('domain-company').textContent = domain.company;
+                document.getElementById('domain-owner').textContent = domain.owner;
+                document.getElementById('domain-service-staff').textContent = domain.serviceStaff;
+                document.getElementById('domain-last').textContent = domain.last;
+                const visible = canViewBusiness(scopeCode);
+                document.getElementById('domain-follow-count').textContent = visible ? domain.follow : '-';
+                document.getElementById('domain-opp-count').textContent = visible ? domain.opp : '-';
+                document.getElementById('domain-scheme-count').textContent = visible ? domain.scheme : '-';
+                document.getElementById('domain-cert-count').textContent = visible ? domain.cert : '-';
+            }
+
+            document.getElementById('selected-scope-note').textContent = `当前查看：${scopeCode} ${scopeNames[scopeCode] || ''}`;
+
+            const timeline = document.getElementById('scope-flow-timeline');
+            if (!canViewBusiness(scopeCode)) {
+                timeline.innerHTML = `
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 text-center">
+                        <i class="fas fa-lock text-gray-400 text-xl mb-2"></i>
+                        <div class="font-semibold text-gray-700">当前角色无权查看该认证领域的具体业务信息</div>
+                        <div class="text-sm text-gray-500 mt-1">可查看归属区域、所属公司和当前客户经理。</div>
+                    </div>
+                `;
+                return;
+            }
+            timeline.innerHTML = data.records.map(record => `
+                <div class="timeline-item">
+                    <div class="timeline-dot ${record.type}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <div>
+                                <span class="timeline-title">${record.title}</span>
+                                <span class="relation-tag ${record.type}">
+                                    <i class="fas fa-link text-xs"></i>${record.relation}
+                                </span>
+                            </div>
+                            <span class="text-xs text-gray-500">${record.time}</span>
+                        </div>
+                        <div class="timeline-meta">
+                            <span class="mr-3"><i class="fas fa-user mr-1"></i>${record.user}</span>
+                            <span class="mr-3"><i class="fas fa-exchange-alt mr-1"></i>${record.method}</span>
+                            <span><i class="fas fa-building mr-1"></i>${record.unit}</span>
+                        </div>
+                        <div class="timeline-body">${record.body}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectCertificationDomain(scopeCode) {
+            document.querySelectorAll('#cert-domain-tabs .sub-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.domain === scopeCode);
+            });
+            showScopeFlow(scopeCode);
+            filterBusinessByScope(scopeCode);
+        }
+
+        function filterBusinessByScope(scopeCode) {
+            const restricted = currentRole !== 'cqc' && scopeCode !== 'ALL' && !salesAllowedScopes.includes(scopeCode);
+            document.querySelectorAll('[data-domain-row]').forEach(row => {
+                const rowScope = row.getAttribute('data-domain-row');
+                const roleVisible = currentRole === 'cqc' || salesAllowedScopes.includes(rowScope);
+                const matched = roleVisible && (scopeCode === 'ALL' || rowScope === scopeCode);
+                row.classList.toggle('hidden', !matched);
+            });
+            document.querySelectorAll('.permission-empty').forEach(el => el.remove());
+            if (restricted) {
+                document.querySelectorAll('#opportunity-history, #scheme, #task, #certificate').forEach(section => {
+                    const body = section.querySelector('tbody');
+                    const grid = section.querySelector('.grid');
+                    const empty = document.createElement(body ? 'tr' : 'div');
+                    empty.className = 'permission-empty';
+                    const message = '<i class="fas fa-lock mr-1"></i>当前角色无权查看该认证领域的具体业务信息';
+                    if (body) {
+                        const colCount = section.querySelectorAll('thead th').length || 1;
+                        empty.innerHTML = `<td colspan="${colCount}" class="py-6 text-center text-gray-500 bg-gray-50">${message}</td>`;
+                        body.appendChild(empty);
+                    } else if (grid) {
+                        empty.innerHTML = `<div class="md:col-span-3 py-6 text-center text-gray-500 bg-gray-50 border border-gray-200 rounded-lg">${message}</div>`;
+                        grid.appendChild(empty);
+                    }
+                });
+            }
+            document.querySelectorAll('.business-filter').forEach(select => {
+                if (select.value !== scopeCode) select.value = scopeCode;
+            });
+        }
+
+        // Tab切换
+        function switchMainTab(type) {
+            const buttons = document.querySelectorAll('.main-tab-btn');
+            const panels = {
+                'business': document.getElementById('panel-business'),
+                'resource': document.getElementById('panel-resource'),
+                'logs': document.getElementById('panel-logs')
+            };
+
+            buttons.forEach((btn, index) => {
+                if ((type === 'business' && index === 0) || 
+                    (type === 'resource' && index === 1) || 
+                    (type === 'logs' && index === 2)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            Object.keys(panels).forEach(key => {
+                if (key === type) {
+                    panels[key].classList.remove('hidden');
+                } else {
+                    panels[key].classList.add('hidden');
+                }
+            });
+
+            if (type === 'business') {
+                document.querySelectorAll('.anchor-btn').forEach((btn, index) => {
+                    if (index === 0) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+            }
+        }
+
+        function switchResourceTab(type) {
+            const buttons = document.querySelectorAll('#panel-resource .flex.gap-4 button');
+            const contactsPanel = document.getElementById('resource-contacts');
+            const sitesPanel = document.getElementById('resource-sites');
+
+            if (type === 'contacts') {
+                buttons[0].className = 'flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm border border-blue-200';
+                buttons[1].className = 'flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium text-sm border border-transparent';
+                contactsPanel.classList.remove('hidden');
+                sitesPanel.classList.add('hidden');
+            } else {
+                buttons[1].className = 'flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm border border-blue-200';
+                buttons[0].className = 'flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium text-sm border border-transparent';
+                sitesPanel.classList.remove('hidden');
+                contactsPanel.classList.add('hidden');
+            }
+        }
+
+        function switchSubTab(type) {
+            showScopeFlow(type || 'QMS');
+        }
+
+        function highlightAnchor(element) {
+            document.querySelectorAll('.anchor-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // 锚点滚动
+        const rightContent = document.querySelector('.right-content');
+        const sections = ['scope-overview', 'followup', 'opportunity-history', 'scheme', 'task', 'certificate'];
+
+        rightContent.addEventListener('scroll', () => {
+            const scrollPos = rightContent.scrollTop + 100;
+
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section && !section.closest('.hidden')) {
+                    const top = section.offsetTop - 80;
+                    const bottom = top + section.offsetHeight;
+
+                    if (scrollPos >= top && scrollPos < bottom) {
+                        document.querySelectorAll('.anchor-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.getAttribute('href') === '#' + sectionId) {
+                                btn.classList.add('active');
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.anchor-btn').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    rightContent.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        function exportData() {
+            showToast('正在导出客户数据...');
+        }
+
+        // 点击弹窗外部关闭
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            ['addr-region-panel', 'site-region-panel', 'site-industry-panel'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.site-name-autocomplete')) {
+                    document.getElementById('site-name-suggestions')?.classList.remove('active');
+                }
+                if (!e.target.closest('.cascader')) {
+                    document.querySelectorAll('.cascader-panel').forEach(panel => panel.classList.remove('active'));
+                }
+            });
+            renderSites();
+        });
+    </script>
+</body>
+</html>
